@@ -1,0 +1,71 @@
+# Menu titles and buttons (MiniMessage). {placeholders} are filled in by the plugin.
+filler: GRAY_STAINED_GLASS_PANE
+grid-frame: BLACK_STAINED_GLASS_PANE
+
+titles:
+  main: "<#3A3A3A>{sym:anvil} blacksmith"
+  category: "<#3A3A3A>blacksmith · {category} <#7A7A7A>({page}/{pages})"
+  recipe: "<#3A3A3A>forge · {item}"
+  runeforge: "<#3A3A3A>rune forge · choose armor"
+  runeforge-apply: "<#3A3A3A>rune forge · socket a rune"
+
+buttons:
+  armor:
+    material: NETHERITE_CHESTPLATE
+    name: "<#B05CFF>{sym:star} armor"
+    lore: ["<gray>emberforged, riftguard & stormstride", "<dark_gray>{count} recipes", "", "<#FFB347>click to browse"]
+  masks:
+    material: CARVED_PUMPKIN
+    name: "<#FFB347>{sym:star} masks"
+    lore: ["<gray>wearable mob masks with powers", "<dark_gray>{count} recipes", "", "<#FFB347>click to browse"]
+  runes:
+    material: ECHO_SHARD
+    name: "<#4AA8FF>{sym:star} runes"
+    lore: ["<gray>socket into exoblacksmith armor", "<dark_gray>{count} recipes", "", "<#FFB347>click to browse"]
+  upgrades:
+    material: NETHER_STAR
+    name: "<#FF5C8A>{sym:star} upgrades"
+    lore: ["<gray>rune tiers, mask levels & totems", "<dark_gray>{count} recipes", "", "<#FFB347>click to browse"]
+  runeforge:
+    material: SMITHING_TABLE
+    name: "<#6BD66B>{sym:anvil} rune forge"
+    lore: ["<gray>socket runes into your armor", "", "<#FFB347>click to open"]
+  back:
+    material: ARROW
+    name: "<gray>{sym:arrow} back"
+  previous:
+    material: SPECTRAL_ARROW
+    name: "<gray>previous page"
+    lore: ["<dark_gray>page {page}"]
+  next:
+    material: SPECTRAL_ARROW
+    name: "<gray>next page"
+    lore: ["<dark_gray>page {page}"]
+  close:
+    material: BARRIER
+    name: "<red>close"
+  confirm:
+    material: LIME_CONCRETE
+    name: "<#6BD66B>{sym:check} forge {item}"
+    lore: ["<gray>takes the ingredients from your inventory", "<gray>and gives you the result."]
+  confirm-disabled:
+    material: RED_CONCRETE
+    name: "<#FF5C5C>{sym:cross} cannot forge"
+    lore: ["<gray>{reason}"]
+  info:
+    material: BOOK
+    name: "<#FFB347>how it works"
+    lore:
+      - "<gray>this menu is a preview: nothing here"
+      - "<gray>can be taken out."
+      - "<gray>collect the ingredients in your inventory,"
+      - "<gray>then press the green button to forge."
+  arrow:
+    material: SPECTRAL_ARROW
+    name: "<gray>{sym:arrow}"
+  empty-slot:
+    material: LIGHT_GRAY_STAINED_GLASS_PANE
+    name: "<dark_gray>empty"
+  rune-slot-empty:
+    material: GLASS_PANE
+    name: "<dark_gray>rune slot {slot}: <gray>empty"

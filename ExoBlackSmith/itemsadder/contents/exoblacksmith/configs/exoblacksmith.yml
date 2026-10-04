@@ -1,0 +1,302 @@
+# ItemsAdder content for ExoBlackSmith visuals. Written from ItemsAdder 4.x conventions; the docs
+# site was not reachable while building, so verify the keys against your ItemsAdder version.
+# ExoBlackSmith copies only item_model / custom model data / equippable from these items.
+info:
+  namespace: exoblacksmith
+
+items:
+  blast_rune:
+    display_name: "blast rune"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/runes/blast_rune.png"
+  totem_surge:
+    display_name: "totem surge rune"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/runes/totem_surge.png"
+  hardened_shell:
+    display_name: "hardened shell rune"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/runes/hardened_shell.png"
+  kinetic_reducer:
+    display_name: "kinetic reducer rune"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/runes/kinetic_reducer.png"
+  phoenix_aura:
+    display_name: "phoenix aura rune"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/runes/phoenix_aura.png"
+  void_stride:
+    display_name: "void stride rune"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/runes/void_stride.png"
+  feather_ward:
+    display_name: "feather ward rune"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/runes/feather_ward.png"
+  anchor_guard:
+    display_name: "anchor guard rune"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/runes/anchor_guard.png"
+  tidal_breath:
+    display_name: "tidal breath rune"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/runes/tidal_breath.png"
+  legendary_rune_upgrade:
+    display_name: "legendary rune upgrade"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/upgrades/legendary_rune_upgrade.png"
+  fabled_rune_upgrade:
+    display_name: "fabled rune upgrade"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/upgrades/fabled_rune_upgrade.png"
+  sedge_mask_totem:
+    display_name: "sedge mask totem"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/totems/sedge_mask_totem.png"
+  wisdom_mask_totem:
+    display_name: "wisdom mask totem"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/totems/wisdom_mask_totem.png"
+  canapy_mask_totem:
+    display_name: "canapy mask totem"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/totems/canapy_mask_totem.png"
+  trident_mask_totem:
+    display_name: "trident mask totem"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/totems/trident_mask_totem.png"
+  creepy_mask_totem:
+    display_name: "creepy mask totem"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/totems/creepy_mask_totem.png"
+  syder_mask_totem:
+    display_name: "syder mask totem"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/totems/syder_mask_totem.png"
+  guard_mask_totem:
+    display_name: "guard mask totem"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/totems/guard_mask_totem.png"
+  golom_mask_totem:
+    display_name: "golom mask totem"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/totems/golom_mask_totem.png"
+  stray_mask_totem:
+    display_name: "stray mask totem"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/totems/stray_mask_totem.png"
+  drownie_mask_totem:
+    display_name: "drownie mask totem"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - "item/totems/drownie_mask_totem.png"
+  emberforged_helmet:
+    display_name: "emberforged helmet"
+    resource:
+      material: DIAMOND_HELMET
+      generate: true
+      textures:
+        - "item/armor/emberforged_helmet.png"
+    equipment:
+      id: "exoblacksmith:emberforged"
+  emberforged_chestplate:
+    display_name: "emberforged chestplate"
+    resource:
+      material: DIAMOND_CHESTPLATE
+      generate: true
+      textures:
+        - "item/armor/emberforged_chestplate.png"
+    equipment:
+      id: "exoblacksmith:emberforged"
+  emberforged_leggings:
+    display_name: "emberforged leggings"
+    resource:
+      material: DIAMOND_LEGGINGS
+      generate: true
+      textures:
+        - "item/armor/emberforged_leggings.png"
+    equipment:
+      id: "exoblacksmith:emberforged"
+  emberforged_boots:
+    display_name: "emberforged boots"
+    resource:
+      material: DIAMOND_BOOTS
+      generate: true
+      textures:
+        - "item/armor/emberforged_boots.png"
+    equipment:
+      id: "exoblacksmith:emberforged"
+  riftguard_helmet:
+    display_name: "riftguard helmet"
+    resource:
+      material: DIAMOND_HELMET
+      generate: true
+      textures:
+        - "item/armor/riftguard_helmet.png"
+    equipment:
+      id: "exoblacksmith:riftguard"
+  riftguard_chestplate:
+    display_name: "riftguard chestplate"
+    resource:
+      material: DIAMOND_CHESTPLATE
+      generate: true
+      textures:
+        - "item/armor/riftguard_chestplate.png"
+    equipment:
+      id: "exoblacksmith:riftguard"
+  riftguard_leggings:
+    display_name: "riftguard leggings"
+    resource:
+      material: DIAMOND_LEGGINGS
+      generate: true
+      textures:
+        - "item/armor/riftguard_leggings.png"
+    equipment:
+      id: "exoblacksmith:riftguard"
+  riftguard_boots:
+    display_name: "riftguard boots"
+    resource:
+      material: DIAMOND_BOOTS
+      generate: true
+      textures:
+        - "item/armor/riftguard_boots.png"
+    equipment:
+      id: "exoblacksmith:riftguard"
+  stormstride_helmet:
+    display_name: "stormstride helmet"
+    resource:
+      material: DIAMOND_HELMET
+      generate: true
+      textures:
+        - "item/armor/stormstride_helmet.png"
+    equipment:
+      id: "exoblacksmith:stormstride"
+  stormstride_chestplate:
+    display_name: "stormstride chestplate"
+    resource:
+      material: DIAMOND_CHESTPLATE
+      generate: true
+      textures:
+        - "item/armor/stormstride_chestplate.png"
+    equipment:
+      id: "exoblacksmith:stormstride"
+  stormstride_leggings:
+    display_name: "stormstride leggings"
+    resource:
+      material: DIAMOND_LEGGINGS
+      generate: true
+      textures:
+        - "item/armor/stormstride_leggings.png"
+    equipment:
+      id: "exoblacksmith:stormstride"
+  stormstride_boots:
+    display_name: "stormstride boots"
+    resource:
+      material: DIAMOND_BOOTS
+      generate: true
+      textures:
+        - "item/armor/stormstride_boots.png"
+    equipment:
+      id: "exoblacksmith:stormstride"
+
+equipments:
+  emberforged:
+    type: armor
+    layer_1: "armor/emberforged_layer_1"
+    layer_2: "armor/emberforged_layer_2"
+  riftguard:
+    type: armor
+    layer_1: "armor/riftguard_layer_1"
+    layer_2: "armor/riftguard_layer_2"
+  stormstride:
+    type: armor
+    layer_1: "armor/stormstride_layer_1"
+    layer_2: "armor/stormstride_layer_2"
+
+font_images:
+  rarity_common:
+    path: "font/rarity_common.png"
+    y_position: 8
+    scale_ratio: 9
+  rarity_uncommon:
+    path: "font/rarity_uncommon.png"
+    y_position: 8
+    scale_ratio: 9
+  rarity_rare:
+    path: "font/rarity_rare.png"
+    y_position: 8
+    scale_ratio: 9
+  rarity_epic:
+    path: "font/rarity_epic.png"
+    y_position: 8
+    scale_ratio: 9
+  rarity_legendary:
+    path: "font/rarity_legendary.png"
+    y_position: 8
+    scale_ratio: 9
+  rarity_fabled:
+    path: "font/rarity_fabled.png"
+    y_position: 8
+    scale_ratio: 9

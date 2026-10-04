@@ -1,0 +1,58 @@
+name: ExoBlackSmith
+version: '${project.version}'
+main: com.exoblacksmith.ExoBlackSmithPlugin
+api-version: '1.21'
+description: Craftable custom armor, masks, runes and upgrades through a blacksmith menu.
+softdepend: [ItemsAdder, ExoSpawners]
+commands:
+  blacksmith:
+    description: Open the blacksmith.
+    usage: /blacksmith [armor|masks|runes|upgrades|runeforge]
+    aliases: [smith]
+  exoblacksmith:
+    description: ExoBlackSmith administration.
+    usage: /exoblacksmith <give|givehead|drop|reload|validate|list|inspect>
+    aliases: [exobs]
+permissions:
+  exoblacksmith.use:
+    description: Open /blacksmith.
+    default: true
+  exoblacksmith.runeforge:
+    description: Use the rune forge.
+    default: true
+  exoblacksmith.craft.*:
+    description: Craft every category.
+    default: true
+    children:
+      exoblacksmith.craft.armor: true
+      exoblacksmith.craft.masks: true
+      exoblacksmith.craft.runes: true
+      exoblacksmith.craft.upgrades: true
+  exoblacksmith.ability.mask:
+    description: Use activated mask abilities.
+    default: true
+  exoblacksmith.ability.armor:
+    description: Use armor set abilities.
+    default: true
+  exoblacksmith.drops:
+    description: Receive value-head drops from kills.
+    default: true
+  exoblacksmith.admin:
+    description: All admin commands.
+    default: op
+    children:
+      exoblacksmith.admin.give: true
+      exoblacksmith.admin.givehead: true
+      exoblacksmith.admin.drop: true
+      exoblacksmith.admin.reload: true
+      exoblacksmith.admin.inspect: true
+  exoblacksmith.admin.give:
+    default: op
+  exoblacksmith.admin.givehead:
+    default: op
+  exoblacksmith.admin.drop:
+    default: op
+  exoblacksmith.admin.reload:
+    default: op
+  exoblacksmith.admin.inspect:
+    default: op

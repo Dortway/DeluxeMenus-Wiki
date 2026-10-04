@@ -1,0 +1,74 @@
+[
+  {
+    "mask": "Sedge",
+    "head": "sheep_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDMwNTMxZTczMWI3MjFkNjk0NDBmMWUzYjI2ODI0MGYxZmQ4NmIyYWIxYzU4YjhhMGYzNmYxYjAwZTQ4NTY4OSJ9fX0=",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjEyZGI0NTQxNmUzNWFlZDM2ZjVjNWM1NTE2NTQ3NDgzNWVmNTNiYmRhNTkzZTI3M2M1Y2Q1NTJkNDM2NDQzIn19fQ=="
+  },
+  {
+    "mask": "Wisdom",
+    "head": "pig_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGU5M2ZlMmYyNDQ4NmUwMGMyYzU1ZmZmNmNiYTQ5ZjA1ZTIzN2Q4Y2NjMzYzN2QwZDE1M2UyZjU0NWY3ZmVjMCJ9fX0=",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTUzOWUzMjk4YWE0MWU1NzllNWQxOWJmZGYyZTUwMGZlOTUzMDVkODI2YWQxMTc2MWMxYjFmMmU5MTAyYTkxNyJ9fX0="
+  },
+  {
+    "mask": "Canapy",
+    "head": "polar_bear_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGQxN2Y1NGQ1ZDk1ZGEwZjQ4NjZhYWYwZTVkMmQ4NWRjMjdlMmFiMjJjOGQwZjRlNTNlODQ2ZDEwZTg3NTVlZSJ9fX0=",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjIyZTNhNTY5ZThkNTgxNDM3YzUwM2UyYWQxZDRiNTkxYmNiODI5MWE3MWVmN2IzNzM4OGVlYTNiMDhlNzIifX19"
+  },
+  {
+    "mask": "Trident",
+    "head": "zombie_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGM4MTM5MTYxNzkxMTA2ZmRmZTkwNmNjYWYzOWRhM2FjZWNkYTlhMmY4YTQ1MDJlMWE0YTMwNzg1Y2ViNmEwYiJ9fX0=",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWRlMDk1MzMyNzIwMjE1Y2E5Yjg1ZTdlYWNkMWQwOTJiMTY5N2ZhZDM0ZDY5NmFkZDk0ZDNiNzA5NzY3MDJjIn19fQ=="
+  },
+  {
+    "mask": "Skelly",
+    "head": "skeleton_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjgyODRlMTFlZDYyMTcyYmQ3ZjIzYjIzNGY3NWRiMjliM2M1NTVlN2EzNDQwMTBiYzBiNjM5MjE0YTc5ZDQzYiJ9fX0=",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzcwYzdlN2U0OTMyZTdmOGJlZGFlNmZlYTkwZDhlMzFhZTdjMWYyNWVlZjZhYzVlOTJhOTRkN2VjMWM3NTNhZiJ9fX0="
+  },
+  {
+    "mask": "Creepy",
+    "head": "creeper_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2Y3NjNiODVkYjE3MTRlMGZhNTcyNDY5ZjVhZmMzZWM0ZGMyYWE1Njk3NTEyMTlmNzM2YjU2YTAyMjkzMzVkOCJ9fX0=",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWNjNWNhMWRlZTgyYThmNjg2NzI2ZmM2M2MyMjFhZmZhMTNjZjg1YmJiYzg3YzNmZjU4NjFlMjI3NGIzNGYzIn19fQ=="
+  },
+  {
+    "mask": "Syder",
+    "head": "spider_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2YwMTVkNDRmMTdjNWQ4MjRjM2I3M2Q1YmNjMjZhYzM1OGFkYmRhNWVkNDdiZGQwNWNmNzJiZjMxYmY4YWY3OCJ9fX0=",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTMzOTg3NGE4MjliODJjMWJjMzc0YjMzOTVhMzEwNzg3Zjk5ODRkN2ZiMGMwZWY3ZTU1ODQ3MjQ5ODM3YTkyYiJ9fX0="
+  },
+  {
+    "mask": "Wolfski",
+    "head": "wolf_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWU1NTBjZjQ2M2M1NzQ1YzM0MjQ3ZjgyMWZkZmQ1ZjdhNWI1ZjA2OTgwMjA1YTI1ZTM0YWQzMWIwMDNhMzQ5MSJ9fX0=",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjI4ZTU3YzJhZjczZjk0MWFmYjM4OTYyOTAzMDM3Mzc2MjA2ZjBhNjQyMDhkZTk1OWQzMmMxMGFjOWY5NGQifX19"
+  },
+  {
+    "mask": "Guard",
+    "head": "villager_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzZkMWNmN2U2NjRhZTBkZjVjZGNiZTg3ZGVmN2I2ZmNjZDczMDZlNGNiNjViMWRkOTVhMzRkYzY0ODQ4NDIwYyJ9fX0=",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzQ4NWI4MGI0YTQ5MzA4ZGEzMzZmNGMwZjU5ZjI2YjNkNjYzYWU1ZTk5OTgxYzI4NmY3MDMzMzBlMDBiMDQzZSJ9fX0="
+  },
+  {
+    "mask": "Golom",
+    "head": "iron_golem_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjI0N2YyNjU4YWViYmIyNzY2MDQ2NjI0ZGE4NWVlMDRjZDJiMThhODI1MjA0NWQ0MjYwYmQ4MWQ2MmM3YjZkOCJ9fX0=",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMThjZTYxMDU1NTU0YWUzY2Q0YjFhNzdjMDRlZmUxY2RmNTM4NzM4ZmQ2MWJiNTczMzVhZjBiYWQzZDBmODk3ZSJ9fX0="
+  },
+  {
+    "mask": "Stray",
+    "head": "stray_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGZhMWVmNDdkYWVjZmJkYTdlNTUwNWExYmE2NTc5MjZmNjIxMjQ3Yzg3NjFjZDQ2YzkwNzczNjY2MWJiZSJ9fX0=",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzlkMDkxZDdhNmFkNDcwYjYwZjY0ZGUwMTkwMDhhYWY4YjQyNTZjZmQ4NzJkOWM3NWU3M2E0YzJiOWVmMDgzMSJ9fX0="
+  },
+  {
+    "mask": "Drownie",
+    "head": "drowned_value_head",
+    "head_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTA5ODNjNTZjMjZjYzI3M2FhZGIwNWM3NGRjZmJjNjE2ZjY5YTdjMWRiY2JlYzEwMmZmZDhiNjNhZTZiNWYifX19",
+    "mask_texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGU1M2Q1OTU5Mjg1YzIwYjk0OGVkZWM3NjNjMzE1NmRkYWNlY2I5NjgyN2MzYTA2MzQwNDNjYjBmODlkZjA2MiJ9fX0="
+  }
+]

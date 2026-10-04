@@ -1,0 +1,107 @@
+# ExoBlackSmith general settings. Every file is validated on load and on /exoblacksmith reload;
+# an invalid file is reported with its file and key, and the previous configuration stays active.
+config-version: 1
+
+presentation:
+  # Use unicode symbols. false = plain-text fallbacks for clients/fonts that lack the glyphs.
+  unicode-symbols: true
+  # Convert lowercase text in names, lore and messages to unicode small capitals.
+  small-caps: false
+  symbols:
+    bullet: {unicode: "▸", plain: ">"}
+    check: {unicode: "✔", plain: "+"}
+    cross: {unicode: "✘", plain: "x"}
+    star: {unicode: "✦", plain: "*"}
+    anvil: {unicode: "⚒", plain: "#"}
+    arrow: {unicode: "➜", plain: "->"}
+
+# Rarity styling. itemsadder-glyph is an optional ItemsAdder font image shown once ItemsAdder has loaded.
+rarities:
+  common:    {name: "common",    color: "#B8C1CC", symbol: "◇", plain-symbol: "-", itemsadder-glyph: ""}
+  uncommon:  {name: "uncommon",  color: "#6BD66B", symbol: "◆", plain-symbol: "*", itemsadder-glyph: ""}
+  rare:      {name: "rare",      color: "#4AA8FF", symbol: "❖", plain-symbol: "**", itemsadder-glyph: ""}
+  epic:      {name: "epic",      color: "#B05CFF", symbol: "✦", plain-symbol: "***", itemsadder-glyph: ""}
+  legendary: {name: "legendary", color: "#FFB347", symbol: "✸", plain-symbol: "****", itemsadder-glyph: ""}
+  fabled:    {name: "fabled",    color: "#FF5C8A", symbol: "❂", plain-symbol: "*****", itemsadder-glyph: ""}
+
+items:
+  # Re-render names/lore/visuals of ExoBlackSmith items in a player's inventory when they join.
+  refresh-presentation-on-join: true
+
+crafting:
+  # Vanilla ingredients must be completely plain (no rename, lore, enchantments or damage).
+  strict-vanilla-ingredients: true
+
+menus:
+  click-cooldown-ms: 250
+
+protection:
+  block-vanilla-crafting: true
+  block-anvil: true
+  block-smithing: true
+  block-grindstone: true
+  block-enchanting: true
+  block-head-placement: true
+
+damage:
+  # Total reduction from all ExoBlackSmith sources on one hit is capped here (max 0.95), so effects can
+  # never add up to immunity or healing. Vanilla armor/enchantments/resistance apply afterwards.
+  max-total-reduction: 0.80
+  # MULTIPLICATIVE: 1 - (1-a)(1-b)...   ADDITIVE: a + b + ...   (both then capped)
+  combine: MULTIPLICATIVE
+  # The same rune on several armor pieces: HIGHEST tier counts (default), or SUM of values capped at the
+  # rune's own tier III value.
+  rune-stacking: HIGHEST
+  # Cap for bonus damage added by masks (trident bonus + Creepy explosive hit) per hit.
+  max-bonus-damage-per-hit: 6.0
+
+movement:
+  # Remove ExoBlackSmith walking-speed bonuses while flying or gliding.
+  disable-speed-bonus-while-flying: true
+
+armor:
+  # Default slots a set bonus needs. Sets can override with required-slots in armor.yml.
+  set-bonus-required-slots: [CHESTPLATE, LEGGINGS, BOOTS]
+
+abilities:
+  require-sneak: true
+  # false: empty hand, swords, axes, mace or trident may activate mask abilities. true: empty hand only.
+  require-empty-main-hand: false
+  debounce-ms: 300
+  # Teleport cause used for the Skelly arrow teleport; region plugins apply their rules for this cause.
+  teleport-cause: ENDER_PEARL
+  respect-spawn-protection: true
+  summons:
+    max-active-per-player: 4
+    respect-scoreboard-teams: true
+
+performance:
+  equipment-scan-interval-ticks: 10
+
+drops:
+  # Worlds where value heads can drop. Empty = all worlds.
+  worlds: []
+  require-player-killer: true
+  allow-spawner-mobs: true
+  allow-natural-mobs: true
+  # Added to a head's drop chance per Looting level on the killer's weapon.
+  looting-bonus-per-level: 0.01
+  # true: put heads into the killer's inventory (overflow drops at their feet). false: drop at the mob.
+  give-directly-to-killer: false
+
+integrations:
+  itemsadder:
+    enabled: true
+  exospawners:
+    # Entities carrying any of these metadata keys or PDC keys (namespace:key) are treated as stacked and
+    # are left to the custom event below instead of the vanilla death handler. Verify the marker your
+    # ExoSpawners version uses; leave empty if unknown.
+    stacked-entity-markers: []
+    custom-event:
+      # Bind a stacked-mob death event by reflection. ExoSpawners' API could not be inspected when this
+      # plugin was built: fill these in from ExoSpawners' own documentation before enabling.
+      enabled: false
+      class: ""            # fully qualified event class
+      killer-method: ""    # no-arg method returning the credited Player
+      entity-method: ""    # no-arg method returning the dead Entity
+      amount-method: ""    # optional no-arg method returning how many mobs actually died
