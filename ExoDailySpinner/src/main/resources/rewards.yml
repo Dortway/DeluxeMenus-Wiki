@@ -1,0 +1,146 @@
+# ═══════════════════════════════════════════════════════════════════════
+#   ExoDailySpinner — rewards
+#
+#   WEIGHTS ARE RELATIVE PROBABILITIES. A reward's chance is
+#   its weight divided by the sum of all weights. With the defaults below
+#   (total weight 143), diamonds (weight 10) have a 10/143 ≈ 7.0% chance.
+#   Weights may be decimals (e.g. 0.5) but must be > 0.
+#
+#   Reward keys (the id) must be lowercase: a-z 0-9 _ -
+#
+#   type: item
+#     item:
+#       material / name / lore / enchantments / custom-model-data / glow
+#       amount: 1-2304 (split into stacks when delivered)
+#       serialized: <base64>   # exact item copy written by /ds reward addhand
+#   type: command
+#     commands: run by the CONSOLE. {player} = player name, {uuid} = player UUID.
+#     Command rewards are trusted administrator configuration.
+#
+#   Optional for every reward:
+#     display: { material, name, lore, ... }   # how it looks in menus (defaults to the item)
+#     display-name: "<gold>Custom name"          # name used in chat messages
+#     announce: true/false                       # broadcast (defaults to the rarity setting)
+#     announcement: "<prefix> <player> got <reward>!"   # custom broadcast
+#
+#   Edit and run /ds reload. Changes are validated before they apply.
+#   If you edit this file by hand, run /ds reload before using /ds reward commands.
+# ═══════════════════════════════════════════════════════════════════════
+
+rarities:
+  common:
+    name: "<#9CA3AF>Common"
+    pane: GRAY_STAINED_GLASS_PANE
+    order: 1
+  uncommon:
+    name: "<#4ADE80>Uncommon"
+    pane: LIME_STAINED_GLASS_PANE
+    order: 2
+  rare:
+    name: "<#22D3EE>Rare"
+    pane: LIGHT_BLUE_STAINED_GLASS_PANE
+    order: 3
+  epic:
+    name: "<#A855F7>Epic"
+    pane: PURPLE_STAINED_GLASS_PANE
+    order: 4
+    announce: true
+    celebrate: true
+  legendary:
+    name: "<gradient:#FBBF24:#F97316>Legendary</gradient>"
+    pane: ORANGE_STAINED_GLASS_PANE
+    order: 5
+    announce: true
+    celebrate: true
+
+rewards:
+  iron:
+    weight: 40
+    rarity: common
+    type: item
+    item:
+      material: IRON_INGOT
+      amount: 16
+
+  golden_carrots:
+    weight: 35
+    rarity: common
+    type: item
+    item:
+      material: GOLDEN_CARROT
+      amount: 16
+
+  experience:
+    weight: 20
+    rarity: uncommon
+    type: command
+    commands:
+      - "xp add {player} 250 points"
+    display:
+      material: EXPERIENCE_BOTTLE
+      name: "<#4ADE80>250 Experience"
+      lore:
+        - "<muted>A burst of experience points."
+
+  emeralds:
+    weight: 20
+    rarity: uncommon
+    type: item
+    item:
+      material: EMERALD
+      amount: 8
+
+  diamonds:
+    weight: 10
+    rarity: rare
+    type: item
+    item:
+      material: DIAMOND
+      amount: 5
+
+  golden_apples:
+    weight: 8
+    rarity: rare
+    type: item
+    item:
+      material: GOLDEN_APPLE
+      amount: 3
+
+  mending_book:
+    weight: 5
+    rarity: epic
+    type: item
+    item:
+      material: ENCHANTED_BOOK
+      amount: 1
+      enchantments:
+        mending: 1
+
+  enchanted_apple:
+    weight: 3
+    rarity: epic
+    type: item
+    item:
+      material: ENCHANTED_GOLDEN_APPLE
+      amount: 1
+
+  bonus_spin:
+    weight: 1
+    rarity: legendary
+    type: command
+    commands:
+      - "dailyspinner give {player} 1"
+    display:
+      material: NETHER_STAR
+      glow: true
+      name: "<gradient:#FBBF24:#A855F7>Bonus Spin</gradient>"
+      lore:
+        - "<muted>One extra spin, usable any time."
+
+  netherite:
+    weight: 1
+    rarity: legendary
+    type: item
+    item:
+      material: NETHERITE_INGOT
+      amount: 1

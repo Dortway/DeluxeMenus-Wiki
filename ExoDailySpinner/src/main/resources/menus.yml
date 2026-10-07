@@ -1,0 +1,268 @@
+# ═══════════════════════════════════════════════════════════════════════
+#   ExoDailySpinner — menu layouts
+#   Item keys: material, amount, name, lore, glow, custom-model-data, hide-tooltip
+#   Slots are 0-based. Slot lists accept numbers and ranges like "10-16".
+#   Placeholders: <time> (until next daily), <cooldown>, <bonus>, <pending>, <rewards>, <daily_status>
+# ═══════════════════════════════════════════════════════════════════════
+
+main-menu:
+  title: "<dark_gray><sym:bar> </dark_gray><gradient:#22D3EE:#A855F7><sc>Daily Spinner</sc></gradient>"
+  filler: { material: BLACK_STAINED_GLASS_PANE, hide-tooltip: true }
+  decorations:
+    outer: { slots: [0, 8], material: PURPLE_STAINED_GLASS_PANE, hide-tooltip: true }
+    inner: { slots: [1, 7], material: CYAN_STAINED_GLASS_PANE, hide-tooltip: true }
+  spinner-button:
+    slot: 4
+    ready:
+      material: NETHER_STAR
+      glow: true
+      name: "<accent><sym:star> <sc>Spin Now</sc> <sym:star>"
+      lore:
+        - ""
+        - "<body>Your daily spin is <success><sym:check> ready</success><body>!"
+        - "<muted>Bonus spins: <secondary><bonus>"
+        - ""
+        - "<primary><sym:arrow> <sc>Click to open the spinner</sc>"
+    resume:
+      material: ENDER_EYE
+      glow: true
+      name: "<primary><sym:arrow> <sc>Resume Spin</sc>"
+      lore:
+        - ""
+        - "<body>You have an unfinished spin."
+        - "<body>Its reward is already locked in."
+        - ""
+        - "<primary><sym:arrow> <sc>Click to finish it</sc>"
+    cooldown:
+      material: CLOCK
+      name: "<muted><sym:hourglass> <sc>On Cooldown</sc>"
+      lore:
+        - ""
+        - "<body>Next free spin in <primary><time>"
+        - "<muted>Bonus spins: <secondary><bonus>"
+        - ""
+        - "<muted><sym:arrow> <sc>Click to view the spinner</sc>"
+    running:
+      material: ENDER_PEARL
+      name: "<secondary><sym:hourglass> <sc>Spin In Progress</sc>"
+      lore:
+        - ""
+        - "<body>Your spin is being processed…"
+    unavailable:
+      material: BARRIER
+      name: "<danger><sym:cross> <sc>Unavailable</sc>"
+      lore:
+        - ""
+        - "<body>The spinner has no rewards configured."
+  preview-button:
+    slot: 2
+    material: CHEST
+    name: "<primary><sym:diamond> <sc>Rewards</sc>"
+    lore:
+      - ""
+      - "<body>Browse all <primary><rewards></primary> rewards,"
+      - "<body>their rarity and exact chances."
+      - ""
+      - "<primary><sym:arrow> <sc>Click to preview</sc>"
+  pending-button:
+    slot: 6
+    has-pending:
+      material: ENDER_CHEST
+      glow: true
+      name: "<accent><sym:gift> <sc>Stored Rewards</sc>"
+      lore:
+        - ""
+        - "<body>You have <accent><pending></accent> stored reward stack(s)"
+        - "<body>that did not fit in your inventory."
+        - ""
+        - "<accent><sym:arrow> <sc>Click to claim</sc>"
+    empty:
+      material: ENDER_CHEST
+      name: "<muted><sym:gift> <sc>Stored Rewards</sc>"
+      lore:
+        - ""
+        - "<muted>Nothing stored. Rewards that don't fit"
+        - "<muted>in your inventory are kept here safely."
+
+spinner-menu:
+  title: "<dark_gray><sym:bar> </dark_gray><gradient:#A855F7:#22D3EE><sc>Daily Spinner</sc></gradient>"
+  filler: { material: BLACK_STAINED_GLASS_PANE, hide-tooltip: true }
+  # Border panes alternate between these two while spinning.
+  border: { material: PURPLE_STAINED_GLASS_PANE, hide-tooltip: true }
+  border-alt: { material: CYAN_STAINED_GLASS_PANE, hide-tooltip: true }
+  border-slots: [0, 1, 2, 3, 5, 6, 7, 8, 19, 20, 21, 23, 24, 25]
+  # Horizontal reel across the middle row; the reward lands on winning-slot.
+  reel-slots: ["9-17"]
+  winning-slot: 13
+  pointer-top:
+    slot: 4
+    material: HOPPER
+    name: "<accent><sym:pointer-down> <sc>Winning Slot</sc> <sym:pointer-down>"
+  pointer-bottom:
+    slot: 22
+    material: LIGHTNING_ROD
+    name: "<accent><sym:pointer-up> <sc>Winning Slot</sc> <sym:pointer-up>"
+  # While idle, this slot shows the spin button; while spinning it shows pointer-bottom (same slot).
+  spin-button:
+    slot: 22
+    ready:
+      material: NETHER_STAR
+      glow: true
+      name: "<accent><sym:star> <sc>Spin Now</sc> <sym:star>"
+      lore:
+        - ""
+        - "<body>Daily spin: <daily_status>"
+        - "<muted>Bonus spins: <secondary><bonus>"
+        - ""
+        - "<accent><sym:arrow> <sc>Click to spin</sc>"
+    resume:
+      material: ENDER_EYE
+      glow: true
+      name: "<primary><sym:arrow> <sc>Resume Spin</sc>"
+      lore:
+        - ""
+        - "<body>Your reward is already locked in."
+        - "<primary><sym:arrow> <sc>Click to reveal it</sc>"
+    cooldown:
+      material: CLOCK
+      name: "<muted><sym:hourglass> <sc>Not Ready</sc>"
+      lore:
+        - ""
+        - "<body>Next free spin in <primary><time>"
+        - "<muted>Bonus spins: <secondary><bonus>"
+    running:
+      material: ENDER_PEARL
+      name: "<secondary><sym:hourglass> <sc>Spinning</sc>"
+    unavailable:
+      material: BARRIER
+      name: "<danger><sym:cross> <sc>Unavailable</sc>"
+      lore:
+        - "<body>No rewards are configured."
+    reserving:
+      material: AMETHYST_SHARD
+      name: "<secondary><sym:hourglass> <sc>Preparing</sc>…"
+  back-button:
+    slot: 18
+    material: ARROW
+    name: "<muted><sym:back> <sc>Back</sc>"
+  info:
+    slot: 26
+    material: BOOK
+    name: "<primary><sym:diamond> <sc>Your Spins</sc>"
+    lore:
+      - ""
+      - "<muted>Daily spin: <daily_status>"
+      - "<muted>Bonus spins: <secondary><bonus>"
+      - "<muted>Stored rewards: <accent><pending>"
+      - ""
+      - "<muted>One free spin every <body><cooldown></body>."
+      - "<muted>Closing the menu mid-spin simply"
+      - "<muted>reveals your locked-in reward early."
+  # Appended to reward items on the reel.
+  reel-lore:
+    - ""
+    - "<muted><sym:dot> <rarity>"
+  # Appended to the winning item when it lands.
+  winner-lore:
+    - ""
+    - "<accent><sym:star> <sc>Your Reward</sc> <sym:star>"
+    - "<muted><sym:dot> <rarity>"
+
+preview-menu:
+  title: "<dark_gray><sym:bar> </dark_gray><gradient:#22D3EE:#A855F7><sc>Rewards</sc></gradient> <dark_gray>(<page>/<pages>)"
+  rows: 6
+  filler: { material: BLACK_STAINED_GLASS_PANE, hide-tooltip: true }
+  decorations:
+    frame: { slots: [0, 8, 45, 53], material: PURPLE_STAINED_GLASS_PANE, hide-tooltip: true }
+    frame-inner: { slots: [1, 7, 46, 52], material: CYAN_STAINED_GLASS_PANE, hide-tooltip: true }
+  content-slots: ["10-16", "19-25", "28-34", "37-43"]
+  previous-page:
+    slot: 48
+    material: SPECTRAL_ARROW
+    name: "<primary><sym:back> <sc>Previous</sc>"
+    lore: ["<muted>Page <page>/<pages>"]
+  next-page:
+    slot: 50
+    material: SPECTRAL_ARROW
+    name: "<primary><sc>Next</sc> <sym:arrow>"
+    lore: ["<muted>Page <page>/<pages>"]
+  back-button:
+    slot: 49
+    material: ARROW
+    name: "<muted><sym:back> <sc>Back</sc>"
+  info:
+    slot: 4
+    material: KNOWLEDGE_BOOK
+    name: "<accent><sym:diamond> <sc>How Chances Work</sc>"
+    lore:
+      - ""
+      - "<body>Each reward has a <primary>weight</primary><body>."
+      - "<body>Weights are relative: a reward's chance"
+      - "<body>is its weight divided by the total"
+      - "<body>weight of all rewards (<accent><total_weight></accent><body>)."
+      - ""
+      - "<muted>Rewards: <body><rewards>"
+  reward-lore:
+    - ""
+    - "<dark_gray><sym:bar> <muted>Rarity  <rarity>"
+    - "<dark_gray><sym:bar> <muted>Amount  <body>x<amount>"
+    - "<dark_gray><sym:bar> <muted>Chance  <accent><chance>"
+    - "<dark_gray><sym:bar> <muted>Type    <body><type>"
+
+admin-menu:
+  title: "<dark_gray><sym:bar> </dark_gray><danger><sc>Spinner Admin</sc></danger> <dark_gray>(<page>/<pages>)"
+  rows: 6
+  filler: { material: GRAY_STAINED_GLASS_PANE, hide-tooltip: true }
+  decorations: {}
+  content-slots: ["0-44"]
+  previous-page:
+    slot: 45
+    material: SPECTRAL_ARROW
+    name: "<primary><sym:back> <sc>Previous</sc>"
+  next-page:
+    slot: 53
+    material: SPECTRAL_ARROW
+    name: "<primary><sc>Next</sc> <sym:arrow>"
+  back-button:
+    slot: 49
+    material: BARRIER
+    name: "<danger><sym:cross> <sc>Close</sc>"
+  info:
+    slot: 48
+    material: KNOWLEDGE_BOOK
+    name: "<accent><sym:diamond> <sc>Reward Manager</sc>"
+    lore:
+      - ""
+      - "<body>Rewards: <primary><rewards></primary>  <body>Total weight: <accent><total_weight>"
+      - "<muted>Chance = weight ÷ total weight."
+      - ""
+      - "<muted>Left/Right click: weight +1 / -1"
+      - "<muted>Shift + Left/Right: weight +10 / -10"
+      - "<muted>Drop key twice: remove reward"
+  add-hand:
+    slot: 47
+    material: HOPPER
+    glow: true
+    name: "<success><sym:star> <sc>Add Held Item</sc>"
+    lore:
+      - ""
+      - "<body>Adds a copy of the item in your"
+      - "<body>main hand as a new reward."
+      - "<muted>Your item is not taken or changed."
+  reload:
+    slot: 51
+    material: REPEATER
+    name: "<primary><sym:arrow> <sc>Reload Config</sc>"
+    lore:
+      - ""
+      - "<muted>Validates all files first; on error the"
+      - "<muted>current configuration stays active."
+  reward-lore:
+    - ""
+    - "<dark_gray><sym:bar> <muted>ID      <body><id>"
+    - "<dark_gray><sym:bar> <muted>Weight  <accent><weight> <muted>(<chance>)"
+    - "<dark_gray><sym:bar> <muted>Rarity  <rarity>"
+    - "<dark_gray><sym:bar> <muted>Type    <body><type>  <muted>Amount <body>x<amount>"
+    - ""
+    - "<primary>Left</primary><muted>/</muted><primary>Right</primary> <muted>±1  <primary>Shift</primary> <muted>±10"
+    - "<danger>Drop key twice <muted>to remove"

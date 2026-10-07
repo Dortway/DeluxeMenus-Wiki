@@ -1,0 +1,52 @@
+name: ExoDailySpinner
+version: '${project.version}'
+main: dev.exo.dailyspinner.ExoDailySpinner
+api-version: '1.21'
+description: Premium crate-style daily reward spinner.
+authors: [Exo]
+commands:
+  dailyspinner:
+    description: Open the daily spinner (see /ds help).
+    usage: /<command> [help|claim|preview|admin|reward|reset|give|reload|reconcile]
+    aliases: [ds, dailyspiner]
+permissions:
+  exodailyspinner.use:
+    description: Open the spinner menu and take daily/bonus spins.
+    default: true
+  exodailyspinner.claim:
+    description: Claim stored (overflow) item rewards.
+    default: true
+  exodailyspinner.preview:
+    description: View the rewards preview menu.
+    default: true
+  exodailyspinner.admin:
+    description: All administrator permissions except command-reward creation.
+    default: op
+    children:
+      exodailyspinner.admin.menu: true
+      exodailyspinner.admin.rewards: true
+      exodailyspinner.admin.reset: true
+      exodailyspinner.admin.give: true
+      exodailyspinner.admin.reload: true
+      exodailyspinner.admin.reconcile: true
+  exodailyspinner.admin.menu:
+    description: Open the administrator reward menu (/ds admin).
+    default: op
+  exodailyspinner.admin.rewards:
+    description: Add, remove and edit item rewards and weights.
+    default: op
+  exodailyspinner.admin.rewards.command:
+    description: Create console-command rewards in-game (/ds reward addcommand). Not granted to ops by default.
+    default: false
+  exodailyspinner.admin.reset:
+    description: Reset a player's daily cooldown.
+    default: op
+  exodailyspinner.admin.give:
+    description: Grant bonus spins.
+    default: op
+  exodailyspinner.admin.reload:
+    description: Reload and validate configuration.
+    default: op
+  exodailyspinner.admin.reconcile:
+    description: Review and resolve interrupted or failed deliveries.
+    default: op

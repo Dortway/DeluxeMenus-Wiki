@@ -1,0 +1,111 @@
+# ═══════════════════════════════════════════════════════════════════════
+#   ExoDailySpinner — main configuration
+#   Text uses MiniMessage: https://docs.advntr.dev/minimessage/format.html
+#   Theme colour tags: <primary> <secondary> <accent> <muted> <body> <success> <danger>
+#   Symbol tags: <sym:star> <sym:diamond> <sym:hourglass> <sym:check> ...
+#   Small caps: wrap short labels in <sc>...</sc>
+#   After editing, run /ds reload. Invalid changes are rejected and the
+#   previous working configuration stays active.
+# ═══════════════════════════════════════════════════════════════════════
+
+# Extra console output for troubleshooting.
+debug: false
+
+spins:
+  # Time between free daily spins (rolling, per player). Examples: 24h, 1d, 12h 30m, 86400 (seconds).
+  daily-cooldown: 24h
+  # Which entitlement is used when a player has a ready daily spin AND bonus spins:
+  #   DAILY_FIRST (default) - the free daily spin is used first; bonus spins are saved for later.
+  #   BONUS_FIRST           - bonus spins are used first.
+  consume-order: DAILY_FIRST
+  # Maximum bonus spins a player can hold (/ds give refuses to exceed it).
+  max-bonus-spins: 10000
+  # Delay after joining before an interrupted spin is delivered (ticks, 20 = 1s).
+  resume-delay-ticks: 40
+
+protection:
+  # Minimum time between menu clicks per player (milliseconds).
+  click-cooldown-ms: 150
+  # Minimum time between /ds commands per player (milliseconds).
+  command-cooldown-ms: 600
+
+database:
+  # SQLite file inside the plugin folder. Changing it requires a restart.
+  file: data.db
+  busy-timeout-ms: 5000
+
+animation:
+  # Number of single-slot reel shifts before the reel lands.
+  steps: 46
+  # Ticks between shifts at full speed and at the very end (the reel eases between them).
+  min-delay-ticks: 1
+  max-delay-ticks: 9
+  # Higher = stays fast longer, then brakes harder.
+  easing: 3.2
+
+effects:
+  # Alternate the border colours while spinning.
+  border-cycle: true
+  # Show a title when the reward lands.
+  title: true
+  # Particles shown only to the winning player (keep counts modest).
+  particles:
+    enabled: true
+    particle: TOTEM_OF_UNDYING
+    count: 40
+    spread: 0.6
+    speed: 0.35
+
+announcements:
+  # Broadcast wins of rewards/rarities marked "announce".
+  enabled: true
+
+admin:
+  # Weight used when adding the held item through the admin menu.
+  default-weight: 10
+  # Rarity assigned to rewards added by command or the admin menu.
+  default-rarity: common
+  # Display material for command rewards added with /ds reward addcommand.
+  command-display-material: NAME_TAG
+
+theme:
+  # Convert <sc>...</sc> labels to small capitals (ᴅᴀɪʟʏ ꜱᴘɪɴɴᴇʀ). Set false for plain text.
+  small-caps: true
+  colors:
+    primary: "#22D3EE"     # cyan
+    secondary: "#A855F7"   # purple
+    accent: "#FBBF24"      # gold
+    muted: "#7C8AA5"
+    body: "#E2E8F0"
+    success: "#4ADE80"
+    danger: "#F87171"
+
+symbols:
+  # false = use the plain fallback text for every symbol (for fonts/clients that lack glyphs).
+  use-unicode: true
+  list:
+    star:         { unicode: "✦", fallback: "*" }
+    diamond:      { unicode: "◆", fallback: "+" }
+    hourglass:    { unicode: "⌛", fallback: "~" }
+    check:        { unicode: "✓", fallback: "+" }
+    cross:        { unicode: "✗", fallback: "x" }
+    arrow:        { unicode: "»", fallback: ">" }
+    back:         { unicode: "«", fallback: "<" }
+    pointer-down: { unicode: "▼", fallback: "v" }
+    pointer-up:   { unicode: "▲", fallback: "^" }
+    dot:          { unicode: "•", fallback: "-" }
+    gift:         { unicode: "❖", fallback: "#" }
+    bar:          { unicode: "┃", fallback: "|" }
+
+sounds:
+  # Any sound key works, e.g. minecraft:entity.player.levelup. Set enabled: false to mute one.
+  enabled: true
+  menu-open:  { sound: "minecraft:block.ender_chest.open", volume: 0.45, pitch: 1.5 }
+  click:      { sound: "minecraft:ui.button.click", volume: 0.35, pitch: 1.6 }
+  denied:     { sound: "minecraft:block.note_block.bass", volume: 0.6, pitch: 0.7 }
+  spin-start: { sound: "minecraft:block.beacon.activate", volume: 0.6, pitch: 1.7 }
+  tick:       { sound: "minecraft:block.note_block.hat", volume: 0.45, pitch: 1.3 }
+  land:       { sound: "minecraft:block.note_block.chime", volume: 0.8, pitch: 1.2 }
+  win:        { sound: "minecraft:entity.player.levelup", volume: 0.7, pitch: 1.2 }
+  win-rare:   { sound: "minecraft:ui.toast.challenge_complete", volume: 0.7, pitch: 1.0 }
+  claim:      { sound: "minecraft:entity.item.pickup", volume: 0.7, pitch: 1.1 }
