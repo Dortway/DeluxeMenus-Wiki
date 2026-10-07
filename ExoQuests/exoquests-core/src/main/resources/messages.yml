@@ -1,0 +1,117 @@
+# ExoQuests messages (MiniMessage format: https://docs.advntr.dev/minimessage/format.html).
+#
+# Theme color tags (set in config.yml):  <primary> <accent> <text> <muted> <success> <warning> <error>
+# Icons (unicode or fallback, config.yml): <icon:check> <icon:cross> <icon:points> <icon:clock> <icon:arrow>
+#                                          <icon:dot> <icon:lock> <icon:shop> <icon:info> <icon:star>
+# <prefix> inserts the prefix below. Other <placeholders> are listed per message; inserted player names
+# and other values are always escaped and cannot inject formatting.
+
+prefix: "<primary><bold>exoquests</bold></primary> <muted><icon:arrow></muted> "
+
+quest:
+  # <quest> <points> <balance> <category>
+  completed: "<prefix><success><icon:check></success> <text>quest complete: <accent><quest></accent> <muted>(+<points> points)</muted>"
+  completed-actionbar: "<success><icon:star> quest complete <muted>· <text>+<points> points <muted>· balance <accent><balance>"
+  # Shown if the reward was reduced because the balance hit points.max-balance.
+  completed-capped: "<prefix><warning>your balance is at the maximum, so only <points> points were added."
+  reset: "<prefix><text>your daily quests have reset. <muted>open them with <accent>/quests</accent>."
+  loading: "<prefix><muted>your quests are still loading, try again in a moment."
+  load-failed: "<prefix><error>your quests could not be loaded. please tell a staff member."
+
+points:
+  # <points>
+  balance: "<prefix><text>you have <accent><icon:points> <points></accent> <text>quest points."
+  # <player> <points>
+  balance-other: "<prefix><text><player> has <accent><icon:points> <points></accent> <text>quest points."
+
+help:
+  - "<primary><bold>exoquests</bold></primary> <muted>· daily quests"
+  - "<accent>/quests</accent> <muted><icon:arrow></muted> <text>open your daily quests"
+  - "<accent>/questshop</accent> <muted><icon:arrow></muted> <text>spend quest points on rewards"
+  - "<accent>/quests points</accent> <muted><icon:arrow></muted> <text>show your quest points"
+  - "<accent>/quests help</accent> <muted><icon:arrow></muted> <text>show this help"
+  - "<muted>complete 3 quests every day. points never expire; unfinished progress resets daily."
+
+admin-help:
+  - "<primary><bold>exoquests admin</bold>"
+  - "<accent>/exoquests reload</accent>"
+  - "<accent>/exoquests points <give|take|set> <player> <amount></accent>"
+  - "<accent>/exoquests points view <player></accent>"
+  - "<accent>/exoquests reset <player></accent> <muted>· reroll today's quests (earned points are kept)"
+  - "<accent>/exoquests shop additem <id> <price> <material> [amount]</accent>"
+  - "<accent>/exoquests shop addhand <id> <price></accent>"
+  - "<accent>/exoquests shop addcommand <id> <price> <command...></accent>"
+  - "<accent>/exoquests shop remove <id></accent> <muted>·</muted> <accent>setprice <id> <price></accent> <muted>·</muted> <accent>list</accent>"
+  - "<accent>/exoquests recovery list</accent> <muted>·</muted> <accent>recovery resolve <purchase-id> <delivered|refund></accent>"
+
+shop:
+  # <item> <price> <balance>
+  purchased: "<prefix><success><icon:check></success> <text>bought <accent><item></accent> <text>for <accent><price></accent> <text>points. <muted>balance: <balance>"
+  insufficient: "<prefix><error><icon:cross></error> <text>you need <accent><price></accent> <text>points but have <accent><balance></accent><text>."
+  price-changed: "<prefix><warning>the price of this reward just changed. please choose it again."
+  reward-changed: "<prefix><warning>this reward was just changed by staff. please choose it again."
+  unavailable: "<prefix><error>this reward is no longer available."
+  no-permission: "<prefix><error>you don't have permission to buy this reward."
+  no-space: "<prefix><error>not enough inventory space. nothing was charged."
+  busy: "<prefix><muted>your previous purchase is still being processed."
+  refunded: "<prefix><warning>the reward could not be delivered, so your points were refunded. <muted>balance: <balance>"
+  queued: "<prefix><warning>you went offline during the purchase; the reward will be delivered when you return."
+  # <id>
+  needs-review: "<prefix><error>something went wrong delivering your reward. staff have been notified <muted>(id <id>)</muted>."
+  error: "<prefix><error>the purchase could not be completed. if your balance changed, please contact staff."
+  expired: "<prefix><muted>that confirmation expired. please choose the reward again."
+  invalid-name: "<prefix><error>this reward can't be delivered to your account. please contact staff."
+  # <item>
+  pending-delivered: "<prefix><success><icon:check></success> <text>a pending reward was delivered: <accent><item></accent>."
+  pending-refunded: "<prefix><warning>a pending reward could not be delivered and was refunded. <muted>balance: <balance>"
+  too-fast: "<prefix><muted>slow down a little."
+
+error:
+  player-only: "<prefix><error>only players can use this command."
+  no-permission: "<prefix><error>you don't have permission to do that."
+  # <input>
+  unknown-player: "<prefix><error>no player called <input> has played here. use an online name or a uuid."
+  invalid-number: "<prefix><error><input> is not a valid whole number."
+  # <usage>
+  usage: "<prefix><muted>usage: <accent><usage>"
+  database: "<prefix><error>a database error occurred. please try again or contact staff."
+  disabled-world: "<prefix><muted>quests don't progress in this world."
+
+admin:
+  reloaded: "<prefix><success><icon:check></success> <text>configuration reloaded."
+  # <count>
+  reload-failed: "<prefix><error>reload failed with <count> problem(s); the previous configuration is still active. see the console."
+  # <player> <delta> <balance>
+  points-updated: "<prefix><success><icon:check></success> <text><player>: <accent><delta></accent> <text>points, balance now <accent><balance></accent><text>."
+  points-insufficient: "<prefix><error><player> only has <balance> points."
+  points-at-max: "<prefix><error><player> is already at the maximum balance."
+  # <max>
+  points-invalid-amount: "<prefix><error>amount must be a whole number from 1 to <max> (0 allowed for set)."
+  reset-done: "<prefix><success><icon:check></success> <text>reset today's quests for <accent><player></accent><text>."
+  # <id> <price>
+  shop-added: "<prefix><success><icon:check></success> <text>added shop reward <accent><id></accent> <text>for <accent><price></accent> <text>points."
+  shop-removed: "<prefix><success><icon:check></success> <text>removed shop reward <accent><id></accent><text>."
+  shop-price-set: "<prefix><success><icon:check></success> <text>price of <accent><id></accent> <text>is now <accent><price></accent><text>."
+  shop-exists: "<prefix><error>a shop reward called <id> already exists."
+  shop-unknown: "<prefix><error>there is no shop reward called <id>."
+  shop-invalid-price: "<prefix><error>price must be a whole number from 10 to 1000."
+  shop-invalid-id: "<prefix><error>ids may only use a-z, 0-9 and _ (max 32 characters)."
+  # <input>
+  shop-invalid-material: "<prefix><error><input> is not an obtainable item."
+  # <max>
+  shop-invalid-amount: "<prefix><error>amount must be a whole number from 1 to <max>."
+  shop-empty-hand: "<prefix><error>hold the item you want to add in your main hand."
+  # <reason>
+  shop-invalid-command: "<prefix><error>invalid command: <reason>"
+  shop-save-failed: "<prefix><error>could not save shop.yml; nothing was changed. see the console."
+  shop-list-header: "<primary><bold>shop rewards</bold> <muted>(<count>)"
+  # <id> <price> <type> <state>
+  shop-list-entry: "<muted><icon:dot></muted> <accent><id></accent> <muted>·</muted> <text><price> pts <muted>· <type> · <state>"
+  recovery-header: "<primary><bold>purchases needing review</bold> <muted>(<count>)"
+  # <id> <player> <item> <price> <note>
+  recovery-entry: "<muted><icon:dot></muted> <accent><id></accent> <muted>· <text><player> <muted>· <item> · <price> pts · <note>"
+  recovery-none: "<prefix><success>no purchases need review."
+  recovery-resolved: "<prefix><success><icon:check></success> <text>purchase <accent><id></accent> <text>marked <accent><resolution></accent><text>."
+  recovery-not-found: "<prefix><error>no purchase awaiting review has id <id>."
+  # <count>
+  recovery-alert: "<prefix><warning><count> purchase(s) need staff review. use <accent>/exoquests recovery list</accent>."

@@ -1,0 +1,711 @@
+# ExoQuests quest pool.
+#
+# Every quest has a stable id (the key, lowercase a-z 0-9 _). Changing an id makes it a different quest.
+#   enabled      false removes the quest from future daily rolls (already-assigned quests keep working)
+#   category     one of the categories below
+#   type         tracking type:
+#                  BLOCK_BREAK            blocks broken (materials); natural-only skips player-placed blocks
+#                  CROP_HARVEST           fully grown crops broken (materials: WHEAT, CARROTS, POTATOES, BEETROOTS, NETHER_WART)
+#                  STACKED_PLANT_HARVEST  sugar cane / cactus / bamboo segments, including the column above
+#                  ENTITY_BREED           babies bred by the player (entities)
+#                  ENTITY_KILL            kills credited to the player (entities)
+#                  TREE_GROW              player-planted saplings growing into trees (trees: OAK, SPRUCE, BIRCH,
+#                                         JUNGLE, ACACIA, DARK_OAK, CHERRY, MANGROVE, PALE_OAK)
+#                  FISH_CATCH             fishing catches (materials; empty = any catch)
+#                  CRAFT_ITEM             items taken from a crafting result (materials)
+#                  SMELT_EXTRACT          items taken from furnace/smoker/blast furnace output (materials)
+#                  SHEAR_ENTITY           entities sheared (entities)
+#                  COLLECT_LAID_EGGS      chicken-laid eggs picked up (materials)
+#   target       amount required (1 - 1,000,000)
+#   reward       quest points awarded once on completion
+#   icon         item shown in the menu
+#   weight       relative chance of being rolled (1 - 10000)
+#   name / description   menu text (lowercase); {target} is replaced with the formatted target
+#
+# The target and reward are copied into a player's assignment when it is rolled, so editing them
+# affects the next daily roll, not quests already assigned today.
+
+categories:
+  mining:
+    name: "mining"
+    icon: "⛏"
+    fallback-icon: "[M]"
+    color: "#5CE1E6"
+  farming:
+    name: "farming"
+    icon: "❀"
+    fallback-icon: "[F]"
+    color: "#7DFFB3"
+  breeding:
+    name: "breeding"
+    icon: "❤"
+    fallback-icon: "[B]"
+    color: "#FF9EC7"
+  mob_kills:
+    name: "mob kills"
+    icon: "⚔"
+    fallback-icon: "[K]"
+    color: "#FF6B6B"
+  growing_trees:
+    name: "growing trees"
+    icon: "♣"
+    fallback-icon: "[T]"
+    color: "#8BE28B"
+  logging:
+    name: "logging"
+    icon: "⚒"
+    fallback-icon: "[L]"
+    color: "#D9A066"
+  fishing:
+    name: "fishing"
+    icon: "⚓"
+    fallback-icon: "[~]"
+    color: "#6FB7FF"
+  crafting:
+    name: "crafting"
+    icon: "⚙"
+    fallback-icon: "[C]"
+    color: "#C9B6FF"
+  smelting:
+    name: "smelting"
+    icon: "♨"
+    fallback-icon: "[S]"
+    color: "#FFB347"
+  ranching:
+    name: "ranching"
+    icon: "✂"
+    fallback-icon: "[R]"
+    color: "#F5F5DC"
+  combat:
+    name: "combat"
+    icon: "☠"
+    fallback-icon: "[X]"
+    color: "#FF8A80"
+
+quests:
+  # Counts every cobblestone block broken that was not placed by a player: cobblestone generator output qualifies. Stone does not.
+  mining_cobblestone:
+    enabled: true
+    category: mining
+    type: BLOCK_BREAK
+    materials: [COBBLESTONE]
+    natural-only: true
+    target: 1000
+    reward: 10
+    icon: COBBLESTONE
+    weight: 10
+    name: "cobblestone grinder"
+    description: "mine {target} cobblestone"
+  # Deepslate and cobbled deepslate generator/natural output both qualify; player-placed blocks do not.
+  mining_deepslate:
+    enabled: true
+    category: mining
+    type: BLOCK_BREAK
+    materials: [DEEPSLATE, COBBLED_DEEPSLATE]
+    natural-only: true
+    target: 700
+    reward: 12
+    icon: DEEPSLATE
+    weight: 10
+    name: "deep digger"
+    description: "mine {target} deepslate"
+  mining_diamond_ore:
+    enabled: true
+    category: mining
+    type: BLOCK_BREAK
+    materials: [DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE]
+    natural-only: true
+    target: 100
+    reward: 19
+    icon: DIAMOND_ORE
+    weight: 10
+    name: "diamond hunter"
+    description: "mine {target} diamond ore"
+  mining_iron_ore:
+    enabled: true
+    category: mining
+    type: BLOCK_BREAK
+    materials: [IRON_ORE, DEEPSLATE_IRON_ORE]
+    natural-only: true
+    target: 100
+    reward: 13
+    icon: IRON_ORE
+    weight: 10
+    name: "iron vein"
+    description: "mine {target} iron ore"
+  mining_gold_ore:
+    enabled: true
+    category: mining
+    type: BLOCK_BREAK
+    materials: [GOLD_ORE, DEEPSLATE_GOLD_ORE]
+    natural-only: true
+    target: 100
+    reward: 14
+    icon: GOLD_ORE
+    weight: 10
+    name: "gold rush"
+    description: "mine {target} gold ore"
+  mining_coal_ore:
+    enabled: true
+    category: mining
+    type: BLOCK_BREAK
+    materials: [COAL_ORE, DEEPSLATE_COAL_ORE]
+    natural-only: true
+    target: 500
+    reward: 9
+    icon: COAL_ORE
+    weight: 10
+    name: "coal miner"
+    description: "mine {target} coal ore"
+  mining_copper_ore:
+    enabled: true
+    category: mining
+    type: BLOCK_BREAK
+    materials: [COPPER_ORE, DEEPSLATE_COPPER_ORE]
+    natural-only: true
+    target: 200
+    reward: 11
+    icon: COPPER_ORE
+    weight: 10
+    name: "copper cutter"
+    description: "mine {target} copper ore"
+  mining_redstone_ore:
+    enabled: true
+    category: mining
+    type: BLOCK_BREAK
+    materials: [REDSTONE_ORE, DEEPSLATE_REDSTONE_ORE]
+    natural-only: true
+    target: 150
+    reward: 13
+    icon: REDSTONE_ORE
+    weight: 10
+    name: "redstone spark"
+    description: "mine {target} redstone ore"
+  # CROP_HARVEST only counts crops at their maximum growth stage.
+  farming_potatoes:
+    enabled: true
+    category: farming
+    type: CROP_HARVEST
+    materials: [POTATOES]
+    target: 200
+    reward: 12
+    icon: POTATO
+    weight: 10
+    name: "spud season"
+    description: "harvest {target} grown potatoes"
+  farming_wheat:
+    enabled: true
+    category: farming
+    type: CROP_HARVEST
+    materials: [WHEAT]
+    target: 500
+    reward: 12
+    icon: WHEAT
+    weight: 10
+    name: "golden fields"
+    description: "harvest {target} grown wheat"
+  # Each grown segment counts once, including segments above the broken one. Player-placed segments never count.
+  farming_sugar_cane:
+    enabled: true
+    category: farming
+    type: STACKED_PLANT_HARVEST
+    materials: [SUGAR_CANE]
+    natural-only: true
+    target: 300
+    reward: 15
+    icon: SUGAR_CANE
+    weight: 10
+    name: "sweet harvest"
+    description: "harvest {target} sugar cane"
+  farming_cactus:
+    enabled: true
+    category: farming
+    type: STACKED_PLANT_HARVEST
+    materials: [CACTUS]
+    natural-only: true
+    target: 1000
+    reward: 12
+    icon: CACTUS
+    weight: 10
+    name: "prickly business"
+    description: "harvest {target} cactus"
+  farming_carrots:
+    enabled: true
+    category: farming
+    type: CROP_HARVEST
+    materials: [CARROTS]
+    target: 900
+    reward: 12
+    icon: CARROT
+    weight: 10
+    name: "carrot patch"
+    description: "harvest {target} grown carrots"
+  # Melon progress = melon blocks broken that grew from a stem (player-placed melon blocks never count).
+  farming_melons:
+    enabled: true
+    category: farming
+    type: BLOCK_BREAK
+    materials: [MELON]
+    natural-only: true
+    target: 2000
+    reward: 12
+    icon: MELON_SLICE
+    weight: 10
+    name: "melon mania"
+    description: "harvest {target} grown melons"
+  farming_bamboo:
+    enabled: true
+    category: farming
+    type: STACKED_PLANT_HARVEST
+    materials: [BAMBOO]
+    natural-only: true
+    target: 300
+    reward: 12
+    icon: BAMBOO
+    weight: 10
+    name: "bamboo forest"
+    description: "harvest {target} bamboo"
+  farming_pumpkins:
+    enabled: true
+    category: farming
+    type: BLOCK_BREAK
+    materials: [PUMPKIN]
+    natural-only: true
+    target: 300
+    reward: 12
+    icon: PUMPKIN
+    weight: 10
+    name: "pumpkin patch"
+    description: "harvest {target} grown pumpkins"
+  farming_nether_wart:
+    enabled: true
+    category: farming
+    type: CROP_HARVEST
+    materials: [NETHER_WART]
+    target: 400
+    reward: 13
+    icon: NETHER_WART
+    weight: 10
+    name: "wart warden"
+    description: "harvest {target} grown nether wart"
+  farming_beetroot:
+    enabled: true
+    category: farming
+    type: CROP_HARVEST
+    materials: [BEETROOTS]
+    target: 400
+    reward: 12
+    icon: BEETROOT
+    weight: 10
+    name: "beet beat"
+    description: "harvest {target} grown beetroots"
+  # Counts once per baby born from a breeding the player started by feeding.
+  breeding_chickens:
+    enabled: true
+    category: breeding
+    type: ENTITY_BREED
+    entities: [CHICKEN]
+    target: 20
+    reward: 20
+    icon: CHICKEN_SPAWN_EGG
+    weight: 10
+    name: "chicken breeder"
+    description: "breed {target} chickens"
+  breeding_pigs:
+    enabled: true
+    category: breeding
+    type: ENTITY_BREED
+    entities: [PIG]
+    target: 10
+    reward: 20
+    icon: PIG_SPAWN_EGG
+    weight: 10
+    name: "pig breeder"
+    description: "breed {target} pigs"
+  breeding_cows:
+    enabled: true
+    category: breeding
+    type: ENTITY_BREED
+    entities: [COW]
+    target: 15
+    reward: 20
+    icon: COW_SPAWN_EGG
+    weight: 10
+    name: "cow breeder"
+    description: "breed {target} cows"
+  breeding_sheep:
+    enabled: true
+    category: breeding
+    type: ENTITY_BREED
+    entities: [SHEEP]
+    target: 18
+    reward: 20
+    icon: SHEEP_SPAWN_EGG
+    weight: 10
+    name: "sheep breeder"
+    description: "breed {target} sheep"
+  # Kills follow tracking.kills in config.yml (direct player damage, spawner mobs excluded).
+  kills_sheep:
+    enabled: true
+    category: mob_kills
+    type: ENTITY_KILL
+    entities: [SHEEP]
+    target: 100
+    reward: 20
+    icon: MUTTON
+    weight: 10
+    name: "sheep hunter"
+    description: "kill {target} sheep"
+  kills_pigs:
+    enabled: true
+    category: mob_kills
+    type: ENTITY_KILL
+    entities: [PIG]
+    target: 100
+    reward: 20
+    icon: PORKCHOP
+    weight: 10
+    name: "pig hunter"
+    description: "kill {target} pigs"
+  kills_cows:
+    enabled: true
+    category: mob_kills
+    type: ENTITY_KILL
+    entities: [COW]
+    target: 100
+    reward: 20
+    icon: BEEF
+    weight: 10
+    name: "cow hunter"
+    description: "kill {target} cows"
+  kills_chickens:
+    enabled: true
+    category: mob_kills
+    type: ENTITY_KILL
+    entities: [CHICKEN]
+    target: 100
+    reward: 20
+    icon: CHICKEN
+    weight: 10
+    name: "chicken hunter"
+    description: "kill {target} chickens"
+  # One tree per growth event from a sapling you planted (natural or bonemeal growth; 2x2 trees count once).
+  trees_jungle:
+    enabled: true
+    category: growing_trees
+    type: TREE_GROW
+    trees: [JUNGLE]
+    target: 10
+    reward: 16
+    icon: JUNGLE_SAPLING
+    weight: 10
+    name: "jungle grower"
+    description: "grow {target} jungle trees"
+  trees_oak:
+    enabled: true
+    category: growing_trees
+    type: TREE_GROW
+    trees: [OAK]
+    target: 10
+    reward: 16
+    icon: OAK_SAPLING
+    weight: 10
+    name: "oak grower"
+    description: "grow {target} oak trees"
+  trees_spruce:
+    enabled: true
+    category: growing_trees
+    type: TREE_GROW
+    trees: [SPRUCE]
+    target: 10
+    reward: 16
+    icon: SPRUCE_SAPLING
+    weight: 10
+    name: "spruce grower"
+    description: "grow {target} spruce trees"
+  trees_birch:
+    enabled: true
+    category: growing_trees
+    type: TREE_GROW
+    trees: [BIRCH]
+    target: 10
+    reward: 16
+    icon: BIRCH_SAPLING
+    weight: 10
+    name: "birch grower"
+    description: "grow {target} birch trees"
+  trees_acacia:
+    enabled: true
+    category: growing_trees
+    type: TREE_GROW
+    trees: [ACACIA]
+    target: 10
+    reward: 16
+    icon: ACACIA_SAPLING
+    weight: 10
+    name: "acacia grower"
+    description: "grow {target} acacia trees"
+  trees_dark_oak:
+    enabled: true
+    category: growing_trees
+    type: TREE_GROW
+    trees: [DARK_OAK]
+    target: 10
+    reward: 16
+    icon: DARK_OAK_SAPLING
+    weight: 10
+    name: "dark oak grower"
+    description: "grow {target} dark oak trees"
+  # Logs from grown trees count; logs placed by players never count.
+  logging_jungle:
+    enabled: true
+    category: logging
+    type: BLOCK_BREAK
+    materials: [JUNGLE_LOG]
+    natural-only: true
+    target: 300
+    reward: 19
+    icon: JUNGLE_LOG
+    weight: 10
+    name: "jungle lumberjack"
+    description: "chop {target} jungle logs"
+  logging_oak:
+    enabled: true
+    category: logging
+    type: BLOCK_BREAK
+    materials: [OAK_LOG]
+    natural-only: true
+    target: 200
+    reward: 19
+    icon: OAK_LOG
+    weight: 10
+    name: "oak lumberjack"
+    description: "chop {target} oak logs"
+  logging_spruce:
+    enabled: true
+    category: logging
+    type: BLOCK_BREAK
+    materials: [SPRUCE_LOG]
+    natural-only: true
+    target: 200
+    reward: 19
+    icon: SPRUCE_LOG
+    weight: 10
+    name: "spruce lumberjack"
+    description: "chop {target} spruce logs"
+  logging_birch:
+    enabled: true
+    category: logging
+    type: BLOCK_BREAK
+    materials: [BIRCH_LOG]
+    natural-only: true
+    target: 200
+    reward: 19
+    icon: BIRCH_LOG
+    weight: 10
+    name: "birch lumberjack"
+    description: "chop {target} birch logs"
+  logging_acacia:
+    enabled: true
+    category: logging
+    type: BLOCK_BREAK
+    materials: [ACACIA_LOG]
+    natural-only: true
+    target: 200
+    reward: 19
+    icon: ACACIA_LOG
+    weight: 10
+    name: "acacia lumberjack"
+    description: "chop {target} acacia logs"
+  logging_dark_oak:
+    enabled: true
+    category: logging
+    type: BLOCK_BREAK
+    materials: [DARK_OAK_LOG]
+    natural-only: true
+    target: 300
+    reward: 19
+    icon: DARK_OAK_LOG
+    weight: 10
+    name: "dark oak lumberjack"
+    description: "chop {target} dark oak logs"
+  # An empty materials list accepts any catch (fish, treasure or junk).
+  fishing_any:
+    enabled: true
+    category: fishing
+    type: FISH_CATCH
+    materials: []
+    target: 40
+    reward: 14
+    icon: FISHING_ROD
+    weight: 10
+    name: "patient angler"
+    description: "reel in {target} catches"
+  fishing_cod:
+    enabled: true
+    category: fishing
+    type: FISH_CATCH
+    materials: [COD]
+    target: 25
+    reward: 13
+    icon: COD
+    weight: 10
+    name: "cod catcher"
+    description: "catch {target} cod"
+  fishing_salmon:
+    enabled: true
+    category: fishing
+    type: FISH_CATCH
+    materials: [SALMON]
+    target: 15
+    reward: 16
+    icon: SALMON
+    weight: 10
+    name: "salmon run"
+    description: "catch {target} salmon"
+  # Avoid reversible recipes (e.g. hay bale <-> wheat) for crafting quests: they could be repeated endlessly.
+  crafting_bread:
+    enabled: true
+    category: crafting
+    type: CRAFT_ITEM
+    materials: [BREAD]
+    target: 64
+    reward: 12
+    icon: BREAD
+    weight: 10
+    name: "village baker"
+    description: "craft {target} bread"
+  crafting_torches:
+    enabled: true
+    category: crafting
+    type: CRAFT_ITEM
+    materials: [TORCH]
+    target: 128
+    reward: 9
+    icon: TORCH
+    weight: 10
+    name: "light bringer"
+    description: "craft {target} torches"
+  crafting_paper:
+    enabled: true
+    category: crafting
+    type: CRAFT_ITEM
+    materials: [PAPER]
+    target: 192
+    reward: 10
+    icon: PAPER
+    weight: 10
+    name: "paper mill"
+    description: "craft {target} paper"
+  # Counts items a player takes out of a furnace, smoker or blast furnace output slot (hoppers do not count).
+  smelting_iron:
+    enabled: true
+    category: smelting
+    type: SMELT_EXTRACT
+    materials: [IRON_INGOT]
+    target: 64
+    reward: 14
+    icon: IRON_INGOT
+    weight: 10
+    name: "iron works"
+    description: "smelt {target} iron ingots"
+  smelting_stone:
+    enabled: true
+    category: smelting
+    type: SMELT_EXTRACT
+    materials: [STONE]
+    target: 256
+    reward: 10
+    icon: STONE
+    weight: 10
+    name: "stone mason"
+    description: "smelt {target} stone"
+  smelting_glass:
+    enabled: true
+    category: smelting
+    type: SMELT_EXTRACT
+    materials: [GLASS]
+    target: 128
+    reward: 10
+    icon: GLASS
+    weight: 10
+    name: "glass blower"
+    description: "smelt {target} glass"
+  cooking_meat:
+    enabled: true
+    category: smelting
+    type: SMELT_EXTRACT
+    materials: [COOKED_BEEF, COOKED_PORKCHOP, COOKED_CHICKEN, COOKED_MUTTON]
+    target: 64
+    reward: 12
+    icon: COOKED_BEEF
+    weight: 10
+    name: "island chef"
+    description: "cook {target} meat"
+  shearing_sheep:
+    enabled: true
+    category: ranching
+    type: SHEAR_ENTITY
+    entities: [SHEEP]
+    target: 40
+    reward: 14
+    icon: SHEARS
+    weight: 10
+    name: "wool gatherer"
+    description: "shear {target} sheep"
+  # Only eggs laid by chickens count; eggs dropped by players or collected by hoppers do not. On 1.21.5+ you may add BROWN_EGG and BLUE_EGG.
+  collecting_eggs:
+    enabled: true
+    category: ranching
+    type: COLLECT_LAID_EGGS
+    materials: [EGG]
+    target: 48
+    reward: 13
+    icon: EGG
+    weight: 10
+    name: "egg collector"
+    description: "collect {target} laid eggs"
+  combat_zombies:
+    enabled: true
+    category: combat
+    type: ENTITY_KILL
+    entities: [ZOMBIE]
+    target: 50
+    reward: 16
+    icon: ROTTEN_FLESH
+    weight: 10
+    name: "zombie slayer"
+    description: "defeat {target} zombies"
+  combat_skeletons:
+    enabled: true
+    category: combat
+    type: ENTITY_KILL
+    entities: [SKELETON]
+    target: 50
+    reward: 17
+    icon: BONE
+    weight: 10
+    name: "bone breaker"
+    description: "defeat {target} skeletons"
+  combat_spiders:
+    enabled: true
+    category: combat
+    type: ENTITY_KILL
+    entities: [SPIDER, CAVE_SPIDER]
+    target: 40
+    reward: 15
+    icon: SPIDER_EYE
+    weight: 10
+    name: "spider squasher"
+    description: "defeat {target} spiders"
+  combat_creepers:
+    enabled: true
+    category: combat
+    type: ENTITY_KILL
+    entities: [CREEPER]
+    target: 30
+    reward: 18
+    icon: GUNPOWDER
+    weight: 10
+    name: "creeper crusher"
+    description: "defeat {target} creepers"

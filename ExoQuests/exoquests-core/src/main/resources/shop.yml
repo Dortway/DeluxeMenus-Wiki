@@ -1,0 +1,66 @@
+# ExoQuests shop. Prices must be whole numbers from 10 to 1000 quest points.
+# This file is rewritten by /exoquests shop commands (comments other than this header are not kept).
+# Each entry: price, type (item|command), enabled, optional permission, optional display overrides.
+#   item rewards:    item: { material, amount, name, lore, enchantments, stored-enchantments,
+#                            custom-model-data, unbreakable, item-flags }  or  item: { serialized: <base64> }
+#   command rewards: commands: [ ... ] with placeholders {player} {uuid} {item_id} {purchase_id} {price};
+#                    icon and name are required for command rewards.
+items:
+  torches:
+    price: 10
+    type: item
+    enabled: true
+    item:
+      material: TORCH
+      amount: 16
+  oak_logs:
+    price: 25
+    type: item
+    enabled: true
+    item:
+      material: OAK_LOG
+      amount: 32
+  iron_ingots:
+    price: 60
+    type: item
+    enabled: true
+    item:
+      material: IRON_INGOT
+      amount: 16
+  diamonds:
+    price: 120
+    type: item
+    enabled: true
+    item:
+      material: DIAMOND
+      amount: 4
+  efficiency_book:
+    price: 300
+    type: item
+    enabled: true
+    item:
+      material: ENCHANTED_BOOK
+      amount: 1
+      stored-enchantments:
+        efficiency: 4
+  quest_pickaxe:
+    price: 1000
+    type: item
+    enabled: true
+    item:
+      material: DIAMOND_PICKAXE
+      amount: 1
+      enchantments:
+        efficiency: 5
+        unbreaking: 3
+  # Example command reward (disabled). Commands run from the console with allowlisted placeholders only.
+  island_fly_hour:
+    price: 400
+    type: command
+    enabled: false
+    icon: FEATHER
+    name: "<#7DFFB3>1 hour island fly"
+    lore:
+      - "<gray>grants temporary island flight"
+    commands:
+      - "lp user {player} permission settemp example.fly true 1h"

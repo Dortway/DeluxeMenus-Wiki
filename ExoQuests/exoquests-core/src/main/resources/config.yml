@@ -1,0 +1,144 @@
+# ExoQuests main configuration.
+# Reload with /exoquests reload. If any file is invalid, the reload is rejected and the previous
+# configuration stays active (problems are printed to the console).
+config-version: 1
+
+reset:
+  # Daily reset time (24h HH:mm) in the given IANA timezone. Daylight-saving changes are handled:
+  # a reset time that does not exist on a spring-forward day happens right after the gap.
+  # Changing these on a running server can start a new quest day immediately.
+  time: "00:00"
+  timezone: "Europe/London"
+
+tracking:
+  # How often (seconds) in-memory progress is written to the database. Completions are always written
+  # immediately; at most this much unfinished progress can be lost if the server crashes.
+  progress-flush-seconds: 5
+  # Only players in these game modes earn progress. CREATIVE and SPECTATOR are never allowed.
+  allowed-gamemodes: [SURVIVAL, ADVENTURE]
+  worlds:
+    # blacklist: progress everywhere except the listed worlds. whitelist: only in the listed worlds.
+    mode: blacklist
+    list: []
+  kills:
+    # The killing blow must come from the player (melee, or their own projectile if allowed below).
+    # Mobs that die from fall damage, lava, fire, suffocation, cramming etc. never count, even if the
+    # player hit them earlier.
+    require-direct-damage: true
+    allow-projectiles: true
+    # Kills made by the player's tamed wolves/cats.
+    allow-tamed-pets: false
+    # Mobs that spawned for these reasons never count (Paper spawn reasons).
+    excluded-spawn-reasons: [SPAWNER, TRIAL_SPAWNER, SPAWNER_EGG, COMMAND, CUSTOM]
+  trees:
+    # PLANTER: the player who planted the sapling gets credit (natural or bonemeal growth).
+    # BONEMEALER_IF_PRESENT: if a player bonemealed the sapling, that player gets credit instead.
+    credit: PLANTER
+    # Credit the planter even when the tree grows while they are offline.
+    credit-offline-planter: true
+  stacked-plants:
+    # Breaking the block a sugar cane / cactus / bamboo column stands on counts the column.
+    count-support-breaks: true
+    # Upper bound when scanning a column upwards.
+    max-scan-height: 32
+
+points:
+  # Balances are capped at this value; credits above it are reduced.
+  max-balance: 1000000000
+
+shop:
+  # Seconds a purchase confirmation menu stays valid.
+  confirm-timeout-seconds: 30
+  # Minimum milliseconds between menu clicks per player.
+  click-cooldown-ms: 250
+  # Command rewards only run for player names matching this pattern. Bedrock (Floodgate) prefixes such
+  # as "." need to be added explicitly, e.g. "^\\.?[A-Za-z0-9_]{1,16}$". Spaces and ';' are never allowed.
+  command-player-name-pattern: "^[A-Za-z0-9_]{1,16}$"
+
+storage:
+  # SQLite database file inside the plugin folder. Changing storage settings requires a restart.
+  file: exoquests.db
+  # FULL survives power loss; NORMAL is faster and still survives a server crash.
+  synchronous: FULL
+  busy-timeout-ms: 5000
+  # Daily assignments older than this many days are pruned on startup. Balances, the points ledger,
+  # completion records and purchases are kept.
+  assignment-retention-days: 30
+
+style:
+  # false = use the plain-text fallback icons below (for clients/fonts without these symbols).
+  unicode: true
+  colors:
+    primary: "#5CE1E6"   # cyan
+    accent: "#7DFFB3"    # mint
+    text: "#FFFFFF"      # white
+    muted: "#8A9BA8"     # muted gray
+    success: "#7DFFB3"
+    warning: "#FFD166"
+    error: "#FF6B6B"
+  progress-bar:
+    length: 10
+    filled: "█"
+    empty: "░"
+    fallback-filled: "|"
+    fallback-empty: "."
+  icons:
+    check: "✔"
+    cross: "✘"
+    points: "✦"
+    clock: "⌚"
+    arrow: "»"
+    dot: "•"
+    lock: "⊘"
+    shop: "⛃"
+    info: "ℹ"
+    star: "★"
+  fallback-icons:
+    check: "[x]"
+    cross: "[!]"
+    points: "*"
+    clock: ""
+    arrow: ">"
+    dot: "-"
+    lock: "[locked]"
+    shop: "$"
+    info: "i"
+    star: "*"
+
+# Sounds use namespaced keys (https://minecraft.wiki/w/Sounds.json). Set enabled: false to mute one.
+sounds:
+  click:
+    enabled: true
+    sound: "minecraft:ui.button.click"
+    volume: 0.5
+    pitch: 1.2
+  open:
+    enabled: true
+    sound: "minecraft:block.amethyst_block.chime"
+    volume: 0.7
+    pitch: 1.4
+  page:
+    enabled: true
+    sound: "minecraft:item.book.page_turn"
+    volume: 0.7
+    pitch: 1.0
+  purchase:
+    enabled: true
+    sound: "minecraft:entity.player.levelup"
+    volume: 0.6
+    pitch: 1.6
+  denied:
+    enabled: true
+    sound: "minecraft:block.note_block.bass"
+    volume: 0.7
+    pitch: 0.7
+  quest-complete:
+    enabled: true
+    sound: "minecraft:ui.toast.challenge_complete"
+    volume: 0.6
+    pitch: 1.2
+  reset:
+    enabled: true
+    sound: "minecraft:block.note_block.chime"
+    volume: 0.6
+    pitch: 1.5
