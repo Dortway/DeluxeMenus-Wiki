@@ -47,8 +47,11 @@ final class RewardPreview {
             plugin.getLogger().log(Level.WARNING, "shop reward " + entry.id() + " cannot be displayed", e);
             return ExoMenu.displayItem(Material.BARRIER, text.item("<error>" + entry.id()), List.of());
         }
-        TagResolver placeholders = TagResolver.resolver(n("price", entry.price()), n("balance", balance),
-                n("missing", missing), n("amount", amount), Placeholder.component("status", text.parse(status)));
+        // The status line is itself a template, so it gets the same values as the other lines.
+        TagResolver values = TagResolver.resolver(n("price", entry.price()), n("balance", balance),
+                n("missing", missing), n("amount", amount));
+        TagResolver placeholders = TagResolver.resolver(values,
+                Placeholder.component("status", text.parse(status, values)));
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             if (entry.displayName() != null) {

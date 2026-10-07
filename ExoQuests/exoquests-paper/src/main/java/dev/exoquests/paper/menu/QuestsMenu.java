@@ -104,7 +104,7 @@ public final class QuestsMenu extends ExoMenu {
                 : slot.progress() > 0 ? template.statusInProgress() : template.statusNotStarted();
         int percent = (int) Math.min(100, (long) slot.progress() * 100 / Math.max(1, slot.target()));
         String objective = def.description().replace("{target}", String.format(Locale.ROOT, "%,d", slot.target()));
-        TagResolver placeholders = TagResolver.resolver(
+        TagResolver values = TagResolver.resolver(
                 p("quest", def.name()),
                 p("category", category.map(QuestCategory::displayName).orElse(def.category())),
                 p("category_icon", categoryIcon),
@@ -114,8 +114,10 @@ public final class QuestsMenu extends ExoMenu {
                 n("target", slot.target()),
                 p("percent", percent),
                 Placeholder.component("bar", text.bar(slot.progress(), slot.target())),
-                n("reward", slot.reward()),
-                Placeholder.component("status", text.parse(status)));
+                n("reward", slot.reward()));
+        // The status line is itself a template, so it gets the same values as the other lines.
+        TagResolver placeholders = TagResolver.resolver(values,
+                Placeholder.component("status", text.parse(status, values)));
         Material material = Material.getMaterial(slot.completed() && !template.completedMaterial().isEmpty()
                 ? template.completedMaterial() : def.icon());
         ItemStack item = displayItem(material, text.item(template.name(), placeholders),
