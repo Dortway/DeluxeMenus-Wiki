@@ -135,7 +135,7 @@ public final class PurchaseService {
         }).thenCompose(debit -> {
             if (!debit.applied()) {
                 return CompletableFuture.completedFuture(
-                        new PurchaseResult(PurchaseResult.Status.INSUFFICIENT_FUNDS, debit.balance(), null));
+                        new PurchaseResult(PurchaseResult.Status.INSUFFICIENT_FUNDS, debit.balance(), null, e.id()));
             }
             return deliverPending(record, debit.balance());
         });
@@ -150,12 +150,12 @@ public final class PurchaseService {
                 port.mainThread()).thenCompose(check -> {
             if (check == DeliveryPort.Check.OFFLINE) {
                 return CompletableFuture.completedFuture(
-                        new PurchaseResult(PurchaseResult.Status.QUEUED, balanceAfterDebit, record.purchaseId()));
+                        new PurchaseResult(PurchaseResult.Status.QUEUED, balanceAfterDebit, record.purchaseId(), record.itemId()));
             }
             if (check != DeliveryPort.Check.OK) {
                 return refund(record.purchaseId(), "not deliverable: " + check)
                         .thenApply(balance -> new PurchaseResult(PurchaseResult.Status.REFUNDED, balance,
-                                record.purchaseId()));
+                                record.purchaseId(), record.itemId()));
             }
             long now = clock.now().toEpochMilli();
             return db.submit(c -> PurchaseStore.transition(c, record.purchaseId(), PurchaseState.PENDING,
@@ -163,7 +163,7 @@ public final class PurchaseService {
                 if (!moved) {
                     // Someone else (an admin or a parallel resume) already handled this record.
                     return CompletableFuture.completedFuture(
-                            new PurchaseResult(PurchaseResult.Status.ERROR, balanceAfterDebit, record.purchaseId()));
+                            new PurchaseResult(PurchaseResult.Status.ERROR, balanceAfterDebit, record.purchaseId(), record.itemId()));
                 }
                 return CompletableFuture.supplyAsync(() -> {
                     // Re-check on the same tick as delivery: nothing can change the inventory in between.
@@ -190,13 +190,13 @@ public final class PurchaseService {
         if (outcome == DeliveryPort.Check.OK) {
             return db.submit(c -> PurchaseStore.transition(c, record.purchaseId(), PurchaseState.DELIVERING,
                             PurchaseState.DELIVERED, null, now))
-                    .thenApply(ok -> new PurchaseResult(PurchaseResult.Status.SUCCESS, balance, record.purchaseId()));
+                    .thenApply(ok -> new PurchaseResult(PurchaseResult.Status.SUCCESS, balance, record.purchaseId(), record.itemId()));
         }
         if (outcome == DeliveryPort.Check.OFFLINE) {
             // Player left between the two checks; nothing was handed out. Keep it for their next join.
             return db.submit(c -> PurchaseStore.transition(c, record.purchaseId(), PurchaseState.DELIVERING,
                             PurchaseState.PENDING, "player went offline before delivery", now))
-                    .thenApply(ok -> new PurchaseResult(PurchaseResult.Status.QUEUED, balance, record.purchaseId()));
+                    .thenApply(ok -> new PurchaseResult(PurchaseResult.Status.QUEUED, balance, record.purchaseId(), record.itemId()));
         }
         if (outcome != null) {
             // Nothing was handed out (pre-delivery check failed on the delivery tick): safe to refund.
@@ -206,11 +206,11 @@ public final class PurchaseService {
                 return PurchaseStore.refund(c, record.purchaseId(), PurchaseState.PENDING, maxBalance.getAsLong(),
                         "system", "re-check failed: " + outcome, now);
             }).thenApply(change -> new PurchaseResult(PurchaseResult.Status.REFUNDED,
-                    change.map(PointsStore.Change::balance).orElse(balance), record.purchaseId()));
+                    change.map(PointsStore.Change::balance).orElse(balance), record.purchaseId(), record.itemId()));
         }
         return db.submit(c -> PurchaseStore.transition(c, record.purchaseId(), PurchaseState.DELIVERING,
                         PurchaseState.NEEDS_REVIEW, "delivery threw an exception", now))
-                .thenApply(ok -> new PurchaseResult(PurchaseResult.Status.NEEDS_REVIEW, balance, record.purchaseId()));
+                .thenApply(ok -> new PurchaseResult(PurchaseResult.Status.NEEDS_REVIEW, balance, record.purchaseId(), record.itemId()));
     }
 
     private CompletableFuture<Long> refund(String purchaseId, String note) {

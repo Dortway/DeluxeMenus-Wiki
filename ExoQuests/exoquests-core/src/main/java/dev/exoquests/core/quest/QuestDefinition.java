@@ -27,7 +27,8 @@ public record QuestDefinition(
     }
 
     public boolean matches(QuestAction action) {
-        return action.type() == type && (keys.isEmpty() || keys.contains(action.key()));
+        return action.type() == type && (keys.isEmpty() || keys.contains(action.key()))
+                && (!naturalOnly || action.natural());
     }
 
     /** Objective text with {@code {target}} substituted, e.g. {@code mine 1,000 cobblestone}. */

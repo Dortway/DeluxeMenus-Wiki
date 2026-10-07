@@ -250,9 +250,9 @@ public final class QuestProgressService {
             return;
         }
         if (s.loading || s.failed) {
-            String key = action.type() + ":" + action.key();
+            String key = action.type() + ":" + action.key() + ":" + action.natural();
             s.pending.merge(key, action, (a, b) -> new QuestAction(a.type(), a.key(),
-                    (int) Math.min(MAX_PENDING_AMOUNT, (long) a.amount() + b.amount())));
+                    (int) Math.min(MAX_PENDING_AMOUNT, (long) a.amount() + b.amount()), a.natural()));
             return;
         }
         apply(s, action);

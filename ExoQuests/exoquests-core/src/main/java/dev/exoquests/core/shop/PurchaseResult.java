@@ -1,7 +1,7 @@
 package dev.exoquests.core.shop;
 
 /** Outcome of a purchase attempt as shown to the player. */
-public record PurchaseResult(Status status, long balance, String purchaseId) {
+public record PurchaseResult(Status status, long balance, String purchaseId, String itemId) {
 
     public enum Status {
         /** Paid and delivered. */
@@ -18,6 +18,6 @@ public record PurchaseResult(Status status, long balance, String purchaseId) {
     }
 
     static PurchaseResult of(Status s) {
-        return new PurchaseResult(s, -1, null);
+        return new PurchaseResult(s, -1, null, null);
     }
 }

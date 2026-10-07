@@ -80,6 +80,15 @@
                                     <include>dev.exoquests:exoquests-core</include>
                                 </includes>
                             </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>dev.exoquests:exoquests-core</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>META-INF/maven/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>

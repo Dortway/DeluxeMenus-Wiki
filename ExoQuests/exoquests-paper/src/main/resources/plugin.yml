@@ -1,0 +1,66 @@
+name: ExoQuests
+version: '${project.version}'
+main: dev.exoquests.paper.ExoQuestsPlugin
+api-version: '1.21'
+description: Daily quests and a quest-point rewards shop for Skyblock.
+authors: [ExoQuests]
+folia-supported: false
+# Paper bundles the SQLite driver; this declares it explicitly so the dependency is visible and
+# available even if a future server build stops bundling it.
+libraries:
+  - org.xerial:sqlite-jdbc:3.46.1.3
+
+commands:
+  quests:
+    description: Open your daily quests.
+    usage: /quests [points|help]
+    aliases: [quest, dailyquests]
+    permission: exoquests.use
+  questshop:
+    description: Open the quest shop.
+    usage: /questshop
+    aliases: [qshop]
+    permission: exoquests.shop
+  exoquests:
+    description: ExoQuests administration.
+    usage: /exoquests help
+    aliases: [exq]
+
+permissions:
+  exoquests.use:
+    description: Use /quests, /quests points and /quests help.
+    default: true
+  exoquests.progress:
+    description: Earn daily quest progress.
+    default: true
+  exoquests.shop:
+    description: Open the quest shop and buy rewards.
+    default: true
+  exoquests.points.others:
+    description: View another player's quest points with /quests points <player>.
+    default: op
+  exoquests.admin:
+    description: Access to /exoquests (grants every admin permission below).
+    default: op
+    children:
+      exoquests.admin.reload: true
+      exoquests.admin.points: true
+      exoquests.admin.reset: true
+      exoquests.admin.shop: true
+      exoquests.admin.recovery: true
+      exoquests.points.others: true
+  exoquests.admin.reload:
+    description: /exoquests reload
+    default: op
+  exoquests.admin.points:
+    description: /exoquests points give|take|set|view
+    default: op
+  exoquests.admin.reset:
+    description: /exoquests reset <player>
+    default: op
+  exoquests.admin.shop:
+    description: /exoquests shop ...
+    default: op
+  exoquests.admin.recovery:
+    description: Review interrupted purchases and receive recovery alerts.
+    default: op
