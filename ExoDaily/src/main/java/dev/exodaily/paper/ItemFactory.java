@@ -39,8 +39,11 @@ public final class ItemFactory {
 
     // ------------------------------------------------------------------ rewards
 
-    /** The exact stacks to deliver, split by max stack size, or empty if the reward cannot be built. */
+    /** The exact stacks to deliver (none for command-only rewards), or empty if the item cannot be built. */
     public Optional<List<ItemStack>> rewardStacks(RewardDefinition reward, TextStyler styler) {
+        if (!reward.type().givesItems()) {
+            return Optional.of(List.of());
+        }
         Optional<ItemStack> base = baseItem(reward, styler);
         if (base.isEmpty()) {
             return Optional.empty();

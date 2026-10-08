@@ -2,6 +2,7 @@ package dev.exodaily.support;
 
 import dev.exodaily.core.claim.ClaimParticipant;
 import dev.exodaily.core.reward.RewardDefinition;
+import dev.exodaily.core.storage.ClaimKey;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -24,6 +25,7 @@ public final class FakePlayer implements ClaimParticipant {
     /** Runs at the start of delivery (after the DELIVERING mark). */
     public volatile Runnable beforeDeliver = () -> { };
     public final List<String> received = new CopyOnWriteArrayList<>();
+    public final List<String> claimKeys = new CopyOnWriteArrayList<>();
 
     public FakePlayer premium(boolean premium) {
         this.premium = premium;
@@ -49,8 +51,9 @@ public final class FakePlayer implements ClaimParticipant {
     }
 
     @Override
-    public synchronized DeliveryResult deliver(RewardDefinition reward) {
+    public synchronized DeliveryResult deliver(RewardDefinition reward, ClaimKey key) {
         beforeDeliver.run();
+        claimKeys.add(key.asString());
         if (deliveryUncertain) {
             return DeliveryResult.UNCERTAIN;
         }

@@ -70,6 +70,8 @@ class ClaimServiceTest {
             assertEquals(ClaimOutcome.LOCKED, h.claim(view, RewardPosition.PREMIUM_TWO, alex).outcome());
             assertEquals(ClaimOutcome.ALREADY_CLAIMED, h.claim(view, RewardPosition.STANDARD, alex).outcome());
             assertEquals(1, alex.received.size());
+            // Delivery receives the unique claim identity (exposed to commands as {claim_id}).
+            assertEquals(List.of(ALEX + ":1:1:1"), alex.claimKeys);
             // Locked attempts leave no claim behind.
             assertEquals(null, claimRow(view, RewardPosition.PREMIUM_ONE));
             DailyView after = h.view(ALEX);

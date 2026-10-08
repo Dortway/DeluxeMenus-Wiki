@@ -210,7 +210,7 @@ public final class ClaimService {
             }
             ClaimParticipant.DeliveryResult result;
             try {
-                result = participant.deliver(reward);
+                result = participant.deliver(reward, key);
             } catch (RuntimeException e) {
                 logger.log(Level.SEVERE, "Unexpected error while delivering " + key + "; delivery is uncertain", e);
                 result = ClaimParticipant.DeliveryResult.UNCERTAIN;

@@ -3,7 +3,9 @@ package dev.exodaily.paper;
 import dev.exodaily.core.claim.ClaimParticipant;
 import dev.exodaily.core.delivery.InventoryFit;
 import dev.exodaily.core.reward.RewardDefinition;
+import dev.exodaily.core.storage.ClaimKey;
 import dev.exodaily.core.text.TextStyler;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -16,7 +18,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Live player checks and all-or-nothing delivery into the main inventory. Server thread only. */
+/** Live player checks, all-or-nothing item delivery into the main inventory, then reward commands. Server thread only. */
 public final class PaperClaimParticipant implements ClaimParticipant {
 
     private final Player player;
@@ -54,10 +56,66 @@ public final class PaperClaimParticipant implements ClaimParticipant {
     }
 
     @Override
-    public DeliveryResult deliver(RewardDefinition reward) {
+    public DeliveryResult deliver(RewardDefinition reward, ClaimKey key) {
+        DeliveryResult itemResult = deliverItems(reward);
+        if (itemResult != DeliveryResult.DELIVERED || !reward.type().runsCommands()) {
+            return itemResult;
+        }
+        return runCommands(reward, key);
+    }
+
+    /**
+     * Runs the reward's console commands in order. Commands cannot be rolled back, so any failure
+     * (an exception, or the command reporting failure) after delivery started makes the claim
+     * UNCERTAIN: it stays blocked and is never re-run automatically.
+     */
+    private DeliveryResult runCommands(RewardDefinition reward, ClaimKey key) {
+        CommandSender console = player.getServer().getConsoleSender();
+        List<String> commands = reward.commands();
+        for (int i = 0; i < commands.size(); i++) {
+            String command = expand(commands.get(i), reward, key);
+            boolean ok;
+            try {
+                ok = player.getServer().dispatchCommand(console, command);
+            } catch (RuntimeException e) {
+                logger.log(Level.SEVERE, "Reward command threw for claim " + key + ": /" + command, e);
+                ok = false;
+            }
+            if (!ok) {
+                logger.severe("Reward command failed for claim " + key + " (reward '" + reward.id() + "', command "
+                        + (i + 1) + " of " + commands.size() + "): /" + command + ". Earlier commands and items cannot be"
+                        + " undone; the claim is flagged for review (/exodaily pending).");
+                return DeliveryResult.UNCERTAIN;
+            }
+        }
+        logger.info("Ran " + commands.size() + " reward command(s) for " + player.getName() + " (claim " + key
+                + ", reward '" + reward.id() + "')");
+        return DeliveryResult.DELIVERED;
+    }
+
+    /** Replaces command placeholders. Player names contain only letters, digits and underscores. */
+    static String expand(String template, Player player, RewardDefinition reward, ClaimKey key) {
+        return template
+                .replace("{player}", player.getName())
+                .replace("{uuid}", player.getUniqueId().toString())
+                .replace("{claim_id}", key.asString())
+                .replace("{cycle}", Integer.toString(key.cycle()))
+                .replace("{day}", Integer.toString(key.day()))
+                .replace("{position}", Integer.toString(key.position().number()))
+                .replace("{reward}", reward.id());
+    }
+
+    private String expand(String template, RewardDefinition reward, ClaimKey key) {
+        return expand(template, player, reward, key);
+    }
+
+    private DeliveryResult deliverItems(RewardDefinition reward) {
         Optional<List<ItemStack>> stacks = items.rewardStacks(reward, styler.get());
         if (stacks.isEmpty()) {
             return DeliveryResult.NOT_DELIVERED_INVALID;
+        }
+        if (stacks.get().isEmpty()) {
+            return DeliveryResult.DELIVERED;
         }
         PlayerInventory inventory = player.getInventory();
         if (!fits(inventory, stacks.get())) {

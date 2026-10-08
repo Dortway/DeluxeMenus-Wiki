@@ -6,6 +6,7 @@ import dev.exodaily.core.reward.RewardCatalog;
 import dev.exodaily.core.reward.RewardDefinition;
 import dev.exodaily.core.reward.RewardPool;
 import dev.exodaily.core.reward.RewardPosition;
+import dev.exodaily.core.reward.RewardType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -621,15 +622,85 @@ public final class ConfigLoader {
                 ctx.error(path + ".custom-model-data", "must be a number");
             }
         }
+        String typeName = ctx.string(yaml, path + ".type", RewardType.ITEM.key());
+        RewardType type = RewardType.parse(typeName).orElse(null);
+        if (type == null) {
+            ctx.error(path + ".type", "unknown type '" + typeName + "' (use item, command or both)");
+            type = RewardType.ITEM;
+        }
+        List<String> commands = commands(ctx, yaml, path, type);
         String summary = yaml.getString(path + ".summary");
         if (summary == null) {
+            if (type == RewardType.COMMAND) {
+                ctx.error(path + ".summary", "command rewards need a summary describing what the player gets");
+            }
             summary = amount + " " + material.toLowerCase(Locale.ROOT).replace('_', ' ');
         }
         if (ctx.errorCount() > errorsBefore) {
             return null;
         }
         return new RewardDefinition(id, material.toUpperCase(Locale.ROOT), amount, name, lore, enchantments, flags,
-                customModelData, summary, weight, serialized);
+                customModelData, summary, weight, serialized, type, commands);
+    }
+
+    private static final int MAX_COMMANDS = 16;
+    private static final int MAX_COMMAND_LENGTH = 1024;
+
+    private List<String> commands(Ctx ctx, YamlConfiguration yaml, String path, RewardType type) {
+        List<String> raw = yaml.isSet(path + ".commands") ? ctx.stringList(yaml, path + ".commands") : List.of();
+        if (!type.runsCommands()) {
+            if (!raw.isEmpty()) {
+                ctx.error(path + ".commands", "commands are only run for type 'command' or 'both' (type is 'item')");
+            }
+            return List.of();
+        }
+        if (raw.isEmpty()) {
+            ctx.error(path + ".commands", "type '" + type.key() + "' needs at least one command");
+            return List.of();
+        }
+        if (raw.size() > MAX_COMMANDS) {
+            ctx.error(path + ".commands", "at most " + MAX_COMMANDS + " commands per reward");
+        }
+        List<String> commands = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            String command = raw.get(i).strip();
+            if (command.startsWith("/")) {
+                command = command.substring(1);
+            }
+            String entry = path + ".commands[" + i + "]";
+            if (command.isBlank()) {
+                ctx.error(entry, "command is empty");
+                continue;
+            }
+            if (command.length() > MAX_COMMAND_LENGTH || command.contains("\n") || command.contains("\r")) {
+                ctx.error(entry, "command must be a single line of at most " + MAX_COMMAND_LENGTH + " characters");
+                continue;
+            }
+            String unknown = unknownPlaceholder(command);
+            if (unknown != null) {
+                ctx.error(entry, "unknown placeholder {" + unknown + "} (use " + String.join(", ", COMMAND_PLACEHOLDERS) + ")");
+            }
+            String label = command.split(" ", 2)[0];
+            platform.commandWarning(label).ifPresent(warning -> ctx.warning(entry, warning));
+            commands.add(command);
+        }
+        return commands;
+    }
+
+    /** Placeholders available in reward commands. */
+    public static final List<String> COMMAND_PLACEHOLDERS =
+            List.of("{player}", "{uuid}", "{claim_id}", "{cycle}", "{day}", "{position}", "{reward}");
+
+    private static final Pattern PLACEHOLDER = Pattern.compile("\\{([a-z_]+)}");
+
+    private static String unknownPlaceholder(String command) {
+        java.util.regex.Matcher matcher = PLACEHOLDER.matcher(command);
+        while (matcher.find()) {
+            if (!COMMAND_PLACEHOLDERS.contains("{" + matcher.group(1) + "}")) {
+                return matcher.group(1);
+            }
+        }
+        return null;
     }
 
     private RewardPool pool(Ctx ctx, YamlConfiguration yaml, String id, String path, Map<String, RewardDefinition> rewards) {

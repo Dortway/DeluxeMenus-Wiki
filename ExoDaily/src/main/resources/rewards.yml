@@ -39,6 +39,38 @@ settings:
 #   weight:            default selection weight (pools may override it)
 #   serialized-item:   written by /exodaily reward save <id>; the item is
 #                      restored exactly (all metadata). Do not edit by hand.
+#   type:              item (default), command, or both (item first, then commands)
+#   commands:          console commands for type command/both, see below
+#
+# ── command rewards ──────────────────────────────────────────────────────────
+# Commands run from the console, in order, after the claim is reserved. The
+# material/name/lore are only the menu icon for type: command, and a summary
+# is required. Placeholders:
+#   {player} {uuid} {claim_id} {cycle} {day} {position} {reward}
+# {claim_id} is unique per player, cycle, day and position. Pass it to plugins
+# that can ignore repeated ids so a reward can never be applied twice.
+#
+# !! Commands are WEAKER than item rewards: they cannot be rolled back and
+# !! ExoDaily cannot see what they did. A command that fails, or a crash while
+# !! commands run, flags the claim for staff review (/exodaily pending); it is
+# !! never re-run automatically. Use commands you trust, ideally idempotent ones.
+#
+# Example (add the id to a pool to use it):
+#   money_500:
+#     type: command
+#     material: GOLD_NUGGET          # menu icon only
+#     summary: "$500"
+#     name: "<#FCD34D>$500"
+#     lore: ["<#9CA3AF>paid into your balance"]
+#     commands:
+#       - "eco give {player} 500"
+#   crate_key:
+#     type: both                     # gives the item, then runs the commands
+#     material: TRIPWIRE_HOOK
+#     amount: 1
+#     summary: "1 crate key"
+#     commands:
+#       - "broadcast {player} claimed a crate key on day {day}!"
 rewards:
 
   # ── everyday resources ────────────────────────────────────────────────────

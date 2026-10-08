@@ -83,6 +83,15 @@ Use a test server whose clock you can change, or set `timezone` to a zone where 
 - [ ] Break `rewards.yml` (for example `material: NOT_A_THING`) and `/exodaily reload`. The reload is rejected with `[rewards.yml] rewards.<id>.material: unknown material`, and menus keep working with the old configuration.
 - [ ] Put two items in the same slot in `menus.yml` and reload. The reload is rejected with `slot N conflicts with …`.
 
+## Command rewards
+
+Uncomment the `money_500` example in `rewards.yml`, change its command to one that exists on your server (for example `"give {player} diamond 1"` or `"say {player} {claim_id}"`), put it alone in a pool, point a day's `position-1` at that pool and run `/exodaily reload`.
+
+- [ ] The menu shows the reward's icon and summary. Claiming runs the command once. The console logs `Ran 1 reward command(s) … (claim <uuid>:<cycle>:<day>:1 …)`.
+- [ ] Spam-click the claim button. The command still runs exactly once.
+- [ ] Change the command to one that doesn't exist and reload. The reload warns that the command is not registered. Claim it on a fresh day: the console logs the failing command, the position shows "under review", `/exodaily pending` lists it, and it is never re-run automatically.
+- [ ] Use an unknown placeholder such as `{nope}` and reload. The reload is rejected with `unknown placeholder {nope}`.
+
 ## Crash recovery (optional, destructive — test server only)
 
 - [ ] Claim a reward, and immediately kill the server process (`kill -9`) while the claim is in flight. On restart, the console reports any released reservations, or any `UNCERTAIN` claims together with "NOT reissued automatically".

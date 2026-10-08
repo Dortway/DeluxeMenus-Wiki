@@ -19,6 +19,13 @@ import java.util.Optional;
 /** Validates configuration values against the running server's registries. Server thread only. */
 public final class PaperPlatformValidator implements PlatformValidator {
 
+    /** Off until the server has finished enabling plugins, so commands of later plugins are not reported. */
+    private volatile boolean commandChecks;
+
+    public void enableCommandChecks() {
+        commandChecks = true;
+    }
+
     @Override
     public Optional<String> checkItemMaterial(String name) {
         Material material = Material.matchMaterial(name);
@@ -99,6 +106,15 @@ public final class PaperPlatformValidator implements PlatformValidator {
         } catch (IllegalArgumentException e) {
             return Optional.of("unknown particle '" + name + "'");
         }
+    }
+
+    @Override
+    public Optional<String> commandWarning(String label) {
+        if (commandChecks && org.bukkit.Bukkit.getCommandMap().getCommand(label.toLowerCase(Locale.ROOT)) == null) {
+            return Optional.of("command '" + label + "' is not registered right now; if no plugin provides it,"
+                    + " claims of this reward will be flagged for review");
+        }
+        return Optional.empty();
     }
 
     @Override

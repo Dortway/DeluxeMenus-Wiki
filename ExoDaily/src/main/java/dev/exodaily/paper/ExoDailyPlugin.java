@@ -97,7 +97,8 @@ public class ExoDailyPlugin extends JavaPlugin implements Listener {
             }
         }
         defaults = bundledDefaults();
-        configManager = new ConfigManager(new ConfigLoader(new PaperPlatformValidator()));
+        PaperPlatformValidator validator = new PaperPlatformValidator();
+        configManager = new ConfigManager(new ConfigLoader(validator));
         ConfigLoader.Result initial = configManager.reload(readFiles(), defaults);
         logIssues(initial);
 
@@ -147,6 +148,20 @@ public class ExoDailyPlugin extends JavaPlugin implements Listener {
         register("daily", new DailyCommand(menuService, messenger));
         register("exodaily", new AdminCommand(this, messenger));
         startTicker(bundle != null ? bundle.settings().countdownUpdateTicks() : 20);
+        // The first tick runs after every plugin has enabled: now reward commands can be checked.
+        getServer().getScheduler().runTask(this, () -> {
+            validator.enableCommandChecks();
+            Presentation p = presentation.get();
+            if (p == null) {
+                return;
+            }
+            for (dev.exodaily.core.reward.RewardDefinition reward : p.config().rewards().rewards().values()) {
+                for (String command : reward.commands()) {
+                    validator.commandWarning(command.split(" ", 2)[0]).ifPresent(warning ->
+                            getLogger().warning("Config warning [rewards.yml] rewards." + reward.id() + ".commands: " + warning));
+                }
+            }
+        });
     }
 
     private void register(String name, org.bukkit.command.TabExecutor executor) {

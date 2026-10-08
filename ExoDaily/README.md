@@ -1,6 +1,6 @@
 # ExoDaily
 
-Calendar-based daily rewards for Paper with a standard tier and a premium tier, randomized per player, built to make reward duplication hard.
+Calendar-based daily rewards for Paper with a standard tier and a premium tier, randomized per player, built to make reward duplication hard. Rewards are items, console commands, or both.
 
 | | |
 |---|---|
@@ -55,6 +55,7 @@ Maven fetches `io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT` from `https://r
 - The first time a player views a day, all three positions are drawn **independently for that player** from weighted pools, then saved. This includes the premium positions of standard players, which are drawn even though they are locked.
 - The saved rewards never change, whatever happens afterwards: reopening the menu, reconnecting, changing permissions, restarting or reloading the configuration.
 - Each assignment stores a **snapshot** of the reward definition in the database. What the player sees and receives comes from that snapshot, so editing or deleting a reward in `rewards.yml` cannot change an assigned reward or break a claim that hasn't happened yet.
+- Snapshots include the reward's type and commands, so editing a command in `rewards.yml` does not change a command reward that has already been assigned.
 - Players can get the same reward by coincidence. The `prevent-duplicates-per-day` option stops the same reward id from appearing twice in one player's day.
 - If a pool has run out of eligible entries, the selector tries that pool's `fallback`, then the global `fallback-pool`. A duplicate is used only as a last resort, and that is logged once per day and position. The plugin also warns at load time when a day can't reach 3 distinct rewards.
 - Rewards are never generated for skipped days.
@@ -186,9 +187,31 @@ Admins reconcile uncertain claims with `/exodaily pending` and `/exodaily status
 
 The window for an uncertain claim is only the time between two server ticks. It is still a real window, and ExoDaily does not claim otherwise.
 
-### Non-item rewards
+### Command rewards
 
-This version delivers **item rewards only**. It does not run economy or console-command rewards. Arbitrary console commands cannot be made dupe-proof: they can't be rolled back, and the plugin can't tell whether they took effect. If you add such rewards, they would have weaker guarantees and would need idempotent integrations (for example, a command that takes the claim id and ignores repeats).
+A reward can run console commands instead of, or after, giving an item:
+
+```yaml
+rewards:
+  money_500:
+    type: command              # item (default) | command | both
+    material: GOLD_NUGGET      # menu icon only for type: command
+    summary: "$500"            # required for command rewards
+    commands:
+      - "eco give {player} 500"
+```
+
+Placeholders: `{player}` `{uuid}` `{claim_id}` `{cycle}` `{day}` `{position}` `{reward}`. A leading `/` is optional. You can have up to 16 commands per reward, each on a single line. Unknown placeholders are rejected when the config loads. A command label that no plugin has registered produces a warning. That check runs after all plugins have enabled, and again on every reload.
+
+**These rewards have weaker guarantees than item rewards. They are not dupe-proof, and ExoDaily does not claim otherwise.**
+
+- They go through the same claim pipeline. Commands run only after the claim is reserved and `DELIVERING` is committed, at most once per claim attempt, and never for a claim that already exists.
+- They **cannot be rolled back**. For `both`, items are given all-or-nothing first, then the commands run in order.
+- ExoDaily **cannot see what a command did**. If a command throws or reports failure (for example an unknown command or a usage error), the claim becomes **`UNCERTAIN`**: it stays blocked, is never re-run automatically, and is logged with the failing command for `/exodaily pending` and `/exodaily resolve`. Earlier commands in the list may already have taken effect.
+- A crash while commands are running leaves the claim `DELIVERING`. On restart it becomes `UNCERTAIN`, exactly as for items.
+- A command that "succeeds" but does nothing (for example an economy plugin that silently rejects the player) cannot be detected.
+- **Use idempotent integrations where possible.** `{claim_id}` (`uuid:cycle:day:position`) is unique per claimable position. Pass it to plugins or scripts that can ignore an id they have already processed, so a reward can never be applied twice even after a manual `resolve … release`.
+- Commands run as the console with full permissions. Only server administrators should be able to edit `rewards.yml`.
 
 ### Multi-server
 
@@ -212,8 +235,9 @@ The default deployment supports **one server**. Claim uniqueness is enforced by 
 ### What was actually compiled and tested
 
 - The plugin was compiled with `javac` 21 (`--release 21`) against **Paper API 1.21.11** with no warnings.
-- **85 automated tests pass** (`mvn clean package`):
+- **92 automated tests pass** (`mvn clean package`):
   - Core tests run against a real SQLite database, without a server.
+  - **4 command-reward tests** run on MockBukkit's real command map: placeholder expansion, no items for `command`, items before commands for `both`, no commands when the items don't fit, and failing or unknown commands → `UNCERTAIN`.
   - **11 integration tests** boot the real plugin on MockBukkit 4.116.3 (a mock Paper 1.21.11 server). They cover enabling with the bundled configuration and storage, menu contents, every click type plus drags being cancelled, standard and premium claims through the GUI, full inventories, leaked-icon removal, admin `setday` refreshing open menus, permission denial, reload rollback, the overview previews and `reward save` from the hand.
 - **Build environment note:** the network used for this build could not reach `repo.papermc.io`. The Paper API jar was therefore compiled locally from the official `PaperMC/Paper` git tag `1.21.11`, with its declared dependencies from Maven Central and Mojang Brigadier built from source. `pom.xml` uses the normal Paper repository and coordinates, so a normal build fetches the official artifact.
 - **Not done:** the plugin has **not** been run on a real Paper server with a real client. Use [TESTING.md](TESTING.md) for the in-game checklist (GUI exploits and visual presentation).
@@ -232,12 +256,13 @@ The default deployment supports **one server**. Claim uniqueness is enforced by 
 | Database failure (fail closed), crash before delivery (released), crash after delivery (`UNCERTAIN`, never reissued), admin resolution | `ClaimServiceTest.FailuresAndRecovery` |
 | Invalid configuration (materials, amounts, weights, enchantments, flags, empty pools, duplicate ids, malformed YAML, slot conflicts) keeping the previous configuration | `ConfigLoaderTest`, `PaperIntegrationTest.failedReloadKeepsTheActiveConfiguration` |
 | `setday` keeps claims, `reset` allows re-earning, audit entries, read-only status | `AssignmentAndAdminTest` |
+| Command rewards: validation, snapshots, `{claim_id}`, `both` ordering, failures flagged | `ConfigLoaderTest`, `RewardSelectorTest`, `CommandRewardTest` |
 
 ## Limitations
 
 - Paper 1.21.11 and Java 21 only, as compiled. Newer Paper versions usually keep plugin compatibility, but they have not been tested.
 - Single server only (see above). Folia is not supported.
-- Item rewards only.
+- Command rewards have weaker guarantees than item rewards (see [Command rewards](#command-rewards)). There is no built-in economy integration; it is reached through commands.
 - `custom-model-data` sets one float. For more complex models, use `/exodaily reward save` with a prepared item.
 - An uncertain delivery after a crash needs manual reconciliation. This is deliberate.
 - Changing `storage.*` needs a restart. Changing `timezone` can move "today" for every player; claims are never repeated, but a player may skip or repeat a calendar *date* boundary once.

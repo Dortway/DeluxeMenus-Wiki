@@ -161,4 +161,46 @@ class ConfigLoaderTest {
         assertNotNull(manager.get());
         assertEquals("America/New_York", manager.get().settings().timezone().getId());
     }
+
+    private ConfigLoader.Result withReward(String yaml) {
+        return loadWith(ConfigLoader.REWARDS, "  iron_16:", yaml + "\n  iron_16:");
+    }
+
+    @Test
+    void parsesCommandRewards() {
+        ConfigLoader.Result result = withReward("""
+                  money_500:
+                    type: command
+                    material: GOLD_NUGGET
+                    summary: "$500"
+                    commands: ["/eco give {player} 500", "log {claim_id} {uuid} {cycle} {day} {position} {reward}"]
+                  crate_key:
+                    type: both
+                    material: TRIPWIRE_HOOK
+                    summary: "1 crate key"
+                    commands: ["say {player}"]""".indent(2).stripTrailing());
+        assertTrue(result.success(), () -> result.errors().toString());
+        var money = result.bundle().rewards().rewards().get("money_500");
+        assertEquals(dev.exodaily.core.reward.RewardType.COMMAND, money.type());
+        assertEquals(List.of("eco give {player} 500", "log {claim_id} {uuid} {cycle} {day} {position} {reward}"),
+                money.commands());
+        assertEquals(dev.exodaily.core.reward.RewardType.BOTH, result.bundle().rewards().rewards().get("crate_key").type());
+        assertEquals(dev.exodaily.core.reward.RewardType.ITEM, result.bundle().rewards().rewards().get("iron_16").type());
+    }
+
+    @Test
+    void rejectsMalformedCommandRewards() {
+        assertIssue(withReward("  m1: { type: command, material: GOLD_NUGGET, summary: \"$1\" }"),
+                ConfigLoader.REWARDS, "rewards.m1.commands", "needs at least one command");
+        assertIssue(withReward("  m2: { type: command, material: GOLD_NUGGET, commands: [\"say hi\"] }"),
+                ConfigLoader.REWARDS, "rewards.m2.summary", "need a summary");
+        assertIssue(withReward("  m3: { material: GOLD_NUGGET, commands: [\"say hi\"] }"),
+                ConfigLoader.REWARDS, "rewards.m3.commands", "only run for type");
+        assertIssue(withReward("  m4: { type: command, material: GOLD_NUGGET, summary: x, commands: [\"say {nope}\"] }"),
+                ConfigLoader.REWARDS, "rewards.m4.commands[0]", "unknown placeholder {nope}");
+        assertIssue(withReward("  m5: { type: money, material: GOLD_NUGGET, summary: x, commands: [\"say hi\"] }"),
+                ConfigLoader.REWARDS, "rewards.m5.type", "unknown type 'money'");
+        assertIssue(withReward("  m6: { type: command, material: GOLD_NUGGET, summary: x, commands: [\"/\"] }"),
+                ConfigLoader.REWARDS, "rewards.m6.commands[0]", "command is empty");
+    }
 }

@@ -33,4 +33,12 @@ public interface PlatformValidator {
     Optional<String> checkParticle(String particle);
 
     Optional<String> checkSound(String key);
+
+    /**
+     * A warning (never an error) when a reward command's label is not currently registered. Other
+     * plugins may register their commands after ExoDaily loads, so this cannot be fatal.
+     */
+    default Optional<String> commandWarning(String label) {
+        return Optional.empty();
+    }
 }

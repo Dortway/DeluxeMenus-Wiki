@@ -144,4 +144,17 @@ class RewardSelectorTest {
                 List.of("<gray>line"), Map.of("efficiency", 3), List.of("HIDE_ENCHANTS"), 1001f, "pickaxe", 15, null);
         assertEquals(reward, RewardSnapshot.decode(RewardSnapshot.encode(reward)));
     }
+
+    @Test
+    void commandSnapshotsRoundTripAndOldSnapshotsReadAsItems() {
+        RewardDefinition command = new RewardDefinition("money", "GOLD_NUGGET", 1, null, List.of(), Map.of(), List.of(),
+                null, "$500", 10, null, dev.exodaily.core.reward.RewardType.COMMAND, List.of("eco give {player} 500"));
+        assertEquals(command, RewardSnapshot.decode(RewardSnapshot.encode(command)));
+        // A snapshot written before command rewards existed has neither field.
+        String legacy = "{\"version\":1,\"reward\":{\"id\":\"coal\",\"material\":\"COAL\",\"amount\":32,"
+                + "\"lore\":[],\"enchantments\":{},\"flags\":[],\"summary\":\"32 coal\",\"weight\":10}}";
+        RewardDefinition decoded = RewardSnapshot.decode(legacy);
+        assertEquals(dev.exodaily.core.reward.RewardType.ITEM, decoded.type());
+        assertTrue(decoded.commands().isEmpty());
+    }
 }
