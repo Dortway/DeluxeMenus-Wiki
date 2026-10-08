@@ -1,0 +1,28 @@
+name: ExoDaily
+version: '${project.version}'
+main: dev.exodaily.paper.ExoDailyPlugin
+api-version: '1.21.11'
+description: Calendar-based daily rewards with standard and premium tiers.
+author: ExoDaily
+folia-supported: false
+
+commands:
+  daily:
+    description: Open your daily rewards.
+    usage: /daily
+    permission: exodaily.use
+  exodaily:
+    description: ExoDaily administration.
+    usage: /exodaily help
+    permission: exodaily.admin
+
+permissions:
+  exodaily.use:
+    description: Open /daily and claim the standard reward.
+    default: true
+  exodaily.premium:
+    description: Claim the two premium reward positions (3 rewards per day in total).
+    default: false
+  exodaily.admin:
+    description: All /exodaily administration commands.
+    default: op

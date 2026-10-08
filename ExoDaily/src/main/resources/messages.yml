@@ -1,0 +1,85 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  ExoDaily · messages.yml · every chat message players and admins see
+#
+#  Format: MiniMessage (https://docs.advntr.dev/minimessage/format.html)
+#  Extras:  <sym:name>      symbol from config.yml style.symbol-set
+#           <sc>text</sc>   small caps (plain text when style.small-caps: false)
+#           <prefix>        the prefix below
+#  Missing keys fall back to the built-in default with a console warning.
+#
+#  Palette: accent <#A78BFA> · secondary <#67E8F9> · success <#86EFAC>
+#           warning <#FCD34D> · error <#FCA5A5> · text <#F3F4F6> · muted <#9CA3AF>
+# ─────────────────────────────────────────────────────────────────────────────
+config-version: 1
+
+prefix: "<#A78BFA><sym:star> <sc>daily</sc></#A78BFA> <#9CA3AF><sym:dot></#9CA3AF> "
+
+# ── general ──────────────────────────────────────────────────────────────────
+no-permission: "<prefix><#FCA5A5>you don't have permission to do that."
+players-only: "<prefix><#FCA5A5>only players can do that."
+storage-unavailable: "<prefix><#FCA5A5>daily rewards are temporarily unavailable. please try again later."
+storage-error: "<prefix><#FCA5A5>something went wrong saving your rewards, so nothing was given. please try again."
+busy: "<prefix><#FCD34D>the server is busy right now. please try again in a moment."
+usage: "<prefix><#9CA3AF>usage: <#F3F4F6><usage>"
+unknown-player: "<prefix><#FCA5A5>no player named <#F3F4F6><player></#F3F4F6> has used daily rewards."
+
+# ── menus ────────────────────────────────────────────────────────────────────
+menu-refreshed: "<prefix><#FCD34D>that menu was out of date, so it has been refreshed."
+menu-admin-updated: "<prefix><#FCD34D>your daily rewards were updated by staff."
+menu-config-reloaded: "<prefix><#9CA3AF>daily rewards were reloaded."
+day-changed: "<prefix><#67E8F9><sym:hourglass> a new day has started. your new rewards are ready."
+
+# ── claims ───────────────────────────────────────────────────────────────────
+claim-success: "<prefix><#86EFAC><sym:check> claimed</#86EFAC> <#67E8F9><reward></#67E8F9><#86EFAC>.</#86EFAC>"
+claim-success-unconfirmed: "<prefix><#86EFAC><sym:check> claimed</#86EFAC> <#67E8F9><reward></#67E8F9><#9CA3AF>. staff have been asked to double-check this claim."
+claim-already: "<prefix><#9CA3AF>you have already claimed that reward today."
+claim-locked: "<prefix><#FCA5A5><sym:cross> that reward is for premium players.</#FCA5A5> <#9CA3AF>premium unlocks 3 rewards per day."
+claim-stale: "<prefix><#FCD34D>that day has passed or changed. missed days can't be claimed later."
+claim-inventory-full: "<prefix><#FCD34D>your inventory is too full for <#67E8F9><reward></#67E8F9>. make space and claim again — it's kept for you until reset."
+claim-delivery-failed: "<prefix><#FCA5A5>that reward couldn't be created. it's still available; please tell staff."
+claim-pending-review: "<prefix><#FCD34D><sym:hourglass> that reward is being checked by staff after an interrupted delivery."
+claim-in-progress: "<prefix><#9CA3AF>that reward is already being claimed."
+
+# ── administration ───────────────────────────────────────────────────────────
+help:
+  - "<#A78BFA><sym:star> <sc>exodaily</sc> <#9CA3AF><sym:dot> admin commands"
+  - "<#F3F4F6>/daily <#9CA3AF><sym:dot> open the rewards menu"
+  - "<#F3F4F6>/exodaily reload <#9CA3AF><sym:dot> reload all files (keeps the old config if invalid)"
+  - "<#F3F4F6>/exodaily status <player> <#9CA3AF><sym:dot> cycle, day, today's rewards and claims"
+  - "<#F3F4F6>/exodaily setday <player> <day> <#9CA3AF><sym:dot> move within the cycle <#86EFAC>(claims kept)"
+  - "<#F3F4F6>/exodaily reset <player> confirm <#9CA3AF><sym:dot> new cycle at day 1 <#FCA5A5>(rewards can be earned again)"
+  - "<#F3F4F6>/exodaily reward save <id> <#9CA3AF><sym:dot> save the held item as a reward"
+  - "<#F3F4F6>/exodaily pending <#9CA3AF><sym:dot> claims awaiting reconciliation"
+  - "<#F3F4F6>/exodaily resolve <id> <delivered|release> <#9CA3AF><sym:dot> settle an uncertain claim"
+
+admin-reload-success: "<prefix><#86EFAC><sym:check> configuration reloaded</#86EFAC> <#9CA3AF>(<warnings> warning(s))."
+admin-reload-failed: "<prefix><#FCA5A5><sym:cross> reload failed with <errors> error(s). the previous configuration is still active."
+admin-config-issue: "<#9CA3AF>  <sym:dot> <#F3F4F6><issue>"
+admin-config-more: "<#9CA3AF>  … and <count> more (see console)"
+
+admin-no-data: "<prefix><#9CA3AF><player> has no daily reward data yet."
+admin-status-header: "<prefix><#A78BFA><sc>status</sc> <#F3F4F6><player> <#9CA3AF>(<uuid>)"
+admin-status-cycle: "<#9CA3AF>  cycle <#F3F4F6><cycle></#F3F4F6> <sym:dot> day <#F3F4F6><day>/<cycle-length></#F3F4F6> <sym:dot> cycle start <#F3F4F6><cycle-start></#F3F4F6> <sym:dot> first use <#F3F4F6><first-use></#F3F4F6> <sym:dot> premium (online) <#F3F4F6><premium>"
+admin-status-not-assigned: "<#9CA3AF>  today's rewards are assigned when the player first opens /daily."
+admin-status-position: "<#9CA3AF>  <position>. <#F3F4F6><reward></#F3F4F6> <#9CA3AF>(<reward-id>) <sym:dot> <#67E8F9><state>"
+admin-status-uncertain: "<#FCD34D>  <sym:warning> claim #<id> <#9CA3AF>cycle <cycle> day <day> position <position> (<reward-id>, <date>) <#FCD34D>needs review"
+
+admin-setday-invalid: "<prefix><#FCA5A5>day must be between 1 and <max>."
+admin-setday-success: "<prefix><#86EFAC><sym:check> <player> is now on day <day> of cycle <cycle>.</#86EFAC> <#9CA3AF>existing claims are kept, so already-claimed positions stay claimed."
+admin-reset-warning: "<prefix><#FCD34D><sym:warning> this starts a NEW cycle for <player> at day 1 today. previous claims stop counting, so they CAN earn rewards again — including today's. run <#F3F4F6>/exodaily reset <player> confirm</#F3F4F6> to continue."
+admin-reset-success: "<prefix><#86EFAC><sym:check> <player> now starts cycle <cycle> at day 1.</#86EFAC> <#FCD34D>they can earn rewards again, including today's."
+
+admin-pending-none: "<prefix><#86EFAC><sym:check> no claims are awaiting reconciliation."
+admin-pending-header: "<prefix><#FCD34D><count> claim(s) await reconciliation:"
+admin-pending-line: "<#FCD34D>  #<id> <#9CA3AF><uuid> cycle <cycle> day <day> position <position> <#F3F4F6><reward-id></#F3F4F6> <#9CA3AF><date> <sym:dot> <note>"
+admin-resolve-not-found: "<prefix><#FCA5A5>no uncertain claim with id #<id>."
+admin-resolve-delivered: "<prefix><#86EFAC><sym:check> claim #<id> marked as delivered; it stays claimed."
+admin-resolve-released: "<prefix><#FCD34D>claim #<id> released.</#FCD34D> <#9CA3AF>the player can claim it again only while day <day> of cycle <cycle> is still their current day."
+admin-uncertain-join: "<prefix><#FCD34D><sym:warning> <count> claim(s) need reconciliation after an interrupted delivery. see <#F3F4F6>/exodaily pending</#F3F4F6>."
+
+admin-reward-invalid-id: "<prefix><#FCA5A5>'<id>' is not a valid id. use lowercase letters, numbers, '_' or '-'."
+admin-reward-no-item: "<prefix><#FCA5A5>hold the item you want to save in your main hand."
+admin-reward-saved: "<prefix><#86EFAC><sym:check> saved reward <#F3F4F6><id></#F3F4F6> from your held item.</#86EFAC> <#9CA3AF>pools: <pools>"
+admin-reward-updated: "<prefix><#86EFAC><sym:check> updated reward <#F3F4F6><id></#F3F4F6> from your held item.</#86EFAC> <#9CA3AF>pools: <pools>. rewards already assigned to players keep their original item."
+admin-reward-not-in-pool: "<prefix><#9CA3AF>add <#F3F4F6><id></#F3F4F6> to a pool in rewards.yml and run /exodaily reload to make it selectable."
+admin-reward-save-failed: "<prefix><#FCA5A5><sym:cross> saving <id> made the configuration invalid, so rewards.yml was restored:"

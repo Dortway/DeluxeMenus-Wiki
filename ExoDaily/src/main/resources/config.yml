@@ -1,0 +1,70 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  ExoDaily · config.yml · general settings
+#  Targets Paper 1.21.11 (Java 21). One server per database (see README).
+# ─────────────────────────────────────────────────────────────────────────────
+config-version: 1
+
+# Every reward day is a calendar date in this timezone. A new day starts at
+# local midnight, so daylight-saving days (23 or 25 hours) are handled
+# correctly. Use any IANA timezone id, e.g. Europe/London, America/New_York.
+# Changing this can move "today" for every player; claims are never repeated.
+timezone: "Europe/London"
+
+# Days per reward cycle. A player's cycle starts on the date of their first
+# /daily. After the last day a new cycle starts automatically.
+# Changing this affects each player from their NEXT cycle; running cycles keep
+# the length they started with. menus.yml overview.day-slots must have at least
+# this many slots.
+cycle-length: 30
+
+storage:
+  # Only sqlite is supported. Changes here need a server restart.
+  type: sqlite
+  # Database file inside plugins/ExoDaily/.
+  file: "data.db"
+  # How long SQLite waits for a locked database before failing (milliseconds).
+  busy-timeout-ms: 5000
+  # Maximum queued storage operations. When full, new requests are refused
+  # with a "busy" message instead of piling up (fail closed).
+  queue-capacity: 1024
+
+claims:
+  # Minimum time between menu clicks per player (milliseconds). Rapid clicks
+  # inside this window are ignored. A claim also blocks further claims until
+  # it finishes, regardless of this value.
+  click-cooldown-ms: 350
+  # Minimum time between /daily uses per player (milliseconds).
+  open-cooldown-ms: 750
+
+menus:
+  # How often open menus check the countdown, day changes and premium changes
+  # (in ticks, 20 = 1 second). Only players with an ExoDaily menu open are
+  # checked; a menu is redrawn only when something it shows has changed.
+  countdown-update-ticks: 20
+
+style:
+  # Render <sc>text</sc> as small caps (ꜱᴍᴀʟʟ ᴄᴀᴘꜱ). When false the text is
+  # shown as normal lowercase letters.
+  small-caps: true
+  # Render <sym:name> with the fancy symbol. When false the plain alternative
+  # is used (useful for clients or fonts that lack these glyphs).
+  symbols: true
+  symbol-set:
+    star:      { fancy: "✦", plain: "*" }
+    diamond:   { fancy: "◆", plain: "-" }
+    check:     { fancy: "✓", plain: "+" }
+    cross:     { fancy: "✕", plain: "x" }
+    hourglass: { fancy: "⌛", plain: "~" }
+    arrow:     { fancy: "➜", plain: ">" }
+    dot:       { fancy: "·", plain: "-" }
+    bar:       { fancy: "■", plain: "#" }
+    warning:   { fancy: "⚠", plain: "!" }
+
+audit:
+  # Also write administrative actions to plugins/ExoDaily/audit.log
+  # (they are always stored in the database audit_log table).
+  file: true
+
+notifications:
+  # Tell admins on join when claims are awaiting reconciliation.
+  notify-admins-on-join: true

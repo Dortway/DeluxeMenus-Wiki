@@ -1,0 +1,265 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  ExoDaily · rewards.yml · rewards, weighted pools and the 30-day schedule
+#
+#  How selection works
+#  • The first time a player views a day, all three positions are drawn
+#    independently for that player from the pools scheduled for that day and
+#    saved. They never change afterwards (reopening, relogging, permission
+#    changes, restarts and reloads all keep them).
+#  • Each player draws separately, so two players may get the same reward.
+#  • The saved copy is what the player sees and receives: editing or removing
+#    a reward here never changes a reward that was already assigned.
+#
+#  Positions: 1 = standard (everyone), 2 and 3 = premium (exodaily.premium).
+#  Premium players can claim at most 3 rewards per day in total.
+# ─────────────────────────────────────────────────────────────────────────────
+config-version: 1
+
+settings:
+  # Never give the same reward id twice in one player's day. If a pool runs
+  # out of unused entries, its fallback pool is tried, then fallback-pool
+  # below; only if every option is used up is a duplicate allowed (logged).
+  prevent-duplicates-per-day: true
+  # Last-resort pool for any pool that runs out of eligible entries.
+  fallback-pool: standard_common
+  # How many possible rewards future-day previews list per pool.
+  preview-max-entries: 4
+  # Days highlighted as milestones in the cycle overview.
+  milestone-days: [7, 14, 21, 30]
+
+# ═════════════════════════════════════════════════════════════════ rewards
+# id (lowercase letters, digits, _ and -; never rename an id in use):
+#   material:          Bukkit material name (required unless serialized-item)
+#   amount:            total amount, split into stacks (up to 36 stacks)
+#   summary:           short text used in menus, e.g. "16 diamonds"
+#   name / lore:       optional MiniMessage display name and lore
+#   enchantments:      { enchantment_key: level }   (unsafe levels allowed)
+#   flags:             [HIDE_ENCHANTS, ...]          (Bukkit ItemFlag names)
+#   custom-model-data: number (applied as the first custom model data float)
+#   weight:            default selection weight (pools may override it)
+#   serialized-item:   written by /exodaily reward save <id>; the item is
+#                      restored exactly (all metadata). Do not edit by hand.
+rewards:
+
+  # ── everyday resources ────────────────────────────────────────────────────
+  iron_16:          { material: IRON_INGOT, amount: 16, summary: "16 iron ingots", weight: 30 }
+  coal_32:          { material: COAL, amount: 32, summary: "32 coal", weight: 30 }
+  copper_32:        { material: COPPER_INGOT, amount: 32, summary: "32 copper ingots", weight: 25 }
+  redstone_24:      { material: REDSTONE, amount: 24, summary: "24 redstone", weight: 20 }
+  lapis_16:         { material: LAPIS_LAZULI, amount: 16, summary: "16 lapis lazuli", weight: 20 }
+  gold_8:           { material: GOLD_INGOT, amount: 8, summary: "8 gold ingots", weight: 15 }
+  torches_32:       { material: TORCH, amount: 32, summary: "32 torches", weight: 20 }
+  arrows_32:        { material: ARROW, amount: 32, summary: "32 arrows", weight: 15 }
+
+  # ── food ──────────────────────────────────────────────────────────────────
+  bread_16:         { material: BREAD, amount: 16, summary: "16 bread", weight: 30 }
+  steak_12:         { material: COOKED_BEEF, amount: 12, summary: "12 steak", weight: 25 }
+  baked_potato_16:  { material: BAKED_POTATO, amount: 16, summary: "16 baked potatoes", weight: 25 }
+  golden_carrot_8:  { material: GOLDEN_CARROT, amount: 8, summary: "8 golden carrots", weight: 15 }
+  pumpkin_pie_8:    { material: PUMPKIN_PIE, amount: 8, summary: "8 pumpkin pies", weight: 15 }
+
+  # ── building ──────────────────────────────────────────────────────────────
+  oak_logs_32:      { material: OAK_LOG, amount: 32, summary: "32 oak logs", weight: 25 }
+  stone_bricks_64:  { material: STONE_BRICKS, amount: 64, summary: "64 stone bricks", weight: 25 }
+  glass_32:         { material: GLASS, amount: 32, summary: "32 glass", weight: 20 }
+  deepslate_64:     { material: DEEPSLATE_BRICKS, amount: 64, summary: "64 deepslate bricks", weight: 15 }
+  bookshelves_4:    { material: BOOKSHELF, amount: 4, summary: "4 bookshelves", weight: 15 }
+  lanterns_8:       { material: LANTERN, amount: 8, summary: "8 lanterns", weight: 15 }
+
+  # ── rarer finds ───────────────────────────────────────────────────────────
+  diamonds_3:       { material: DIAMOND, amount: 3, summary: "3 diamonds", weight: 20 }
+  emeralds_8:       { material: EMERALD, amount: 8, summary: "8 emeralds", weight: 25 }
+  xp_bottles_16:    { material: EXPERIENCE_BOTTLE, amount: 16, summary: "16 bottles o' enchanting", weight: 25 }
+  ender_pearls_4:   { material: ENDER_PEARL, amount: 4, summary: "4 ender pearls", weight: 20 }
+  golden_apple_1:   { material: GOLDEN_APPLE, amount: 1, summary: "1 golden apple", weight: 10 }
+
+  # ── premium resources ─────────────────────────────────────────────────────
+  diamonds_4:       { material: DIAMOND, amount: 4, summary: "4 diamonds", weight: 20 }
+  emeralds_16:      { material: EMERALD, amount: 16, summary: "16 emeralds", weight: 25 }
+  golden_apples_2:  { material: GOLDEN_APPLE, amount: 2, summary: "2 golden apples", weight: 15 }
+  xp_bottles_24:    { material: EXPERIENCE_BOTTLE, amount: 24, summary: "24 bottles o' enchanting", weight: 20 }
+  ender_pearls_8:   { material: ENDER_PEARL, amount: 8, summary: "8 ender pearls", weight: 15 }
+  quartz_32:        { material: QUARTZ, amount: 32, summary: "32 nether quartz", weight: 20 }
+  amethyst_16:      { material: AMETHYST_SHARD, amount: 16, summary: "16 amethyst shards", weight: 15 }
+  name_tag_1:       { material: NAME_TAG, amount: 1, summary: "1 name tag", weight: 10 }
+
+  # ── premium rarities ──────────────────────────────────────────────────────
+  diamonds_8:       { material: DIAMOND, amount: 8, summary: "8 diamonds", weight: 20 }
+  emeralds_32:      { material: EMERALD, amount: 32, summary: "32 emeralds", weight: 20 }
+  golden_apples_4:  { material: GOLDEN_APPLE, amount: 4, summary: "4 golden apples", weight: 15 }
+  blaze_rods_8:     { material: BLAZE_ROD, amount: 8, summary: "8 blaze rods", weight: 15 }
+  shulker_shells_2: { material: SHULKER_SHELL, amount: 2, summary: "2 shulker shells", weight: 10 }
+  saddle_1:         { material: SADDLE, amount: 1, summary: "1 saddle", weight: 10 }
+
+  # ── weekly milestones (days 7, 14, 21) ────────────────────────────────────
+  milestone_xp_32:  { material: EXPERIENCE_BOTTLE, amount: 32, summary: "32 bottles o' enchanting", weight: 20 }
+  milestone_pickaxe:
+    material: DIAMOND_PICKAXE
+    amount: 1
+    summary: "milestone pickaxe"
+    name: "<#67E8F9><sym:star> milestone pickaxe"
+    lore:
+      - "<#9CA3AF>earned by a full week of rewards"
+    enchantments:
+      efficiency: 3
+      unbreaking: 2
+    custom-model-data: 1001
+    weight: 15
+  diamonds_16:      { material: DIAMOND, amount: 16, summary: "16 diamonds", weight: 20 }
+  netherite_scrap_2: { material: NETHERITE_SCRAP, amount: 2, summary: "2 netherite scrap", weight: 15 }
+  totem_1:          { material: TOTEM_OF_UNDYING, amount: 1, summary: "1 totem of undying", weight: 10 }
+  enchanted_apple_1: { material: ENCHANTED_GOLDEN_APPLE, amount: 1, summary: "1 enchanted golden apple", weight: 5 }
+  premium_pickaxe:
+    material: DIAMOND_PICKAXE
+    amount: 1
+    summary: "premium pickaxe"
+    name: "<#FCD34D><sym:star> premium pickaxe"
+    lore:
+      - "<#9CA3AF>a premium milestone reward"
+    enchantments:
+      efficiency: 4
+      unbreaking: 3
+      fortune: 2
+    custom-model-data: 1002
+    weight: 15
+  premium_blade:
+    material: DIAMOND_SWORD
+    amount: 1
+    summary: "premium blade"
+    name: "<#FCD34D><sym:star> premium blade"
+    lore:
+      - "<#9CA3AF>a premium milestone reward"
+    enchantments:
+      sharpness: 4
+      unbreaking: 3
+      looting: 2
+    weight: 15
+
+  # ── cycle finale (day 30) ─────────────────────────────────────────────────
+  netherite_ingot_1: { material: NETHERITE_INGOT, amount: 1, summary: "1 netherite ingot", weight: 20 }
+  netherite_ingot_2: { material: NETHERITE_INGOT, amount: 2, summary: "2 netherite ingots", weight: 20 }
+  diamonds_32:      { material: DIAMOND, amount: 32, summary: "32 diamonds", weight: 20 }
+  nether_star_1:    { material: NETHER_STAR, amount: 1, summary: "1 nether star", weight: 10 }
+  cycle_crown:
+    material: GOLDEN_HELMET
+    amount: 1
+    summary: "cycle crown"
+    name: "<#FCD34D><sym:star> cycle crown"
+    lore:
+      - "<#9CA3AF>for completing a full cycle"
+    enchantments:
+      protection: 4
+      unbreaking: 3
+    flags: [HIDE_ENCHANTS]
+    custom-model-data: 1003
+    weight: 10
+
+# ═══════════════════════════════════════════════════════════════════ pools
+# description: shown in future-day previews ("possible rewards").
+# fallback:    pool tried when this one has no eligible entry left.
+# entries:     reward ids, or { reward: id, weight: n } to override the weight.
+pools:
+  standard_common:
+    description: "everyday resources"
+    entries: [iron_16, coal_32, copper_32, redstone_24, lapis_16, gold_8, torches_32, arrows_32]
+
+  standard_food:
+    description: "hearty food"
+    fallback: standard_common
+    entries: [bread_16, steak_12, baked_potato_16, golden_carrot_8, pumpkin_pie_8]
+
+  standard_building:
+    description: "building blocks"
+    fallback: standard_common
+    entries: [oak_logs_32, stone_bricks_64, glass_32, deepslate_64, bookshelves_4, lanterns_8]
+
+  standard_uncommon:
+    description: "rarer finds"
+    fallback: standard_common
+    entries: [diamonds_3, emeralds_8, xp_bottles_16, ender_pearls_4, golden_apple_1]
+
+  premium_common:
+    description: "premium resources"
+    fallback: standard_uncommon
+    entries: [diamonds_4, emeralds_16, golden_apples_2, xp_bottles_24, ender_pearls_8, quartz_32, amethyst_16, name_tag_1]
+
+  premium_uncommon:
+    description: "premium rarities"
+    fallback: premium_common
+    entries: [diamonds_8, emeralds_32, golden_apples_4, blaze_rods_8, shulker_shells_2, saddle_1]
+
+  milestone_standard:
+    description: "weekly milestone"
+    fallback: standard_uncommon
+    entries:
+      - diamonds_8
+      - golden_apples_4
+      - milestone_pickaxe
+      - milestone_xp_32
+
+  milestone_premium:
+    description: "premium milestone"
+    fallback: premium_uncommon
+    entries:
+      - premium_pickaxe
+      - premium_blade
+      - netherite_scrap_2
+      - totem_1
+      - diamonds_16
+      - { reward: enchanted_apple_1, weight: 5 }
+
+  finale_standard:
+    description: "cycle finale"
+    fallback: milestone_standard
+    entries: [netherite_ingot_1, diamonds_16, totem_1, enchanted_apple_1]
+
+  finale_premium:
+    description: "premium cycle finale"
+    fallback: milestone_premium
+    entries: [netherite_ingot_2, diamonds_32, nether_star_1, cycle_crown]
+
+# ════════════════════════════════════════════════════════════════ schedule
+# default: pools for any day not listed under days.
+# days:    per-day pools. A day may set only some positions; the rest use
+#          default. Days beyond cycle-length (config.yml) are ignored.
+schedule:
+  default:
+    position-1: standard_common
+    position-2: premium_common
+    position-3: premium_common
+
+  days:
+    # ── week 1 ──
+    1:  { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
+    2:  { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
+    3:  { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
+    4:  { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
+    5:  { position-1: standard_uncommon,  position-2: premium_uncommon,  position-3: premium_common }
+    6:  { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
+    7:  { position-1: milestone_standard, position-2: milestone_premium, position-3: premium_uncommon }
+    # ── week 2 ──
+    8:  { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
+    9:  { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
+    10: { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
+    11: { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
+    12: { position-1: standard_uncommon,  position-2: premium_uncommon,  position-3: premium_common }
+    13: { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
+    14: { position-1: milestone_standard, position-2: milestone_premium, position-3: premium_uncommon }
+    # ── week 3 ──
+    15: { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
+    16: { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
+    17: { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
+    18: { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
+    19: { position-1: standard_uncommon,  position-2: premium_uncommon,  position-3: premium_common }
+    20: { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
+    21: { position-1: milestone_standard, position-2: milestone_premium, position-3: premium_uncommon }
+    # ── week 4 and finale ──
+    22: { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
+    23: { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
+    24: { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
+    25: { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
+    26: { position-1: standard_uncommon,  position-2: premium_uncommon,  position-3: premium_common }
+    27: { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
+    28: { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
+    29: { position-1: standard_uncommon,  position-2: premium_uncommon,  position-3: premium_uncommon }
+    30: { position-1: finale_standard,    position-2: finale_premium,    position-3: milestone_premium }
