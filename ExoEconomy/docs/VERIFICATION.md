@@ -41,8 +41,9 @@ These are implemented, but no Paper server could run here:
 | Provenance | Pistons, falling blocks, generators, tree growth, bone meal. |
 | Slaying | Spawn reasons, Paper `fromMobSpawner()`, ExoSpawners `StackMobKilledEvent`. |
 | Integrations | PlaceholderAPI registration; ExoSkills sale bonus through ExoArmorTrims' service. |
+| Vault API | Signatures checked against the real Vault 1.7.3 jar from the ExoCubes project. |
 | Selling currency | Vault money deposits (connection, `fractionalDigits`, formatting), or the chosen ExcellentEconomy currency. |
-| ExoCubes / ExoWoodCubes | Whether they regenerate blocks with direct `setType` (works now) or cancel the break event (needs the `rewardBlockBreak` call). |
+| ExoCubes / ExoWoodCube | Rewards on real cube harvests. Both plugins were read from source: they cancel breaks and fire committed-harvest events. ExoEconomy's reflection binding was checked against ExoCubes' compiled `CubeHarvestEvent` and the patched `WoodCubeHarvestEvent`; both bind. The ExoWoodCube patch itself could not be compiled here (no Paper API), apart from the new event class. |
 
 Suggested acceptance pass on a test server:
 1. Run `/exoeconomy info`.
@@ -78,7 +79,7 @@ Suggested acceptance pass on a test server:
 
 ## Follow-up information needed
 
-0. **ExoCubes and ExoWoodCubes** jars or source. With them I can confirm how they break and regenerate blocks and, if they cancel the break event, add a direct hook instead of relying on the API call or the block-replacement rule.
+0. Rebuild **ExoWoodCube** with the patch in `integrations/ExoWoodCube` (adds `WoodCubeHarvestEvent`).
 
 1. Your installed **ExcellentEconomy and NightCore versions** and the **Shards currency file** (`plugins/ExcellentEconomy/currencies/<id>.yml`).
 2. Results of **`build.ps1`** against your server. Any compile error there means an API difference, and I can adjust it immediately.

@@ -14,6 +14,7 @@ import net.exoeconomy.core.tx.TxState;
 import net.exoeconomy.core.tx.Ledger;
 import net.exoeconomy.economy.EconomyBridge;
 import net.exoeconomy.economy.VaultBridge;
+import net.exoeconomy.integration.CubeHarvestBridge;
 import net.exoeconomy.integration.ExoSkillsBridge;
 import net.exoeconomy.integration.ExoSpawnersBridge;
 import net.exoeconomy.integration.PapiExpansion;
@@ -58,6 +59,8 @@ public final class ExoEconomyPlugin extends JavaPlugin {
     private SellService sell;
     private MenuListener menus;
     private ExoSpawnersBridge exoSpawners;
+    private CubeHarvestBridge exoCubes;
+    private CubeHarvestBridge exoWoodCube;
     private boolean papi;
     private BukkitTask flushTask;
     private final List<BukkitTask> tasks = new ArrayList<>();
@@ -176,6 +179,10 @@ public final class ExoEconomyPlugin extends JavaPlugin {
         if (settings.exoSkills() && settings.selling().exoSkillsBonus() && !sell.exoSkillsConnected())
             getLogger().warning("selling.exoskills-sale-bonus is enabled but the ExoSkills sale bonus is unavailable; selling uses 1x.");
         if (exoSpawners == null && settings.exoSpawners()) exoSpawners = ExoSpawnersBridge.connect(this);
+        if (exoCubes == null) exoCubes = CubeHarvestBridge.connect(this, "ExoCubes", "dev.exo.cubes.api.CubeHarvestEvent",
+                () -> settings.exoCubes(), "Update ExoCubes to a version with dev.exo.cubes.api.CubeHarvestEvent.");
+        if (exoWoodCube == null) exoWoodCube = CubeHarvestBridge.connect(this, "ExoWoodCube", "dev.exo.woodcube.api.WoodCubeHarvestEvent",
+                () -> settings.exoWoodCube(), "Apply the patch in ExoEconomy/integrations/ExoWoodCube and rebuild ExoWoodCube.");
         if (!papi && settings.placeholderApi() && Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             try {
                 papi = new PapiExpansion(this).register();
@@ -252,6 +259,8 @@ public final class ExoEconomyPlugin extends JavaPlugin {
             });
         }
         if (exoSpawners != null) exoSpawners.close();
+        if (exoCubes != null) exoCubes.close();
+        if (exoWoodCube != null) exoWoodCube.close();
         getServer().getServicesManager().unregisterAll(this);
         tasks.forEach(BukkitTask::cancel);
         if (database != null) {
@@ -282,6 +291,8 @@ public final class ExoEconomyPlugin extends JavaPlugin {
         List<String> parts = new ArrayList<>();
         parts.add("ExoSkills sale bonus: " + (sell.exoSkillsConnected() ? (settings.selling().exoSkillsBonus() ? "on" : "available, off") : "unavailable"));
         parts.add("ExoSpawners: " + (exoSpawners != null ? (settings.rewards().slaying().exoSpawnersStackKills() ? "stack kills paid" : "hooked, off") : "not hooked"));
+        parts.add("ExoCubes: " + (exoCubes != null ? "hooked" : "not hooked"));
+        parts.add("ExoWoodCube: " + (exoWoodCube != null ? "hooked" : "not hooked"));
         parts.add("PlaceholderAPI: " + (papi ? "on" : "off"));
         return String.join(", ", parts);
     }

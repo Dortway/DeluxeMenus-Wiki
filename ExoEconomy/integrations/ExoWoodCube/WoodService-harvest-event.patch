@@ -1,0 +1,13 @@
+--- a/src/main/java/dev/exo/woodcube/service/WoodService.java	2026-10-11 17:43:34.159996186 +0000
++++ b/src/main/java/dev/exo/woodcube/service/WoodService.java	2026-10-11 17:43:34.210137463 +0000
+@@ -493,6 +493,10 @@
+         if (!tool.isEmpty() && tool.getType().getMaxDurability() > 0) {
+             player.damageItemStack(EquipmentSlot.HAND, 1);
+         }
++        // Committed harvest: let other plugins (e.g. ExoEconomy rewards) react to exactly this log.
++        Bukkit.getPluginManager().callEvent(new dev.exo.woodcube.api.WoodCubeHarvestEvent(player, cube.id(), cube.owner(),
++                cube.tier(), block.getLocation(), material, Material.matchMaterial(wood.item()), amount,
++                r.outcome() == Harvest.Outcome.AUTOSOLD, r.value() / 100.0));
+         Location center = block.getLocation().add(0.5, 0.5, 0.5);
+         block.getWorld().spawnParticle(Particle.BLOCK, center, 18, 0.25, 0.25, 0.25, 0, data);
+         block.getWorld().playSound(center, Sound.BLOCK_WOOD_BREAK, 1f, 1f);

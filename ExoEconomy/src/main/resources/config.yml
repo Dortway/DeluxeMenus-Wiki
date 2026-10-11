@@ -64,3 +64,17 @@ integrations:
   exoskills: true
   exospawners: true
   placeholderapi: true
+  # ExoCubes and ExoWoodCube cancel the break of every cube block and harvest it themselves, so
+  # ExoEconomy pays for cube blocks through their harvest events instead (once per block a player
+  # really mined in survival; never for Auto-Mine, refused breaks or creative mode).
+  # The reward is the block's reward in rewards.yml for that activity, times reward-multiplier
+  # (cubes regenerate endlessly, so you may want them to pay less than natural blocks).
+  exocubes:
+    enabled: true
+    activity: mining          # uses activities.mining.rewards (COAL_ORE, DIAMOND_ORE, ...)
+    reward-multiplier: 1.0
+  exowoodcube:
+    enabled: true
+    activity: woodcutting     # uses activities.woodcutting.rewards (OAK_LOG, ...)
+    reward-multiplier: 1.0
+    # Needs ExoWoodCube built with the patch in ExoEconomy/integrations/ExoWoodCube (adds WoodCubeHarvestEvent).

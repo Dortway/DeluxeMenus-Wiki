@@ -79,7 +79,7 @@ public interface Server {
 }""")
 f("org/bukkit/GameMode.java", "package org.bukkit;\npublic enum GameMode { CREATIVE, SURVIVAL, ADVENTURE, SPECTATOR }")
 f("org/bukkit/Keyed.java", "package org.bukkit;\npublic interface Keyed { NamespacedKey getKey(); }")
-f("org/bukkit/Location.java", "package org.bukkit;\npublic class Location { }")
+f("org/bukkit/Location.java", "package org.bukkit;\npublic class Location implements Cloneable { @Override public Location clone() { return this; } }")
 f("org/bukkit/World.java", """package org.bukkit;
 public interface World { java.util.UUID getUID(); String getName(); int getMaxHeight(); }""")
 f("org/bukkit/OfflinePlayer.java", """package org.bukkit;

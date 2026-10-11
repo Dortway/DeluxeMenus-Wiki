@@ -1,5 +1,6 @@
 package net.exoeconomy.config;
 
+import net.exoeconomy.integration.CubeHarvestBridge;
 import net.exoeconomy.sell.PriceCatalogue;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,6 +21,7 @@ import java.util.function.Function;
 public record Settings(int generation, String currencyId, String scale, String storageFile, int storageQueue,
                        boolean shardsCommand, String shardsCommandName, List<String> shardsAliases,
                        boolean exoSkills, boolean exoSpawners, boolean placeholderApi,
+                       CubeHarvestBridge.Rule exoCubes, CubeHarvestBridge.Rule exoWoodCube,
                        SellSettings selling, RewardSettings rewards, BoosterSettings boosters,
                        PriceCatalogue catalogue, Messages messages, List<String> warnings) {
 
@@ -53,6 +55,8 @@ public record Settings(int generation, String currencyId, String scale, String s
         RewardSettings rewardSettings = RewardSettings.load(rewards, problems, warnings);
         BoosterSettings boosterSettings = BoosterSettings.load(boosters, selling.boostersEnabled(), problems, warnings);
         PriceCatalogue catalogue = PriceCatalogue.load(prices, problems, warnings);
+        CubeHarvestBridge.Rule exoCubes = cubeRule(config, "exocubes", RewardSettings.MINING, rewardSettings, problems, warnings);
+        CubeHarvestBridge.Rule exoWoodCube = cubeRule(config, "exowoodcube", RewardSettings.WOODCUTTING, rewardSettings, problems, warnings);
         Messages msgs;
         try (InputStream in = resources.apply("messages.yml")) {
             YamlConfiguration defaults = new YamlConfiguration();
@@ -66,8 +70,21 @@ public record Settings(int generation, String currencyId, String scale, String s
         return new Settings(generation, currency, scale, config.getString("storage.file", "exoeconomy.db"), queue,
                 config.getBoolean("commands.shards.enabled", false), shardsName, config.getStringList("commands.shards.aliases"),
                 config.getBoolean("integrations.exoskills", true), config.getBoolean("integrations.exospawners", true),
-                config.getBoolean("integrations.placeholderapi", true), selling, rewardSettings, boosterSettings, catalogue,
+                config.getBoolean("integrations.placeholderapi", true), exoCubes, exoWoodCube, selling, rewardSettings, boosterSettings, catalogue,
                 msgs, List.copyOf(warnings));
+    }
+
+    /** integrations.&lt;key&gt;: enabled, activity, reward-multiplier. */
+    private static CubeHarvestBridge.Rule cubeRule(YamlConfiguration config, String key, String defaultActivity,
+                                                   RewardSettings rewards, List<String> problems, List<String> warnings) {
+        String path = "integrations." + key;
+        String activity = config.getString(path + ".activity", defaultActivity).toLowerCase(java.util.Locale.ROOT);
+        java.math.BigDecimal multiplier = RewardSettings.amount(config.get(path + ".reward-multiplier", 1.0), path + ".reward-multiplier", problems);
+        if (multiplier.compareTo(java.math.BigDecimal.valueOf(100)) > 0) problems.add(path + ".reward-multiplier must be 0..100");
+        boolean enabled = config.getBoolean(path + ".enabled", true);
+        if (enabled && rewards.activity(activity) == null)
+            warnings.add(path + ".activity '" + activity + "' has no section in rewards.yml; cube harvests pay nothing");
+        return new CubeHarvestBridge.Rule(enabled, activity, multiplier);
     }
 
     private static YamlConfiguration read(File file, List<String> problems) {

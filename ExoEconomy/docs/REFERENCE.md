@@ -54,6 +54,7 @@ All admin commands tab-complete subcommands, players, tiers, booster ids and act
 
 | File | Contents |
 |---|---|
+| `config.yml` (integrations) | `exocubes` / `exowoodcube`: `enabled`, `activity` (mining / woodcutting), `reward-multiplier`. Blocks mined inside cubes pay that activity's reward for the block × the multiplier, once per block. |
 | `config.yml` | Currency id and precision, storage, optional `/shards`, selling (**`currency`**: `vault` (default), `excellenteconomy:<id>` or `shards`; **`price-multiplier`** (default 100, applied to every `prices.yml` price); game modes, worlds, max payout, confirm window, crash recovery mode, selling boosters, ExoSkills bonus, multiplier cap), integrations. |
 | `rewards.yml` | Per activity: enabled, permission, worlds, game modes, daily cap, rewards per material or entity. Mining: `reward-generated-blocks`. Farming: `allow-fertilized`, `stem-scan-limit`. Slaying: `origins.{spawner,bred,summoned,unknown}`, `blocked-spawn-reasons`, `reward-players`, `exospawners-stack-kills`. Woodcutting: log rewards (placed logs never pay). Also notifications (action bar, chat with optional `interval-seconds` batching, sound, `allow-player-toggle`, flush interval), `provenance.forget-when-block-changes`, and a total daily cap. |
 | `boosters.yml` | Stacking rules, time model, announcements, menu layout, tiers. |

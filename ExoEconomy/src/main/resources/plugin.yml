@@ -3,7 +3,7 @@ version: '${version}'
 main: net.exoeconomy.ExoEconomyPlugin
 api-version: '26.1.2'
 description: Shards activity rewards and boosters (ExcellentEconomy), plus /sell for money.
-softdepend: [ExcellentEconomy, NightCore, Vault, ExoSkills, ExoArmorTrims, ExoSpawners, ESkyblock, PlaceholderAPI]
+softdepend: [ExcellentEconomy, NightCore, Vault, ExoSkills, ExoArmorTrims, ExoSpawners, ExoCubes, ExoWoodCube, ESkyblock, PlaceholderAPI]
 commands:
   sell:
     description: Open the selling menu, or collect returned items with /sell claim
