@@ -19,7 +19,7 @@ case "$MODE" in
   --server)
     SERVER="${2:?usage: ./build.sh --server /path/to/server}"
     CP="$(find "$SERVER/libraries" -name '*.jar' | tr '\n' ':')"
-    for p in 'ExcellentEconomy*.jar' 'nightcore*.jar' 'NightCore*.jar' 'PlaceholderAPI*.jar'; do
+    for p in 'ExcellentEconomy*.jar' 'nightcore*.jar' 'NightCore*.jar' 'PlaceholderAPI*.jar' 'Vault*.jar'; do
       CP="$CP$(find "$SERVER/plugins" -maxdepth 1 -name "$p" | tr '\n' ':')"
     done
     echo "$CP" | grep -q ExcellentEconomy || { echo "ExcellentEconomy jar not found in $SERVER/plugins" >&2; exit 1; }

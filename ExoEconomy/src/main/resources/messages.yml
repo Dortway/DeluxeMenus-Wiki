@@ -39,6 +39,7 @@ booster-global-activated: "%prefix%&f%player% &aactivated %tier%&a: &f%multiplie
 booster-global-expired: "%prefix%&7The global %tier% &7has ended."
 
 sell-disabled: "%prefix%&cSelling is disabled."
+sell-economy-unavailable: "%prefix%&cSelling is temporarily unavailable (the money economy is not connected)."
 sell-not-here: "%prefix%&cYou can't sell here or in this game mode."
 sell-menu-closed: "%prefix%&cThe sell menu was closed; nothing was sold."
 sell-confirm-expired: "%prefix%&eThe items changed or the confirmation expired; check the new total and confirm again."
@@ -49,6 +50,12 @@ sell-reject-protected: "protected item"
 sell-reject-unpriced: "not sellable"
 sell-reject-disabled: "selling disabled for this item"
 sell-reject-modified: "not a plain vanilla item"
+notify-usage: "%prefix%&7Usage: &f/%label% [chat|actionbar|sound|all|status] [on|off]"
+notify-locked: "%prefix%&cReward messages can't be changed on this server."
+notify-status: "%prefix%&7Reward messages &8- &7chat: %chat% &8| &7action bar: %actionbar% &8| &7sound: %sound%"
+notify-state-on: "&aon"
+notify-state-off: "&coff"
+notify-state-server-off: "&8off (server)"
 claims-none: "%prefix%&7You have nothing to collect."
 claims-delivered: "%prefix%&aDelivered &f%count% &astored item batch(es)."
 
@@ -57,6 +64,7 @@ activity-names:
   mining: "Mining"
   farming: "Farming"
   slaying: "Slaying"
+  woodcutting: "Woodcutting"
   selling: "Selling"
 scope-names:
   personal: "Personal"
@@ -140,7 +148,8 @@ menus:
 help:
   player:
     - "&#DA94E3ExoEconomy &8- &7Shards rewards, selling and boosters"
-    - "&f/sell &8- &7sell plain vanilla items for Shards"
+    - "&f/sell &8- &7sell plain vanilla items for money"
+    - "&f/shardnotify [chat|actionbar|sound] [on|off] &8- &7turn reward messages on or off"
     - "&f/sell claim &8- &7collect items returned while your inventory was full"
     - "&f/boosters &8- &7buy boosters and see active ones"
     - "&f/%label% info &8- &7plugin status"
@@ -153,7 +162,7 @@ help:
     - "&f/%label% audit &8- &7check prices against recipes"
     - "&f/%label% storage &8- &7retry storage after a failure"
 
-info: "%prefix%&fExoEconomy %version%\n&7Economy: &f%economy%\n&7Currency: &f%currency% &7(precision %scale%)\n&7Storage: &f%storage%\n&7Boosters: &f%boosters% &7| Prices: &f%prices% &7| Provenance: &f%provenance%\n&7Integrations: &f%integrations%"
+info: "%prefix%&fExoEconomy %version%\n&7Economy: &f%economy%\n&7Currency: &f%currency% &7(precision %scale%)\n&7Selling pays: &f%sell_currency%\n&7Storage: &f%storage%\n&7Boosters: &f%boosters% &7| Prices: &f%prices% &7| Provenance: &f%provenance%\n&7Integrations: &f%integrations%"
 
 admin-uncertain: "%prefix%&eTransaction &f%tx% &e(%player%) has an uncertain outcome. Review: /exoeco tx inspect %tx%"
 admin-booster-header: "%prefix%&f%count% booster(s):"
@@ -177,6 +186,6 @@ admin-claim-not-found: "%prefix%&cNo unique claim matches %id%."
 admin-claim-linked: "%prefix%&cThis claim belongs to uncertain sale %tx%; resolve the sale instead (not-paid returns the items)."
 admin-claim-approved: "%prefix%&aClaim %id% approved; the player can collect it with /sell claim."
 admin-claim-discarded: "%prefix%&aClaim %id% discarded."
-audit-clean: "%prefix%&aNo recipe turns sellable inputs into more Shards."
+audit-clean: "%prefix%&aNo recipe turns sellable inputs into more sell value."
 audit-findings: "%prefix%&e%count% recipe(s) sell for more than their inputs:"
 audit-line: " &8▪ &f%item% &7(%recipe%): sells %output% > inputs %input%"

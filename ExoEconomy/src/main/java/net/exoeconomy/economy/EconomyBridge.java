@@ -2,7 +2,7 @@ package net.exoeconomy.economy;
 
 import net.exoeconomy.core.Money;
 import net.exoeconomy.core.tx.LedgerResult;
-import net.exoeconomy.core.tx.ShardsLedger;
+import net.exoeconomy.core.tx.Ledger;
 import org.bukkit.Bukkit;
 
 import java.math.BigDecimal;
@@ -12,11 +12,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 /**
- * {@link ShardsLedger} backed by ExcellentEconomy when it is present and the configured currency
+ * {@link Ledger} backed by ExcellentEconomy when it is present and the configured currency
  * exists; otherwise reports unavailable and every economy-dependent action is refused.
  * Reconnects when ExcellentEconomy registers or unregisters its service.
  */
-public final class EconomyBridge implements ShardsLedger {
+public final class EconomyBridge implements Ledger {
     private final Logger log;
     private final String currencyId;
     private final String scaleSetting;

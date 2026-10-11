@@ -16,6 +16,7 @@ import org.bukkit.event.server.ServiceUnregisterEvent;
 /** Join/quit housekeeping and dependency tracking. */
 final class PlayerListener implements Listener {
     private static final String EE_API = "su.nightexpress.excellenteconomy.api.ExcellentEconomyAPI";
+    private static final String VAULT_ECONOMY = "net.milkbowl.vault.economy.Economy";
     private final ExoEconomyPlugin plugin;
 
     PlayerListener(ExoEconomyPlugin plugin) { this.plugin = plugin; }
@@ -44,12 +45,16 @@ final class PlayerListener implements Listener {
 
     @EventHandler
     public void serviceRegistered(ServiceRegisterEvent e) {
-        if (e.getProvider().getService().getName().equals(EE_API)) Bukkit.getScheduler().runTask(plugin, () -> plugin.ledger().connect());
+        String service = e.getProvider().getService().getName();
+        if (service.equals(EE_API)) Bukkit.getScheduler().runTask(plugin, () -> { plugin.ledger().connect(); plugin.reconnectSell(true); });
+        if (service.equals(VAULT_ECONOMY)) Bukkit.getScheduler().runTask(plugin, () -> plugin.reconnectSell(false));
     }
 
     @EventHandler
     public void serviceUnregistered(ServiceUnregisterEvent e) {
-        if (e.getProvider().getService().getName().equals(EE_API)) plugin.ledger().disconnect("ExcellentEconomy unregistered its API");
+        String service = e.getProvider().getService().getName();
+        if (service.equals(EE_API)) plugin.ledger().disconnect("ExcellentEconomy unregistered its API");
+        if (service.equals(VAULT_ECONOMY) || service.equals(EE_API)) Bukkit.getScheduler().runTask(plugin, () -> plugin.reconnectSell(false));
     }
 
     @EventHandler

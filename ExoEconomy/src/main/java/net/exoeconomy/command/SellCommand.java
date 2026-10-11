@@ -27,7 +27,7 @@ public final class SellCommand implements TabExecutor {
         if (!player.hasPermission("exoeconomy.sell")) { msg.send(player, "no-permission"); return true; }
         if (!plugin.settings().selling().enabled()) { msg.send(player, "sell-disabled"); return true; }
         if (!plugin.sell().canSell(player)) { msg.send(player, "sell-not-here"); return true; }
-        if (!plugin.ledger().available()) { msg.send(player, "economy-unavailable"); return true; }
+        if (!plugin.sellLedger().available()) { msg.send(player, "sell-economy-unavailable"); return true; }
         if (!plugin.database().healthy()) { msg.send(player, "storage-unavailable"); return true; }
         new SellMenu(plugin, player).open();
         return true;

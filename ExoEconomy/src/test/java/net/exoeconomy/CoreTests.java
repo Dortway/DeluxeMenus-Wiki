@@ -77,6 +77,10 @@ public final class CoreTests {
         run("daily caps include pending rewards and reset daily", CoreTests::dailyCaps);
         run("reward batching carries fractions and restores on failure", CoreTests::accumulator);
         run("props and durations round-trip", CoreTests::propsAndDurations);
+        run("notification toggles per player and channel", CoreTests::notificationPrefs);
+        run("notification toggles persist", CoreTests::prefsPersist);
+        run("provenance: placed blocks stay placed; replaced blocks become natural", CoreTests::provenanceTypes);
+        run("provenance marks with types persist and reload", CoreTests::provenancePersist);
         run("price catalogue covers 1014 block items, all valid", () -> catalogue(prices));
         if (exoSkillsJar != null) run("ExoSkills 1.0.1 combine(skill, 1.0) returns the pure skill bonus", () -> exoSkillsCombine(exoSkillsJar));
 
@@ -358,7 +362,7 @@ public final class CoreTests {
     // ------------------------------------------------------------------ transactions
 
     /** Scripted economy. Balances live here only to simulate ExcellentEconomy. */
-    static final class FakeLedger implements ShardsLedger {
+    static final class FakeLedger implements Ledger {
         final Map<UUID, BigDecimal> balances = new HashMap<>();
         boolean available = true;
         LedgerResult.Outcome forced;
@@ -443,7 +447,7 @@ public final class CoreTests {
         boolean finished() { return !events.isEmpty(); }
     }
 
-    static TransactionCoordinator coordinator(Journal journal, ShardsLedger ledger, Executor main) {
+    static TransactionCoordinator coordinator(Journal journal, Ledger ledger, Executor main) {
         AtomicInteger n = new AtomicInteger();
         return new TransactionCoordinator(journal, ledger, main, System::currentTimeMillis, () -> "tx-" + n.incrementAndGet(), LOG);
     }
@@ -731,7 +735,7 @@ public final class CoreTests {
             } catch (SQLException expected) {
                 check(expected.getMessage().contains("newer"), "clear message");
             }
-            t.db.write(List.of(Database.putMeta("schema_version", "1"))).get(5, TimeUnit.SECONDS);
+            t.db.write(List.of(Database.putMeta("schema_version", String.valueOf(Database.SCHEMA_VERSION)))).get(5, TimeUnit.SECONDS);
         }
     }
 
@@ -782,6 +786,62 @@ public final class CoreTests {
         throwsIae(() -> Text.parseDuration("30"), "unit required");
         throwsIae(() -> Text.parseDuration("-5m"), "negative refused");
         eq("1h 05m", Text.duration(3_900_000L), "format");
+    }
+
+    // ------------------------------------------------------------------ notifications and provenance
+
+    static void notificationPrefs() {
+        var prefs = new net.exoeconomy.reward.NotificationPrefs(Map.of());
+        int CHAT = net.exoeconomy.reward.NotificationPrefs.CHAT, BAR = net.exoeconomy.reward.NotificationPrefs.ACTION_BAR,
+            ALL = net.exoeconomy.reward.NotificationPrefs.ALL;
+        check(prefs.enabled(A, CHAT) && prefs.enabled(A, BAR), "everything on by default");
+        eq(CHAT, prefs.set(A, CHAT, false), "chat muted");
+        check(!prefs.enabled(A, CHAT) && prefs.enabled(A, BAR), "only chat off");
+        check(prefs.enabled(B, CHAT), "other players unaffected");
+        prefs.set(A, ALL, null); // toggle: not all on, so turn all on
+        check(prefs.enabled(A, CHAT) && prefs.enabled(A, BAR), "toggle all turns everything on");
+        eq(ALL, prefs.set(A, ALL, null), "toggle again turns everything off");
+        eq(0, prefs.set(A, ALL, true), "explicit on clears");
+    }
+
+    static void prefsPersist() throws Exception {
+        try (TempDb t = new TempDb()) {
+            t.db.write(List.of(Database.savePrefs(A, 3), Database.savePrefs(B, 1), Database.savePrefs(B, 0))).get(5, TimeUnit.SECONDS);
+            Map<UUID, Integer> loaded = t.db.loadPrefs();
+            eq(3, loaded.get(A), "saved");
+            check(!loaded.containsKey(B), "all-on removes the row");
+        }
+    }
+
+    static void provenanceTypes() {
+        var p = new net.exoeconomy.reward.Provenance();
+        p.merge(List.of());
+        p.set("w", 10, 64, 10, net.exoeconomy.reward.Provenance.PLACED, "STONE");
+        eq(net.exoeconomy.reward.Provenance.PLACED, p.kindOf("w", 10, 64, 10, "STONE"), "placed stone stays placed");
+        eq(net.exoeconomy.reward.Provenance.NATURAL, p.kindOf("w", 10, 64, 10, "DIAMOND_ORE"), "replaced by a cube/mine plugin: natural");
+        eq(net.exoeconomy.reward.Provenance.NATURAL, p.kindOf("w", 10, 64, 10, "STONE"), "stale mark was removed");
+        p.set("w", 1, 1, 1, net.exoeconomy.reward.Provenance.PLACED, null);
+        eq(net.exoeconomy.reward.Provenance.PLACED, p.kindOf("w", 1, 1, 1, "ANYTHING"), "schema-1 rows without a type are kept");
+        p.forgetOnTypeChange(false);
+        p.set("w", 2, 2, 2, net.exoeconomy.reward.Provenance.PLACED, "STONE");
+        eq(net.exoeconomy.reward.Provenance.PLACED, p.kindOf("w", 2, 2, 2, "DIRT"), "option off keeps the mark");
+        eq(net.exoeconomy.reward.Provenance.NATURAL, p.kindOf("w", -5, -60, 33, "STONE"), "untracked is natural");
+    }
+
+    static void provenancePersist() throws Exception {
+        try (TempDb t = new TempDb()) {
+            var p = new net.exoeconomy.reward.Provenance();
+            p.merge(List.of());
+            p.set("w", 3, 70, -4, net.exoeconomy.reward.Provenance.PLACED, "OAK_LOG");
+            p.set("w", 4, 70, -4, net.exoeconomy.reward.Provenance.GENERATED, "COBBLESTONE");
+            t.db.write(List.of(Database.writePlaced(p.drainDirty(100)))).get(5, TimeUnit.SECONDS);
+            var q = new net.exoeconomy.reward.Provenance();
+            q.merge(t.db.loadPlaced().get(5, TimeUnit.SECONDS));
+            eq(2, q.size(), "both loaded");
+            eq(net.exoeconomy.reward.Provenance.PLACED, q.kindOf("w", 3, 70, -4, "OAK_LOG"), "placed log");
+            eq(net.exoeconomy.reward.Provenance.GENERATED, q.kindOf("w", 4, 70, -4, "COBBLESTONE"), "generated cobble");
+            eq(net.exoeconomy.reward.Provenance.NATURAL, q.kindOf("w", 3, 70, -4, "STRIPPED_OAK_LOG"), "type kept across restart");
+        }
     }
 
     // ------------------------------------------------------------------ catalogue

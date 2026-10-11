@@ -7,20 +7,33 @@ defaults:
   # Max Shards per player per day across all activities (after boosters). 0 = unlimited.
   daily-cap: 0
 
+# Messages shown when Shards are deposited for mining, farming, woodcutting, slaying or custom
+# activities. Set enabled: false to turn a channel off for everyone. With allow-player-toggle,
+# players can also turn each channel off for themselves: /shardnotify [chat|actionbar|sound|all] [on|off]
 notifications:
   flush-interval-ticks: 40
+  allow-player-toggle: true
   action-bar:
     enabled: true
     format: "&#B8F2FF+%amount% &8• &7%activities%"
   chat:
-    enabled: false
-    format: "%prefix%&#B8F2FF+%amount% &7(%activities%)"
+    enabled: true
+    format: "%prefix%&7You earned &#B8F2FF%amount% &7from &f%activities%&7."
+    # 0 = a chat line for every deposit (about every 2 seconds while mining). Above 0, rewards are
+    # added up and sent at most once per this many seconds.
+    interval-seconds: 10
   sound:
     enabled: true
     key: entity.experience_orb.pickup
     volume: 0.35
     pitch: 1.7
   unavailable-message-cooldown-seconds: 300
+
+# A block remembers the type it had when it was placed. If the block at that spot is later a
+# different type, it was replaced without a block event (regenerating mines/cubes such as
+# ExoCubes and ExoWoodCubes set blocks directly), so it counts as natural again and pays.
+provenance:
+  forget-when-block-changes: true
 
 activities:
   mining:
@@ -89,6 +102,24 @@ activities:
       CACTUS: 0.02
       BAMBOO: 0.005
       KELP: 0.005
+
+  woodcutting:
+    enabled: true
+    permission: exoeconomy.earn.woodcutting
+    daily-cap: 0
+    # Logs from trees (natural or grown from saplings) pay; placed logs never do.
+    rewards:
+      OAK_LOG: 0.05
+      SPRUCE_LOG: 0.05
+      BIRCH_LOG: 0.05
+      JUNGLE_LOG: 0.05
+      ACACIA_LOG: 0.05
+      DARK_OAK_LOG: 0.05
+      MANGROVE_LOG: 0.05
+      CHERRY_LOG: 0.05
+      PALE_OAK_LOG: 0.05
+      CRIMSON_STEM: 0.05
+      WARPED_STEM: 0.05
 
   slaying:
     enabled: true

@@ -67,14 +67,15 @@ public final class SellService {
             if (!v.custom() && s.exoSkillsBonus() && exoSkills != null)
                 mult = mult.multiply(skillCache.computeIfAbsent(item.getType(), m -> exoSkills.multiplier(seller, m)), MathContext.DECIMAL64);
             mult = mult.min(s.maxTotalMultiplier()).max(BigDecimal.ONE);
-            BigDecimal subtotal = v.unitPrice().multiply(BigDecimal.valueOf(item.getAmount())).multiply(mult, MathContext.DECIMAL64);
+            BigDecimal unit = v.custom() ? v.unitPrice() : v.unitPrice().multiply(s.priceMultiplier());
+            BigDecimal subtotal = unit.multiply(BigDecimal.valueOf(item.getAmount())).multiply(mult, MathContext.DECIMAL64);
             total = total.add(subtotal);
             sold.put(e.getKey(), item.clone());
             BigDecimal m = mult;
-            lines.merge(v.key() + "@" + m.toPlainString(), new Line(v.key(), item.getType(), item.getAmount(), v.unitPrice(), m, subtotal),
+            lines.merge(v.key() + "@" + m.toPlainString(), new Line(v.key(), item.getType(), item.getAmount(), unit, m, subtotal),
                     (a, b) -> new Line(a.key(), a.type(), a.amount() + b.amount(), a.unit(), a.multiplier(), a.subtotal().add(b.subtotal())));
         }
-        BigDecimal payout = Money.floor(total, plugin.ledger().scale());
+        BigDecimal payout = Money.floor(total, plugin.sellLedger().scale());
         boolean tooLarge = payout.compareTo(s.maxPayoutPerSale()) > 0 || payout.compareTo(Money.MAX_OPERATION) > 0;
         return new Quote(List.copyOf(lines.values()), List.copyOf(rejected), Collections.unmodifiableMap(sold), total, payout,
                 fingerprint(contents), tooLarge);

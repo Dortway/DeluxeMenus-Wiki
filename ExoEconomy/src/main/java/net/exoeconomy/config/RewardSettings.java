@@ -11,8 +11,11 @@ import java.util.*;
 
 /** rewards.yml */
 public record RewardSettings(Map<String, Activity> activities, BigDecimal totalDailyCap, int flushTicks,
-                             Notifications notifications, Mining mining, Farming farming, Slaying slaying) {
-    public static final String MINING = "mining", FARMING = "farming", SLAYING = "slaying", SELLING = "selling";
+                             Notifications notifications, Mining mining, Farming farming, Slaying slaying,
+                             boolean forgetOnTypeChange) {
+    public static final String MINING = "mining", FARMING = "farming", SLAYING = "slaying", WOODCUTTING = "woodcutting", SELLING = "selling";
+    /** Built-in activity ids; plugins cannot register these. */
+    public static final Set<String> BUILT_IN = Set.of("all", SELLING, MINING, FARMING, SLAYING, WOODCUTTING);
 
     /**
      * @param worlds          worlds where the activity pays; empty means every world not in disabledWorlds
@@ -27,8 +30,13 @@ public record RewardSettings(Map<String, Activity> activities, BigDecimal totalD
         }
     }
 
-    public record Notifications(boolean actionBar, String actionBarFormat, boolean chat, String chatFormat,
-                                boolean sound, String soundKey, float volume, float pitch, long unavailableCooldownMs) {}
+    /**
+     * @param chatIntervalMs 0 = a chat line for every deposit; otherwise deposits are summed and sent at most this often
+     * @param playerToggle   players may turn each channel off for themselves (/shardnotify)
+     */
+    public record Notifications(boolean actionBar, String actionBarFormat, boolean chat, String chatFormat, long chatIntervalMs,
+                                boolean sound, String soundKey, float volume, float pitch, long unavailableCooldownMs,
+                                boolean playerToggle) {}
 
     public record Mining(boolean rewardGeneratedBlocks) {}
 
@@ -92,11 +100,14 @@ public record RewardSettings(Map<String, Activity> activities, BigDecimal totalD
         ConfigurationSection n = section(root, "notifications");
         int flush = n.getInt("flush-interval-ticks", 40);
         if (flush < 1 || flush > 1200) problems.add("notifications.flush-interval-ticks must be 1..1200");
+        long chatInterval = n.getLong("chat.interval-seconds", 0) * 1000;
+        if (chatInterval < 0 || chatInterval > 3_600_000) problems.add("notifications.chat.interval-seconds must be 0..3600");
         Notifications notifications = new Notifications(n.getBoolean("action-bar.enabled", true),
-                n.getString("action-bar.format", "&a+%amount% &7(%activities%)"), n.getBoolean("chat.enabled", false),
-                n.getString("chat.format", "%prefix%&a+%amount% &7(%activities%)"), n.getBoolean("sound.enabled", true),
+                n.getString("action-bar.format", "&a+%amount% &7(%activities%)"), n.getBoolean("chat.enabled", true),
+                n.getString("chat.format", "%prefix%&a+%amount% &7(%activities%)"), chatInterval, n.getBoolean("sound.enabled", true),
                 n.getString("sound.key", "entity.experience_orb.pickup"), (float) n.getDouble("sound.volume", 0.4),
-                (float) n.getDouble("sound.pitch", 1.6), n.getLong("unavailable-message-cooldown-seconds", 300) * 1000);
+                (float) n.getDouble("sound.pitch", 1.6), n.getLong("unavailable-message-cooldown-seconds", 300) * 1000,
+                n.getBoolean("allow-player-toggle", true));
 
         ConfigurationSection m = acts.getConfigurationSection(MINING);
         ConfigurationSection f = acts.getConfigurationSection(FARMING);
@@ -108,13 +119,14 @@ public record RewardSettings(Map<String, Activity> activities, BigDecimal totalD
                 s.getBoolean("origins.summoned", false), s.getBoolean("origins.unknown", false), s.getBoolean("reward-players", false),
                 Set.copyOf(s.getStringList("blocked-spawn-reasons").stream().map(x -> x.toUpperCase(Locale.ROOT)).toList()),
                 s.getBoolean("exospawners-stack-kills", false));
-        return new RewardSettings(Map.copyOf(activities), totalCap, flush, notifications, mining, farming, slaying);
+        return new RewardSettings(Map.copyOf(activities), totalCap, flush, notifications, mining, farming, slaying,
+                root.getBoolean("provenance.forget-when-block-changes", true));
     }
 
     private static boolean validKey(String activity, String key) {
         try {
             if (SLAYING.equals(activity)) { EntityType.valueOf(key); return true; }
-            if (MINING.equals(activity) || FARMING.equals(activity)) return Material.getMaterial(key) != null;
+            if (MINING.equals(activity) || FARMING.equals(activity) || WOODCUTTING.equals(activity)) return Material.getMaterial(key) != null;
             return true;
         } catch (IllegalArgumentException e) {
             return false;

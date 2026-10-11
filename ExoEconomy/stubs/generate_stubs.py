@@ -7,6 +7,7 @@ download Paper, ExcellentEconomy or PlaceholderAPI. Every signature mirrors the 
   constant pool of ExoSkills 1.0.1, which was compiled against Paper 26.1.2.
 - ExcellentEconomy: signatures copied from su.nightexpress.excellenteconomy 2.8.0 source.
 - PlaceholderAPI: the long-stable PlaceholderExpansion contract.
+- Vault: VaultAPI 1.7 Economy / EconomyResponse (methods used only).
 The production build (build.ps1 / build.sh --real) compiles against the real server jars instead.
 """
 import os, sys
@@ -484,6 +485,22 @@ public interface ExcellentCurrency {
 }""")
 f("su/nightexpress/excellenteconomy/api/currency/operation/OperationResult.java", """package su.nightexpress.excellenteconomy.api.currency.operation;
 public enum OperationResult { SUCCESS, FAILURE; public boolean success() { return this == SUCCESS; } }""")
+
+# ---------------------------------------------------------------- VaultAPI 1.7 (subset, exact signatures)
+f("net/milkbowl/vault/economy/Economy.java", """package net.milkbowl.vault.economy;
+public interface Economy {
+    boolean isEnabled(); String getName(); int fractionalDigits(); String format(double amount);
+    double getBalance(org.bukkit.OfflinePlayer player);
+    boolean has(org.bukkit.OfflinePlayer player, double amount);
+    EconomyResponse withdrawPlayer(org.bukkit.OfflinePlayer player, double amount);
+    EconomyResponse depositPlayer(org.bukkit.OfflinePlayer player, double amount);
+}""")
+f("net/milkbowl/vault/economy/EconomyResponse.java", """package net.milkbowl.vault.economy;
+public class EconomyResponse {
+    public final double amount; public final double balance; public final String errorMessage;
+    public EconomyResponse(double amount, double balance, Object type, String errorMessage) { this.amount = amount; this.balance = balance; this.errorMessage = errorMessage; }
+    public boolean transactionSuccess() %s
+}""" % S)
 
 # ---------------------------------------------------------------- PlaceholderAPI
 f("me/clip/placeholderapi/expansion/PlaceholderExpansion.java", """package me.clip.placeholderapi.expansion;

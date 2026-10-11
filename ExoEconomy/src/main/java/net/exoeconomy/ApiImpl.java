@@ -34,9 +34,13 @@ final class ApiImpl implements ExoEconomyAPI {
         return plugin.rewards().award(player, activityId, key == null ? "" : key, base);
     }
 
+    @Override public RewardOutcome rewardBlockBreak(Player player, Material material) { return plugin.rewards().awardBlock(player, material); }
+
     @Override public BigDecimal boosterMultiplier(UUID player, String activityId) { return plugin.boosters().book().multiplier(player, activityId); }
 
-    @Override public Optional<BigDecimal> vanillaPrice(Material material) { return plugin.settings().catalogue().price(material); }
+    @Override public Optional<BigDecimal> vanillaPrice(Material material) {
+        return plugin.settings().catalogue().price(material).map(p -> p.multiply(plugin.settings().selling().priceMultiplier()));
+    }
 
     @Override public void registerPriceProvider(Plugin owner, SellPriceProvider provider) { plugin.sell().inspector().addProvider(owner.getName(), provider); }
 

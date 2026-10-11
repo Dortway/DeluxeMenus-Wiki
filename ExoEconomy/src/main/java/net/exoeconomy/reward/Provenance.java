@@ -11,6 +11,11 @@ import java.util.*;
  * stone, basalt, obsidian generators, plus snow/ice) and FERTILIZED (crops grown with bone meal).
  * Absent means natural. Indexed by world and chunk; persisted in batches by {@link RewardService}.
  *
+ * <p>Each mark remembers the block type it was recorded for. When the block at that position is
+ * now a different type, something replaced it without a Bukkit event (typically a regenerating
+ * mine or cube plugin setting blocks directly), so the mark no longer describes the block and it
+ * is treated as natural ({@code forget-when-block-changes}, on by default).
+ *
  * <p>Until the startup load finishes, {@link #loaded()} is false and mining rewards are withheld,
  * because an unknown block could be a placed one. Changes made before the load completes win over
  * loaded rows.
@@ -18,65 +23,94 @@ import java.util.*;
 public final class Provenance {
     public static final byte NATURAL = 0, PLACED = 1, GENERATED = 2, FERTILIZED = 3;
 
-    private final Map<String, Map<Long, Map<Integer, Byte>>> worlds = new HashMap<>();
-    private final Map<Key, Byte> dirty = new LinkedHashMap<>();
+    private record Mark(byte kind, String type) {}
+
+    private final Map<String, Map<Long, Map<Integer, Mark>>> worlds = new HashMap<>();
+    private final Map<Key, Mark> dirty = new LinkedHashMap<>();
     private volatile boolean loaded;
+    private volatile boolean forgetOnTypeChange = true;
     private int size;
 
     record Key(String world, long chunk, int pos) {}
 
     public boolean loaded() { return loaded; }
     public int size() { return size; }
+    public void forgetOnTypeChange(boolean value) { this.forgetOnTypeChange = value; }
 
-    public byte get(Block b) { return get(b.getWorld().getUID().toString(), b.getX(), b.getY(), b.getZ()); }
+    /** Origin of the block as it is now. */
+    public byte get(Block b) {
+        return kindOf(b.getWorld().getUID().toString(), b.getX(), b.getY(), b.getZ(), b.getType().name());
+    }
 
-    public void set(Block b, byte kind) { set(b.getWorld().getUID().toString(), b.getX(), b.getY(), b.getZ(), kind); }
+    /** Origin of the block at a position that currently has {@code currentType}. */
+    public byte kindOf(String world, int x, int y, int z, String currentType) {
+        Mark mark = mark(world, x, y, z);
+        if (mark == null) return NATURAL;
+        if (forgetOnTypeChange && mark.type() != null && !mark.type().equals(currentType)) {
+            set(world, x, y, z, NATURAL, null); // stale: the block was replaced without an event
+            return NATURAL;
+        }
+        return mark.kind();
+    }
+
+    /** Marks the block with its current type. */
+    public void set(Block b, byte kind) { set(b, kind, b.getType().name()); }
+
+    /** Marks the block with the type it is about to have (for events fired before the change). */
+    public void set(Block b, byte kind, String type) {
+        set(b.getWorld().getUID().toString(), b.getX(), b.getY(), b.getZ(), kind, type);
+    }
 
     public byte get(String world, int x, int y, int z) {
-        Map<Long, Map<Integer, Byte>> chunks = worlds.get(world);
-        if (chunks == null) return NATURAL;
-        Map<Integer, Byte> chunk = chunks.get(chunkKey(x, z));
-        if (chunk == null) return NATURAL;
-        return chunk.getOrDefault(pos(x, y, z), NATURAL);
+        Mark mark = mark(world, x, y, z);
+        return mark == null ? NATURAL : mark.kind();
     }
 
-    public void set(String world, int x, int y, int z, byte kind) {
+    private Mark mark(String world, int x, int y, int z) {
+        Map<Long, Map<Integer, Mark>> chunks = worlds.get(world);
+        if (chunks == null) return null;
+        Map<Integer, Mark> chunk = chunks.get(chunkKey(x, z));
+        return chunk == null ? null : chunk.get(pos(x, y, z));
+    }
+
+    public void set(String world, int x, int y, int z, byte kind, String type) {
         long ck = chunkKey(x, z);
         int p = pos(x, y, z);
-        if (put(world, ck, p, kind)) dirty.put(new Key(world, ck, p), kind);
+        Mark mark = kind == NATURAL ? null : new Mark(kind, type);
+        if (put(world, ck, p, mark)) dirty.put(new Key(world, ck, p), mark == null ? new Mark(NATURAL, null) : mark);
     }
 
-    private boolean put(String world, long ck, int p, byte kind) {
-        if (kind == NATURAL) {
-            Map<Long, Map<Integer, Byte>> chunks = worlds.get(world);
+    private boolean put(String world, long ck, int p, Mark mark) {
+        if (mark == null) {
+            Map<Long, Map<Integer, Mark>> chunks = worlds.get(world);
             if (chunks == null) return !loaded;
-            Map<Integer, Byte> chunk = chunks.get(ck);
+            Map<Integer, Mark> chunk = chunks.get(ck);
             if (chunk == null) return !loaded;
             if (chunk.remove(p) == null) return !loaded;
             size--;
             if (chunk.isEmpty()) chunks.remove(ck);
             return true;
         }
-        Byte previous = worlds.computeIfAbsent(world, w -> new HashMap<>()).computeIfAbsent(ck, c -> new HashMap<>()).put(p, kind);
+        Mark previous = worlds.computeIfAbsent(world, w -> new HashMap<>()).computeIfAbsent(ck, c -> new HashMap<>()).put(p, mark);
         if (previous == null) size++;
-        return previous == null || previous != kind;
+        return !mark.equals(previous);
     }
 
     /** Merges rows loaded from the database; rows changed since startup are kept as they are now. */
     public void merge(List<Database.PlacedRow> rows) {
         for (Database.PlacedRow row : rows) {
             if (dirty.containsKey(new Key(row.world(), row.chunk(), row.pos()))) continue;
-            put(row.world(), row.chunk(), row.pos(), row.kind());
+            put(row.world(), row.chunk(), row.pos(), row.kind() == NATURAL ? null : new Mark(row.kind(), row.type()));
         }
         loaded = true;
     }
 
     public List<Database.PlacedRow> drainDirty(int max) {
         List<Database.PlacedRow> out = new ArrayList<>(Math.min(max, dirty.size()));
-        Iterator<Map.Entry<Key, Byte>> it = dirty.entrySet().iterator();
+        Iterator<Map.Entry<Key, Mark>> it = dirty.entrySet().iterator();
         while (it.hasNext() && out.size() < max) {
-            Map.Entry<Key, Byte> e = it.next();
-            out.add(new Database.PlacedRow(e.getKey().world(), e.getKey().chunk(), e.getKey().pos(), e.getValue()));
+            Map.Entry<Key, Mark> e = it.next();
+            out.add(new Database.PlacedRow(e.getKey().world(), e.getKey().chunk(), e.getKey().pos(), e.getValue().kind(), e.getValue().type()));
             it.remove();
         }
         return out;
@@ -84,7 +118,7 @@ public final class Provenance {
 
     /** Puts rows back after a failed write so they are retried. */
     public void requeue(List<Database.PlacedRow> rows) {
-        for (Database.PlacedRow row : rows) dirty.putIfAbsent(new Key(row.world(), row.chunk(), row.pos()), row.kind());
+        for (Database.PlacedRow row : rows) dirty.putIfAbsent(new Key(row.world(), row.chunk(), row.pos()), new Mark(row.kind(), row.type()));
     }
 
     public int pending() { return dirty.size(); }

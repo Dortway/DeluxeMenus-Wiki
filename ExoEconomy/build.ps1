@@ -13,8 +13,8 @@ Remove-Item -Recurse -Force "$root\build" -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force "$root\build\classes", "$root\build\test-classes" | Out-Null
 # Paper, Adventure, SQLite JDBC and other server libraries.
 $deps = @(Get-ChildItem -LiteralPath (Join-Path $ServerDirectory 'libraries') -Recurse -Filter '*.jar' | ForEach-Object FullName)
-# ExcellentEconomy 2.8.x and NightCore (ExcellentEconomy's API exposes NightCore types), PlaceholderAPI if installed.
-foreach ($pattern in 'ExcellentEconomy*.jar', 'nightcore*.jar', 'NightCore*.jar', 'PlaceholderAPI*.jar') {
+# ExcellentEconomy 2.8.x and NightCore (ExcellentEconomy's API exposes NightCore types), PlaceholderAPI and Vault if installed.
+foreach ($pattern in 'ExcellentEconomy*.jar', 'nightcore*.jar', 'NightCore*.jar', 'PlaceholderAPI*.jar', 'Vault*.jar') {
   $deps += @(Get-ChildItem -LiteralPath (Join-Path $ServerDirectory 'plugins') -Filter $pattern | ForEach-Object FullName)
 }
 if (-not ($deps | Where-Object { $_ -like '*ExcellentEconomy*' })) { throw 'ExcellentEconomy jar not found in plugins' }

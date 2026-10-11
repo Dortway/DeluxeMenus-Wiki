@@ -4,13 +4,16 @@ import net.exoeconomy.api.ExoEconomyAPI;
 import net.exoeconomy.booster.BoosterService;
 import net.exoeconomy.command.BoostersCommand;
 import net.exoeconomy.command.ExoEconomyCommand;
+import net.exoeconomy.command.NotifyCommand;
 import net.exoeconomy.command.SellCommand;
 import net.exoeconomy.command.ShardsCommand;
 import net.exoeconomy.config.ConfigException;
 import net.exoeconomy.config.Settings;
 import net.exoeconomy.core.tx.TransactionCoordinator;
 import net.exoeconomy.core.tx.TxState;
+import net.exoeconomy.core.tx.Ledger;
 import net.exoeconomy.economy.EconomyBridge;
+import net.exoeconomy.economy.VaultBridge;
 import net.exoeconomy.integration.ExoSkillsBridge;
 import net.exoeconomy.integration.ExoSpawnersBridge;
 import net.exoeconomy.integration.PapiExpansion;
@@ -48,6 +51,8 @@ public final class ExoEconomyPlugin extends JavaPlugin {
     private Database database;
     private EconomyBridge ledger;
     private TransactionCoordinator coordinator;
+    private Ledger sellLedger;
+    private TransactionCoordinator sellCoordinator;
     private RewardService rewards;
     private BoosterService boosters;
     private SellService sell;
@@ -83,7 +88,11 @@ public final class ExoEconomyPlugin extends JavaPlugin {
             ledger.connect(true); // retried (and failures logged) after all plugins have enabled
             coordinator = new TransactionCoordinator(database, ledger, r -> Bukkit.getScheduler().runTask(this, r),
                     System::currentTimeMillis, () -> UUID.randomUUID().toString(), getLogger());
-            rewards = new RewardService(this, database.loadDaily(RewardService.today()));
+            sellLedger = createSellLedger();
+            sellCoordinator = sellLedger == ledger ? coordinator : new TransactionCoordinator(database, sellLedger,
+                    r -> Bukkit.getScheduler().runTask(this, r), System::currentTimeMillis, () -> UUID.randomUUID().toString(), getLogger());
+            rewards = new RewardService(this, database.loadDaily(RewardService.today()), database.loadPrefs());
+            rewards.provenance().forgetOnTypeChange(settings.rewards().forgetOnTypeChange());
             boosters = new BoosterService(this, database.loadBoosters());
             sell = new SellService(this);
         } catch (Exception | LinkageError e) {
@@ -112,6 +121,7 @@ public final class ExoEconomyPlugin extends JavaPlugin {
         command("sell", new SellCommand(this));
         command("boosters", new BoostersCommand(this));
         command("exoeconomy", new ExoEconomyCommand(this));
+        command("shardnotify", new NotifyCommand(this));
         registerShardsCommand();
         getServer().getServicesManager().register(ExoEconomyAPI.class, new ApiImpl(this), this, ServicePriority.Normal);
 
@@ -121,11 +131,38 @@ public final class ExoEconomyPlugin extends JavaPlugin {
         Bukkit.getScheduler().runTask(this, this::afterStartup);
     }
 
+    /** /sell pays in Vault money by default, or in an ExcellentEconomy currency (selling.currency). */
+    private Ledger createSellLedger() {
+        var s = settings.selling();
+        if (s.usesShards()) return ledger;
+        if (s.usesVault()) {
+            VaultBridge vault = new VaultBridge(getLogger());
+            vault.connect(true);
+            return vault;
+        }
+        EconomyBridge other = new EconomyBridge(s.excellentCurrency(), "auto", getLogger());
+        other.connect(true);
+        return other;
+    }
+
+    /** (Re)connects the selling currency when it is not the Shards ledger. */
+    public void reconnectSell(boolean quiet) {
+        if (sellLedger instanceof VaultBridge vault) vault.connect(quiet);
+        else if (sellLedger != ledger && sellLedger instanceof EconomyBridge other) other.connect(quiet);
+    }
+
+    public String sellCurrencySummary() {
+        String what = sellLedger instanceof VaultBridge vault ? "Vault money (" + vault.providerName() + ")"
+                : sellLedger == ledger ? "Shards" : "ExcellentEconomy '" + sellLedger.currencyId() + "'";
+        return what + (sellLedger.available() ? "" : " UNAVAILABLE: " + sellLedger.unavailableReason());
+    }
+
     private void afterStartup() {
         if (!ledger.available()) ledger.connect();
+        if (!sellLedger.available()) reconnectSell(false);
         connectIntegrations();
         List<PriceAudit.Finding> findings = PriceAudit.run(settings.catalogue());
-        if (findings.isEmpty()) getLogger().info("Price audit: no recipe turns sellable inputs into more Shards (" + settings.catalogue().size() + " prices).");
+        if (findings.isEmpty()) getLogger().info("Price audit: no recipe turns sellable inputs into more sell value (" + settings.catalogue().size() + " prices).");
         else getLogger().warning("Price audit: " + findings.size() + " recipe(s) sell for more than their inputs; see /exoeconomy audit. First: "
                 + findings.get(0).recipe() + " (" + findings.get(0).outputValue() + " > " + findings.get(0).inputValue() + ")");
         for (Player p : Bukkit.getOnlinePlayers()) sell.deliverClaims(p, true);
@@ -188,8 +225,10 @@ public final class ExoEconomyPlugin extends JavaPlugin {
         if (!next.currencyId().equals(settings.currencyId()) || !next.scale().equals(settings.scale()))
             notes.add("economy.currency-id / economy.scale changes need a restart; still using '" + settings.currencyId() + "'");
         if (!next.storageFile().equals(settings.storageFile())) notes.add("storage.file changes need a restart");
+        if (!next.selling().currency().equals(settings.selling().currency())) notes.add("selling.currency changes need a restart");
         settings = next;
         boosters.reloadRules();
+        rewards.provenance().forgetOnTypeChange(next.rewards().forgetOnTypeChange());
         scheduleFlush();
         for (var menu : menus.openMenus())
             if (menu instanceof BoosterShopMenu || menu instanceof ActiveBoostersMenu) menu.close();
@@ -205,10 +244,11 @@ public final class ExoEconomyPlugin extends JavaPlugin {
             try { rewards.shutdown(); } catch (RuntimeException e) { getLogger().log(Level.SEVERE, "Reward flush failed", e); }
         }
         if (boosters != null) boosters.shutdown();
-        if (coordinator != null && database != null) {
-            coordinator.close().forEach((id, beforeEconomy) -> {
+        for (TransactionCoordinator co : new LinkedHashSet<>(Arrays.asList(coordinator, sellCoordinator))) {
+            if (co == null || database == null) continue;
+            co.close().forEach((id, beforeEconomy) -> {
                 if (beforeEconomy) database.finish(id, TxState.ABORTED, null, null, "server stopping before economy call", List.of());
-                else getLogger().warning("Transaction " + id + " was still waiting for ExcellentEconomy at shutdown; it will be UNCERTAIN on next start.");
+                else getLogger().warning("Transaction " + id + " was still waiting for the economy at shutdown; it will be UNCERTAIN on next start.");
             });
         }
         if (exoSpawners != null) exoSpawners.close();
@@ -229,6 +269,9 @@ public final class ExoEconomyPlugin extends JavaPlugin {
     public Database database() { return database; }
     public EconomyBridge ledger() { return ledger; }
     public TransactionCoordinator coordinator() { return coordinator; }
+    /** The currency /sell pays in (Vault money by default). */
+    public Ledger sellLedger() { return sellLedger; }
+    public TransactionCoordinator sellCoordinator() { return sellCoordinator; }
     public RewardService rewards() { return rewards; }
     public BoosterService boosters() { return boosters; }
     public SellService sell() { return sell; }

@@ -7,7 +7,7 @@ ExcellentEconomy is the only ledger. ExoEconomy calls `ExcellentEconomyAPI` (fro
 | Movement | API call | Journaled |
 |---|---|---|
 | Activity rewards | `deposit(Player, currency, amount)`, batched every 2 s | No; ExcellentEconomy's operations log records them |
-| Sale payout | `deposit(Player, ...)` | Yes (`SALE`) |
+| Sale payout (selling currency) | Vault `depositPlayer(OfflinePlayer, amount)` by default, or ExcellentEconomy `deposit(Player, ...)` | Yes (`SALE`, separate coordinator and lock) |
 | Booster purchase | `withdraw(Player, ...)` | Yes (`BOOSTER_PURCHASE`) |
 | Refund, admin payout | `deposit(Player, ...)` online, or `depositAsync(UUID, ...)` offline | Yes (`REFUND`/`PAYOUT`, one live per parent) |
 
@@ -95,6 +95,14 @@ API filters can veto even plain-looking items.
 
 **Default prices.** Defaults are derived from recipes, so no crafting, smelting or stonecutting recipe produces more sell value than its inputs (verified by the generator on 2,142 modelled recipes). `/exoeconomy audit` re-checks against the server's real recipe list at every startup.
 
+## Selling currency
+
+`/sell` pays through its own ledger: Vault money (default), another ExcellentEconomy currency, or Shards. The money balance belongs to the Vault economy plugin; ExoEconomy reads it before and after each deposit and journals the sale exactly like Shards transactions (same UNCERTAIN handling and admin resolution, with `pay` crediting the selling currency). Precision follows Vault's `fractionalDigits()` (2 if unlimited). Prices are `prices.yml × price-multiplier`; a uniform factor keeps the no-arbitrage property.
+
+## Reward messages
+
+Each batched deposit (every `flush-interval-ticks`) can show an action bar line, a chat line and a sound. Each channel has a server switch (`notifications.<channel>.enabled`). With `allow-player-toggle`, players switch channels for themselves with `/shardnotify`; choices are stored in `player_prefs` (schema v2). With `chat.interval-seconds` above 0, chat lines are summed and sent at most that often, so mining does not flood chat; the action bar still updates on every deposit.
+
 ## Activity rewards and provenance
 
 **Pipeline.** Handlers run at MONITOR with `ignoreCancelled`: anything a protection plugin cancels pays nothing and changes no provenance. Each reward goes through:
@@ -113,12 +121,15 @@ One global task deposits the totals every `flush-interval-ticks`; there is no pe
 | Farming (crops) | The crop is fully grown. Bone-meal-grown crops only if `allow-fertilized`. | Immature crops. |
 | Farming (cane, cactus, bamboo, kelp) | Each grown segment broken (up to `stem-scan-limit`). | The planted base. |
 | Farming (melons, pumpkins) | Grown, not placed. | Placed melons and pumpkins. |
+| Woodcutting | The log is not player-placed: natural trees and trees grown from saplings. | Placed logs. |
 | Slaying | A player killed the mob and its origin is allowed. Origins: spawner (spawn reason, Paper `fromMobSpawner()`, ExoSpawners tag), bred, summoned, unknown. All four are off by default. | Mobs already paid (persistent tag), players (unless `reward-players`). |
 
 **Provenance tracking.**
 - **Kinds:** PLACED, GENERATED or FERTILIZED, indexed by world and chunk in memory.
 - **Persistence:** saved to SQLite in batches (up to 5,000 rows every flush). Pending changes during the startup load win over loaded rows.
 - **Events tracked:** place and multi-place, liquid form (cobblestone, stone, basalt and obsidian generators), entity form, growth, tree structure growth, spread, fertilize, pistons (origin moves with the block), falling blocks (origin carried on the entity), explosions, burn, fade, decay, and enderman or ravager changes.
+
+**Regenerating blocks (ExoCubes, ExoWoodCubes and similar).** Every mark stores the block type it was recorded for (schema v2). When the block at a marked position is a different type, something replaced it without a block event, which is how regenerating mines and cube plugins usually work. The mark is then dropped and the block pays as natural (`provenance.forget-when-block-changes`, default on). A position broken by a player is also cleared, so blocks a plugin puts back afterwards pay. Not verified against ExoCubes/ExoWoodCubes themselves (their code was not available). If a cube plugin **cancels** the BlockBreakEvent and handles drops itself, ExoEconomy never sees the break; that plugin needs one call to `ExoEconomyAPI.rewardBlockBreak(player, material)`.
 
 **What the server cannot reliably identify.** These are documented, not solved:
 - Blocks changed without Bukkit events: WorldEdit/FAWE, schematic pastes, some plugin generators.

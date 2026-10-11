@@ -2,8 +2,8 @@ name: ExoEconomy
 version: '${version}'
 main: net.exoeconomy.ExoEconomyPlugin
 api-version: '26.1.2'
-description: Activity rewards, /sell and boosters paid in ExcellentEconomy Shards.
-softdepend: [ExcellentEconomy, NightCore, ExoSkills, ExoArmorTrims, ExoSpawners, ESkyblock, PlaceholderAPI]
+description: Shards activity rewards and boosters (ExcellentEconomy), plus /sell for money.
+softdepend: [ExcellentEconomy, NightCore, Vault, ExoSkills, ExoArmorTrims, ExoSpawners, ESkyblock, PlaceholderAPI]
 commands:
   sell:
     description: Open the selling menu, or collect returned items with /sell claim
@@ -15,6 +15,10 @@ commands:
     description: ExoEconomy help, information and administration
     usage: /exoeconomy [help|info|reload|booster|tx|claims|audit|storage]
     aliases: [exoeco]
+  shardnotify:
+    description: Turn your Shards reward chat, action bar and sound messages on or off
+    usage: /shardnotify [chat|actionbar|sound|all|status] [on|off]
+    aliases: [rewardnotify]
 permissions:
   exoeconomy.use:
     description: /exoeconomy help and info
@@ -42,6 +46,12 @@ permissions:
     default: true
   exoeconomy.earn.slaying:
     description: Earn Shards from slaying mobs
+    default: true
+  exoeconomy.earn.woodcutting:
+    description: Earn Shards from chopping logs
+    default: true
+  exoeconomy.notify:
+    description: Toggle your own reward notifications with /shardnotify
     default: true
   exoeconomy.shards:
     description: Use the optional balance command

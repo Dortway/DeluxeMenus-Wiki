@@ -80,6 +80,13 @@ public final class ActivityListener implements Listener {
             rewards.award(player, RewardSettings.FARMING, key, farm);
             return;
         }
+        BigDecimal wood = rewards.configured(RewardSettings.WOODCUTTING, key);
+        if (wood.signum() > 0) {
+            // Logs from trees (natural or grown from saplings) pay; placed logs never do.
+            if (!loaded || kind == Provenance.PLACED || !rewards.eligible(player, RewardSettings.WOODCUTTING)) return;
+            rewards.award(player, RewardSettings.WOODCUTTING, key, wood);
+            return;
+        }
         BigDecimal mine = rewards.configured(RewardSettings.MINING, key);
         if (mine.signum() <= 0 || !loaded || kind == Provenance.PLACED || kind == Provenance.FERTILIZED) return;
         if (kind == Provenance.GENERATED && !settings.mining().rewardGeneratedBlocks()) return;

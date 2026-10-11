@@ -2,11 +2,12 @@
 
 Shards rewards for your Paper 26.1.2 server, with ExcellentEconomy as the bank:
 
-- **Activity rewards** for mining natural blocks, harvesting fully grown crops and killing eligible mobs. Custom plugins can add their own activities through the API.
-- **`/sell`**: a menu where players deposit plain vanilla items and confirm a sale. Prices come from a catalogue that lists every vanilla block item in 26.1.
+- **Activity rewards** for mining natural blocks, chopping tree logs, harvesting fully grown crops and killing eligible mobs. Custom plugins can add their own activities through the API. Every deposit shows a chat line and an action bar message; both can be turned off server-wide, and players can turn them off for themselves with `/shardnotify`.
+- **`/sell`**: a menu where players deposit plain vanilla items and confirm a sale. **It pays in money** (Vault by default, or any ExcellentEconomy currency). Prices come from a catalogue that lists every vanilla block item in 26.1.
+- **ExoCubes / ExoWoodCubes**: blocks those plugins regenerate count as natural again, so breaking them pays. If a cube plugin cancels the break event itself, it can pay through `ExoEconomyAPI.rewardBlockBreak` (see docs/REFERENCE.md).
 - **`/boosters`**: personal and global timed boosters bought with Shards, with stacking rules, queues, persistence and announcements.
 
-**ExcellentEconomy owns the Shards currency and every balance.** ExoEconomy never stores, caches or modifies balances itself. It asks ExcellentEconomy's native currency API to deposit or withdraw, and keeps only its own records: boosters, a transaction journal, sell escrow and claims, block provenance and daily counters.
+**ExcellentEconomy owns the Shards currency and every balance, and your money economy (through Vault) owns money balances.** ExoEconomy never stores, caches or modifies balances itself. It asks ExcellentEconomy's native currency API to deposit or withdraw, and keeps only its own records: boosters, a transaction journal, sell escrow and claims, block provenance and daily counters.
 
 ## Detected setup
 
@@ -47,7 +48,7 @@ src/main/java/net/exoeconomy/
   integration/    ExoSkills, ExoSpawners, PlaceholderAPI
   command/        /sell, /boosters, /exoeconomy, optional /shards
 src/main/resources/   plugin.yml, config.yml, rewards.yml, boosters.yml, prices.yml, messages.yml
-src/test/java/        CoreTests (36 tests)
+src/test/java/        CoreTests (40 tests)
 tools/generate_prices.py   regenerates prices.yml from minecraft-data with the no-arbitrage check
 stubs/            compile-only API stubs for offline builds (never shipped)
 ```

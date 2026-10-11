@@ -41,8 +41,19 @@ public final class RewardService {
     private final Map<UUID, Long> unavailableNotified = new HashMap<>();
     private final ZoneId zone = ZoneId.systemDefault();
 
-    public RewardService(ExoEconomyPlugin plugin, List<DailyLimits.Row> today) {
+    private final NotificationPrefs prefs;
+    private final Map<UUID, PendingChat> pendingChat = new HashMap<>();
+
+    /** Chat summaries collected while chat.interval-seconds is above 0. */
+    private static final class PendingChat {
+        BigDecimal amount = BigDecimal.ZERO;
+        final Set<String> activities = new LinkedHashSet<>();
+        long lastSent;
+    }
+
+    public RewardService(ExoEconomyPlugin plugin, List<DailyLimits.Row> today, Map<UUID, Integer> mutedNotifications) {
         this.plugin = plugin;
+        this.prefs = new NotificationPrefs(mutedNotifications);
         this.limits = new DailyLimits(LocalDate.now(zone).toEpochDay());
         today.forEach(limits::load);
     }
@@ -58,7 +69,7 @@ public final class RewardService {
     }
 
     public boolean registerActivity(String pluginName, String id) {
-        if (!id.matches("[a-z0-9_\\-]{1,32}") || Set.of("all", "selling", RewardSettings.MINING, RewardSettings.FARMING, RewardSettings.SLAYING).contains(id)) return false;
+        if (!id.matches("[a-z0-9_\\-]{1,32}") || RewardSettings.BUILT_IN.contains(id)) return false;
         customActivities.put(id, pluginName);
         return true;
     }
@@ -87,6 +98,21 @@ public final class RewardService {
         if (a == null) return BigDecimal.ZERO;
         BigDecimal v = a.reward(key);
         return v.signum() > 0 ? v : a.defaultReward();
+    }
+
+    /**
+     * Reward for a block broken by a plugin that handles breaking itself (cancels the BlockBreakEvent or
+     * regenerates blocks, as mine/cube plugins do). Uses the configured farming, woodcutting or mining
+     * reward for the material; provenance is not checked because the calling plugin vouches for the break.
+     */
+    public RewardOutcome awardBlock(Player player, org.bukkit.Material material) {
+        String key = material.name();
+        for (String activity : List.of(RewardSettings.FARMING, RewardSettings.WOODCUTTING, RewardSettings.MINING)) {
+            BigDecimal base = configured(activity, key);
+            RewardSettings.Activity a = activity(activity);
+            if (a != null && a.reward(key).signum() > 0) return award(player, activity, key, base);
+        }
+        return RewardOutcome.INELIGIBLE;
     }
 
     public RewardOutcome award(Player player, String activityId, String key, BigDecimal base) {
@@ -129,6 +155,7 @@ public final class RewardService {
             }
             flush(player);
         }
+        if (!pendingChat.isEmpty()) flushChat();
         persist();
     }
 
@@ -164,17 +191,63 @@ public final class RewardService {
         }
     }
 
+    public NotificationPrefs prefs() { return prefs; }
+
+    /**
+     * Action bar and chat line for a deposit. Each channel can be turned off server-wide
+     * (notifications.*.enabled) or per player (/shardnotify) when allow-player-toggle is true.
+     */
     private void notifyReward(Player player, RewardAccumulator.Payout p) {
         RewardSettings.Notifications n = plugin.settings().rewards().notifications();
-        String amount = plugin.ledger().format(p.amount());
-        String activities = p.byActivity().keySet().stream().map(Text::title).collect(Collectors.joining(", "));
-        Map<String, String> values = Map.of("amount", amount, "activities", activities, "raw_amount", Money.plain(p.amount()));
-        if (n.actionBar()) player.sendActionBar(Text.color(Text.replace(n.actionBarFormat(), values)));
-        if (n.chat()) player.sendMessage(Text.color(Text.replace(n.chatFormat().replace("%prefix%", plugin.settings().messages().raw("prefix")), values)));
-        if (n.sound()) {
+        UUID id = player.getUniqueId();
+        if (n.actionBar() && wants(id, NotificationPrefs.ACTION_BAR, n))
+            player.sendActionBar(Text.color(Text.replace(n.actionBarFormat(), values(p.amount(), p.byActivity().keySet()))));
+        if (n.chat() && wants(id, NotificationPrefs.CHAT, n)) {
+            if (n.chatIntervalMs() <= 0) sendChat(player, p.amount(), p.byActivity().keySet());
+            else {
+                PendingChat pc = pendingChat.computeIfAbsent(id, k -> new PendingChat());
+                pc.amount = pc.amount.add(p.amount());
+                pc.activities.addAll(p.byActivity().keySet());
+                if (System.currentTimeMillis() - pc.lastSent >= n.chatIntervalMs()) sendPendingChat(player, pc);
+            }
+        }
+        if (n.sound() && wants(id, NotificationPrefs.SOUND, n)) {
             try {
                 player.playSound(player.getLocation(), n.soundKey(), n.volume(), n.pitch());
             } catch (RuntimeException ignored) { }
+        }
+    }
+
+    private boolean wants(UUID player, int channel, RewardSettings.Notifications n) {
+        return !n.playerToggle() || prefs.enabled(player, channel);
+    }
+
+    private Map<String, String> values(BigDecimal amount, Collection<String> activityIds) {
+        String activities = activityIds.stream().map(a -> plugin.boosters().activityName(a)).collect(Collectors.joining(", "));
+        return Map.of("amount", plugin.ledger().format(amount), "activities", activities, "raw_amount", Money.plain(amount));
+    }
+
+    private void sendChat(Player player, BigDecimal amount, Collection<String> activities) {
+        RewardSettings.Notifications n = plugin.settings().rewards().notifications();
+        player.sendMessage(Text.color(Text.replace(n.chatFormat().replace("%prefix%", plugin.settings().messages().raw("prefix")), values(amount, activities))));
+    }
+
+    private void sendPendingChat(Player player, PendingChat pc) {
+        if (pc.amount.signum() > 0) sendChat(player, pc.amount, pc.activities);
+        pc.amount = BigDecimal.ZERO;
+        pc.activities.clear();
+        pc.lastSent = System.currentTimeMillis();
+    }
+
+    /** Sends chat summaries whose interval has passed (so the last batch is not held back). */
+    private void flushChat() {
+        RewardSettings.Notifications n = plugin.settings().rewards().notifications();
+        long now = System.currentTimeMillis();
+        for (Iterator<Map.Entry<UUID, PendingChat>> it = pendingChat.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<UUID, PendingChat> e = it.next();
+            Player player = Bukkit.getPlayer(e.getKey());
+            if (player == null) { it.remove(); continue; }
+            if (e.getValue().amount.signum() > 0 && now - e.getValue().lastSent >= n.chatIntervalMs()) sendPendingChat(player, e.getValue());
         }
     }
 
@@ -195,6 +268,8 @@ public final class RewardService {
         flush(player);
         accumulator.remove(player.getUniqueId());
         unavailableNotified.remove(player.getUniqueId());
+        PendingChat pc = pendingChat.remove(player.getUniqueId());
+        if (pc != null && pc.amount.signum() > 0) sendChat(player, pc.amount, pc.activities);
         limits.forget(player.getUniqueId());
     }
 

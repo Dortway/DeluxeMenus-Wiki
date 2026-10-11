@@ -11,6 +11,7 @@
 | `/boosters` | `exoeconomy.boosters` | Opens the booster shop: tiers, your effective multipliers, balance, and active boosters with timers. |
 | `/exoeconomy` (`/exoeco`) | `exoeconomy.use` | Shows help. |
 | `/exoeconomy info` | `exoeconomy.use` | Shows economy connection, currency and precision, storage health, boosters, prices, provenance and integrations. |
+| `/shardnotify [chat\|actionbar\|sound\|all\|status] [on\|off]` (`/rewardnotify`) | `exoeconomy.notify` | Turns your own reward chat line, action bar or sound on or off. With no arguments it toggles all three. Saved across restarts. Needs `notifications.allow-player-toggle: true`. |
 | `/shards [player]` | `exoeconomy.shards` (`.others` to look up others) | **Optional, off by default.** Read-only balance through ExcellentEconomy. It is never registered if the name is already taken, for example by ExcellentEconomy's own currency command. |
 
 `/sell` can clash with another plugin's `/sell`. `/exoeconomy:sell` always works, and Bukkit's `commands.yml` can alias it.
@@ -43,7 +44,8 @@ All admin commands tab-complete subcommands, players, tiers, booster ids and act
 |---|---|---|
 | `exoeconomy.use`, `exoeconomy.sell`, `exoeconomy.sell.claim`, `exoeconomy.boosters` | everyone | |
 | `exoeconomy.boosters.buy.personal`, `exoeconomy.boosters.buy.global` | everyone | Buy boosters per scope; tiers can also require their own `permission`. |
-| `exoeconomy.earn.mining`, `.earn.farming`, `.earn.slaying`, `.earn.<custom>` | everyone | Configurable per activity in `rewards.yml`; set it to `""` to require no permission. |
+| `exoeconomy.notify` | everyone | `/shardnotify` |
+| `exoeconomy.earn.mining`, `.earn.woodcutting`, `.earn.farming`, `.earn.slaying`, `.earn.<custom>` | everyone | Configurable per activity in `rewards.yml`; set it to `""` to require no permission. |
 | `exoeconomy.shards` | everyone | |
 | `exoeconomy.shards.others` | op | |
 | `exoeconomy.admin` | op | Includes `.admin.reload`, `.admin.boosters`, `.admin.transactions`, `.admin.claims`, `.admin.audit`. |
@@ -52,8 +54,8 @@ All admin commands tab-complete subcommands, players, tiers, booster ids and act
 
 | File | Contents |
 |---|---|
-| `config.yml` | Currency id and precision, storage, optional `/shards`, selling (game modes, worlds, max payout, confirm window, crash recovery mode, selling boosters, ExoSkills bonus, multiplier cap), integrations. |
-| `rewards.yml` | Per activity: enabled, permission, worlds, game modes, daily cap, rewards per material or entity. Mining: `reward-generated-blocks`. Farming: `allow-fertilized`, `stem-scan-limit`. Slaying: `origins.{spawner,bred,summoned,unknown}`, `blocked-spawn-reasons`, `reward-players`, `exospawners-stack-kills`. Also notifications (action bar, chat, sound, flush interval) and a total daily cap. |
+| `config.yml` | Currency id and precision, storage, optional `/shards`, selling (**`currency`**: `vault` (default), `excellenteconomy:<id>` or `shards`; **`price-multiplier`** (default 100, applied to every `prices.yml` price); game modes, worlds, max payout, confirm window, crash recovery mode, selling boosters, ExoSkills bonus, multiplier cap), integrations. |
+| `rewards.yml` | Per activity: enabled, permission, worlds, game modes, daily cap, rewards per material or entity. Mining: `reward-generated-blocks`. Farming: `allow-fertilized`, `stem-scan-limit`. Slaying: `origins.{spawner,bred,summoned,unknown}`, `blocked-spawn-reasons`, `reward-players`, `exospawners-stack-kills`. Woodcutting: log rewards (placed logs never pay). Also notifications (action bar, chat with optional `interval-seconds` batching, sound, `allow-player-toggle`, flush interval), `provenance.forget-when-block-changes`, and a total daily cap. |
 | `boosters.yml` | Stacking rules, time model, announcements, menu layout, tiers. |
 | `prices.yml` | Shards per item for every 26.1 block item, plus common non-block drops. `false` with a comment means not sellable. |
 | `messages.yml` | Every player-facing text and menu lore. Supports `&` codes and `&#RRGGBB`. Missing keys fall back to the defaults. |
@@ -103,7 +105,8 @@ ExoEconomyAPI api = Bukkit.getServicesManager().load(ExoEconomyAPI.class);   // 
 | `boosterMultiplier(uuid, activity)`, `boosters(uuid)`, `globalBoosters()` | Thread-safe. |
 | `grantBooster(scope, owner, activity, multiplier, durationMs, reason)` | Free grant, following the stacking rules. |
 | `cancelBooster(id)` | Cancels without refund. |
-| `vanillaPrice(Material)` | |
+| `rewardBlockBreak(player, material)` | For plugins that break blocks themselves (regenerating mines, cube plugins that cancel the BlockBreakEvent): pays the configured farming, woodcutting or mining reward with the normal eligibility, boosters, caps and messages. Provenance is not checked, so call it only for legitimate breaks, and never for breaks ExoEconomy already saw as an uncancelled event. |
+| `vanillaPrice(Material)` | Price in the selling currency (`prices.yml` × `price-multiplier`). |
 | `registerPriceProvider(plugin, (player, item) -> Optional<BigDecimal>)` | Price your own custom items in `/sell`. Without a provider they are always rejected. |
 | `registerItemFilter(plugin, (player, item) -> Optional<String>)` | Veto selling any item, such as quest, soulbound or event items, with a reason shown to the player. |
 

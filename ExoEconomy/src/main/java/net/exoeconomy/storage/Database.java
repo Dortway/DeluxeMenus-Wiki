@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  * survive a crash or power loss.
  */
 public final class Database implements Journal, AutoCloseable {
-    public static final int SCHEMA_VERSION = 1;
+    public static final int SCHEMA_VERSION = 2;
 
     private final Connection db;
     private final ThreadPoolExecutor writer;
@@ -101,7 +101,13 @@ public final class Database implements Journal, AutoCloseable {
                       PRIMARY KEY(player, day, activity)) WITHOUT ROWID""");
                 setMeta(s, "schema_version", "1");
             }
-            // Future migrations: if (version < 2) { ...; setMeta(s, "schema_version", "2"); }
+            if (version < 2) {
+                // Per-player notification toggles, and the block type each provenance mark was recorded for.
+                s.execute("CREATE TABLE player_prefs(player TEXT PRIMARY KEY, muted INTEGER NOT NULL)");
+                s.execute("ALTER TABLE placed_blocks ADD COLUMN type TEXT");
+                setMeta(s, "schema_version", "2");
+            }
+            // Future migrations: if (version < 3) { ...; setMeta(s, "schema_version", "3"); }
             db.commit();
         } catch (SQLException e) {
             db.rollback();
@@ -521,14 +527,15 @@ public final class Database implements Journal, AutoCloseable {
 
     // ------------------------------------------------------------------ provenance
 
-    public record PlacedRow(String world, long chunk, int pos, byte kind) {}
+    /** {@code type} is the material the mark was recorded for (null for rows from schema 1). */
+    public record PlacedRow(String world, long chunk, int pos, byte kind, String type) {}
 
     /** Loads every provenance row; run on the writer thread via {@link #submit}. */
     public CompletableFuture<List<PlacedRow>> loadPlaced() {
         return submit(c -> {
             List<PlacedRow> out = new ArrayList<>();
-            try (Statement s = c.createStatement(); ResultSet r = s.executeQuery("SELECT world, chunk, pos, kind FROM placed_blocks")) {
-                while (r.next()) out.add(new PlacedRow(r.getString(1), r.getLong(2), r.getInt(3), (byte) r.getInt(4)));
+            try (Statement s = c.createStatement(); ResultSet r = s.executeQuery("SELECT world, chunk, pos, kind, type FROM placed_blocks")) {
+                while (r.next()) out.add(new PlacedRow(r.getString(1), r.getLong(2), r.getInt(3), (byte) r.getInt(4), r.getString(5)));
             }
             return out;
         });
@@ -537,18 +544,39 @@ public final class Database implements Journal, AutoCloseable {
     /** kind 0 deletes the row. */
     public static Work writePlaced(List<PlacedRow> rows) {
         return c -> {
-            try (PreparedStatement put = c.prepareStatement("INSERT OR REPLACE INTO placed_blocks VALUES(?,?,?,?)");
+            try (PreparedStatement put = c.prepareStatement("INSERT OR REPLACE INTO placed_blocks(world, chunk, pos, kind, type) VALUES(?,?,?,?,?)");
                  PreparedStatement del = c.prepareStatement("DELETE FROM placed_blocks WHERE world=? AND chunk=? AND pos=?")) {
                 for (PlacedRow row : rows) {
                     PreparedStatement p = row.kind() == 0 ? del : put;
                     p.setString(1, row.world());
                     p.setLong(2, row.chunk());
                     p.setInt(3, row.pos());
-                    if (row.kind() != 0) p.setInt(4, row.kind());
+                    if (row.kind() != 0) { p.setInt(4, row.kind()); p.setString(5, row.type()); }
                     p.addBatch();
                 }
                 put.executeBatch();
                 del.executeBatch();
+            }
+        };
+    }
+
+    // ------------------------------------------------------------------ player preferences
+
+    /** Bit set of muted notification channels per player (absent = everything on). Startup only. */
+    public Map<UUID, Integer> loadPrefs() throws SQLException {
+        Map<UUID, Integer> out = new HashMap<>();
+        try (Statement s = db.createStatement(); ResultSet r = s.executeQuery("SELECT player, muted FROM player_prefs")) {
+            while (r.next()) out.put(UUID.fromString(r.getString(1)), r.getInt(2));
+        }
+        return out;
+    }
+
+    public static Work savePrefs(UUID player, int muted) {
+        return c -> {
+            try (PreparedStatement p = c.prepareStatement(muted == 0 ? "DELETE FROM player_prefs WHERE player=?" : "INSERT OR REPLACE INTO player_prefs VALUES(?,?)")) {
+                p.setString(1, player.toString());
+                if (muted != 0) p.setInt(2, muted);
+                p.executeUpdate();
             }
         };
     }

@@ -27,6 +27,17 @@ commands:
 
 selling:
   enabled: true
+  # What /sell pays with:
+  #   vault                     Vault money (your server's normal money, e.g. ExcellentEconomy's
+  #                             primary currency or EssentialsX). Default. Needs Vault installed.
+  #   excellenteconomy:<id>     a specific ExcellentEconomy currency, e.g. excellenteconomy:money
+  #   shards                    the Shards currency above
+  # Changing it needs a restart.
+  currency: vault
+  # Every price in prices.yml is multiplied by this. prices.yml is scaled for Shards
+  # (cobblestone 0.01, diamond 5); 100 gives typical money prices (cobblestone $1, diamond $500).
+  # The same factor applies to every item, so crafting still never turns items into more money.
+  price-multiplier: 100
   game-modes: [SURVIVAL, ADVENTURE]
   disabled-worlds: []
   title: "&8Sell Items"
@@ -42,10 +53,10 @@ selling:
     # Selling payouts are NOT boosted unless this is true AND a tier in boosters.yml names
     # "activity: selling". Boosters for "all" never apply to selling.
     enabled: false
-  # Apply ExoSkills' farming/mining sell milestone bonus (via its SaleMultiplierAPI service,
-  # which ExoSkills only registers while ExoArmorTrims is installed). Off by default because
-  # ExoSkills' bonuses are designed for its own money shop.
-  exoskills-sale-bonus: false
+  # Apply ExoSkills' farming/mining sell milestone bonus ("increase your money multiplier when
+  # selling ores/crops to the shop") via its SaleMultiplierAPI service. ExoSkills only registers
+  # that service while ExoArmorTrims is installed; without it selling uses 1x.
+  exoskills-sale-bonus: true
   # Cap on the combined selling multiplier (ExoSkills bonus x selling booster).
   max-total-multiplier: 3.0
 

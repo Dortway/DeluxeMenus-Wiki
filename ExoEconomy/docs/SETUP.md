@@ -23,12 +23,13 @@ Use ExcellentEconomy for balances, payments, give/take/set and resets. ExoEconom
 ## 2. Install ExoEconomy
 
 1. Build the jar (section 3) and copy `ExoEconomy-1.0.0.jar` into `plugins/`.
-2. Optional plugins, used when present:
+2. **Vault plus a money economy** for `/sell` (the default `selling.currency: vault`). ExcellentEconomy can provide Vault money through its primary currency, or use EssentialsX or similar. To pay with a specific ExcellentEconomy currency instead, set `selling.currency: excellenteconomy:money`.
+3. Optional plugins, used when present:
    - **PlaceholderAPI**
    - **ExoSkills**, for its sell bonus. That bonus needs ExoArmorTrims, because ExoSkills registers it through ExoArmorTrims' API.
    - **ExoSpawners**
-3. Start the server. ExoEconomy creates `config.yml`, `rewards.yml`, `boosters.yml`, `prices.yml`, `messages.yml` and `exoeconomy.db`.
-4. Set the currency id and restart. Then check `/exoeconomy info`; it shows the economy status, storage and integrations.
+4. Start the server. ExoEconomy creates `config.yml`, `rewards.yml`, `boosters.yml`, `prices.yml`, `messages.yml` and `exoeconomy.db`.
+5. Set the currency id and restart. Then check `/exoeconomy info`; it shows the economy status, storage and integrations.
 
 ## 3. Build
 

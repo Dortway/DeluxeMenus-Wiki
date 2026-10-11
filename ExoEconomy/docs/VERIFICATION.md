@@ -5,8 +5,8 @@
 | Step | Result |
 |---|---|
 | `./build.sh --stubs` with OpenJDK 25.0.4, `--release 25`, `-Xlint:all` | Compiles with **0 errors, 0 warnings** |
-| Jar contents | 140 entries: ExoEconomy classes and resources only, no stubs |
-| Tests (`CoreTests`, SQLite JDBC 3.53.4.0, ExoSkills 1.0.1 jar) | **36 passed, 0 failed** |
+| Jar contents | ExoEconomy classes and resources only, no stubs |
+| Tests (`CoreTests`, SQLite JDBC 3.53.4.0, ExoSkills 1.0.1 jar) | **40 passed, 0 failed** |
 | Price generator (`tools/generate_prices.py`, minecraft-data 26.1) | 1,014 block items: 980 priced, 34 disabled with reasons. **0 arbitrage violations** over 2,142 modelled recipes. |
 
 The Paper API and ExcellentEconomy could not be downloaded in this environment (network policy). The jar was therefore compiled against **compile-only stubs** that reproduce the exact API surface used. The stub kinds and descriptors were cross-checked against ExoSkills 1.0.1's constant pool (compiled against Paper 26.1.2) and the ExcellentEconomy 2.8.0 source.
@@ -24,6 +24,8 @@ The Paper API and ExcellentEconomy could not be downloaded in this environment (
 | Recovery | PENDING → UNCERTAIN. SELLING escrow → REVIEW claim linked to its transaction. OPEN escrow → REVIEW or CLAIMABLE. Idempotent recovery. Crash versus clean-shutdown detection. A claim cannot be delivered twice. A newer schema is refused. |
 | Rewards | Daily caps (activity and total, counted on accrual, give-back, day reset, reload). Batching carries fractions and restores on refusal. |
 | Catalogue | All 1,014 block items present, valid keys, every disabled entry has a reason. |
+| Notifications | Per-player, per-channel toggles (on, off, toggle-all) and persistence. |
+| Provenance (schema v2) | Placed blocks stay placed; a block replaced by a different type without an event becomes natural; old rows without a type are kept; option off keeps marks; marks with types survive a restart. |
 | ExoSkills | `Progress.combine(skill, 1.0, add\|multiply) == skill` on the real 1.0.1 code, which is the assumption ExoSkillsBridge relies on. |
 
 ## Not tested: needs your server
@@ -39,6 +41,8 @@ These are implemented, but no Paper server could run here:
 | Provenance | Pistons, falling blocks, generators, tree growth, bone meal. |
 | Slaying | Spawn reasons, Paper `fromMobSpawner()`, ExoSpawners `StackMobKilledEvent`. |
 | Integrations | PlaceholderAPI registration; ExoSkills sale bonus through ExoArmorTrims' service. |
+| Selling currency | Vault money deposits (connection, `fractionalDigits`, formatting), or the chosen ExcellentEconomy currency. |
+| ExoCubes / ExoWoodCubes | Whether they regenerate blocks with direct `setType` (works now) or cancel the break event (needs the `rewardBlockBreak` call). |
 
 Suggested acceptance pass on a test server:
 1. Run `/exoeconomy info`.
@@ -73,6 +77,8 @@ Suggested acceptance pass on a test server:
 - Not Folia-compatible; single server only.
 
 ## Follow-up information needed
+
+0. **ExoCubes and ExoWoodCubes** jars or source. With them I can confirm how they break and regenerate blocks and, if they cancel the break event, add a direct hook instead of relying on the API call or the block-replacement rule.
 
 1. Your installed **ExcellentEconomy and NightCore versions** and the **Shards currency file** (`plugins/ExcellentEconomy/currencies/<id>.yml`).
 2. Results of **`build.ps1`** against your server. Any compile error there means an API difference, and I can adjust it immediately.

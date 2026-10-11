@@ -6,16 +6,17 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * The only way ExoEconomy moves or reads Shards. The production implementation delegates to
- * ExcellentEconomy's native currency API; ExoEconomy never stores or caches balances itself.
+ * One currency ExoEconomy can read and move: the Shards currency (ExcellentEconomy) or the selling
+ * currency (Vault money or another ExcellentEconomy currency). Implementations delegate to the
+ * owning economy plugin; ExoEconomy never stores or caches balances itself.
  * Synchronous methods take online players and must be called on the server thread.
  */
-public interface ShardsLedger {
+public interface Ledger {
     boolean available();
     /** Human-readable reason when {@link #available()} is false. */
     String unavailableReason();
     String currencyId();
-    /** Decimal places amounts are rounded down to before they reach ExcellentEconomy. */
+    /** Decimal places amounts are rounded down to before they reach the economy plugin. */
     int scale();
     /** Maximum balance, if the currency has one. */
     Optional<BigDecimal> maxBalance();

@@ -24,6 +24,8 @@ import java.util.Map;
  * Keeps {@link Provenance} up to date. All handlers run at MONITOR and ignore cancelled events, so
  * protection plugins that cancel an action also cancel the provenance change.
  *
+ * <p>Events fired before the world changes record the type the block is about to have.
+ *
  * <p>Limits (documented): blocks changed by plugins without firing Bukkit events, WorldEdit edits,
  * the second half of doors/beds/tall plants when broken indirectly, and blocks moved by
  * mechanisms other than pistons and gravity are not tracked.
@@ -48,7 +50,7 @@ public final class ProvenanceListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void form(BlockFormEvent e) {
-        provenance.set(e.getBlock(), e instanceof EntityBlockFormEvent ? Provenance.PLACED : Provenance.GENERATED);
+        provenance.set(e.getBlock(), e instanceof EntityBlockFormEvent ? Provenance.PLACED : Provenance.GENERATED, e.getNewState().getType().name());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -69,7 +71,7 @@ public final class ProvenanceListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void fertilize(BlockFertilizeEvent e) {
-        for (BlockState s : e.getBlocks()) if (s.getBlockData() instanceof Ageable) provenance.set(s.getBlock(), Provenance.FERTILIZED);
+        for (BlockState s : e.getBlocks()) if (s.getBlockData() instanceof Ageable) provenance.set(s.getBlock(), Provenance.FERTILIZED, s.getType().name());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -80,12 +82,13 @@ public final class ProvenanceListener implements Listener {
 
     private void move(List<Block> blocks, BlockFace direction) {
         Map<Block, Byte> kinds = new HashMap<>();
-        for (Block b : blocks) kinds.put(b, provenance.get(b));
+        Map<Block, String> types = new HashMap<>();
+        for (Block b : blocks) { kinds.put(b, provenance.get(b)); types.put(b, b.getType().name()); }
         for (Block b : blocks) provenance.set(b, Provenance.NATURAL);
         // Moved blocks keep their origin; generator blocks pushed out of a generator stay GENERATED.
         for (Block b : blocks) {
             byte kind = kinds.get(b);
-            if (kind != Provenance.NATURAL) provenance.set(b.getRelative(direction), kind);
+            if (kind != Provenance.NATURAL) provenance.set(b.getRelative(direction), kind, types.get(b));
         }
     }
 
@@ -99,7 +102,7 @@ public final class ProvenanceListener implements Listener {
                 if (kind != Provenance.NATURAL) falling.getPersistentDataContainer().set(fallingKey, PersistentDataType.BYTE, kind);
             } else {
                 Byte kind = falling.getPersistentDataContainer().get(fallingKey, PersistentDataType.BYTE);
-                provenance.set(block, kind == null ? Provenance.NATURAL : kind);
+                provenance.set(block, kind == null ? Provenance.NATURAL : kind, e.getTo().name());
             }
         } else {
             // Endermen, ravagers, silverfish, sheep eating grass and similar: not player-made.

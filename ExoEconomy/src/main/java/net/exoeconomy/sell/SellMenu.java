@@ -210,7 +210,7 @@ public final class SellMenu extends Menu implements MenuListener.GuardedMenu {
             if (shown++ == 8) { lore.add(msg.format("menus.sell.more-lines", "count", String.valueOf(quote.lines().size() - 8))); break; }
             lore.add(msg.format("menus.sell.line", "amount", String.valueOf(l.amount()), "item", Text.title(l.type().name().toLowerCase(Locale.ROOT)),
                     "unit", Money.plain(l.unit()), "multiplier", Money.plain(l.multiplier().stripTrailingZeros()),
-                    "subtotal", plugin.ledger().format(Money.floor(l.subtotal(), Math.max(2, plugin.ledger().scale())))));
+                    "subtotal", plugin.sellLedger().format(Money.floor(l.subtotal(), Math.max(2, plugin.sellLedger().scale())))));
         }
         if (!quote.rejected().isEmpty()) {
             lore.add(msg.format("menus.sell.rejected-header", "count", String.valueOf(quote.rejected().stream().mapToInt(SellService.Rejected::amount).sum())));
@@ -219,19 +219,19 @@ public final class SellMenu extends Menu implements MenuListener.GuardedMenu {
                     "reason", msg.raw(r.reasonKey()) + (r.detail() == null ? "" : " (" + r.detail() + ")"))));
         }
         lore.add("");
-        String payout = plugin.ledger().format(quote.payout());
+        String payout = plugin.sellLedger().format(quote.payout());
         Material icon;
         String name;
         if (state == State.ARMED && armed != null) {
             icon = Material.LIME_CONCRETE;
-            name = msg.format("menus.sell.armed-name", "payout", plugin.ledger().format(armed.payout()));
+            name = msg.format("menus.sell.armed-name", "payout", plugin.sellLedger().format(armed.payout()));
             lore.addAll(lines(msg, "menus.sell.armed-lore", "seconds", String.valueOf(Math.max(0, (armedUntil - System.currentTimeMillis() + 999) / 1000))));
         } else if (state == State.PROCESSING) {
             icon = Material.YELLOW_CONCRETE;
             name = msg.raw("menus.sell.processing-name");
         } else if (quote.tooLarge()) {
             icon = Material.RED_CONCRETE;
-            name = msg.format("menus.sell.too-large-name", "max", plugin.ledger().format(plugin.settings().selling().maxPayoutPerSale()));
+            name = msg.format("menus.sell.too-large-name", "max", plugin.sellLedger().format(plugin.settings().selling().maxPayoutPerSale()));
         } else if (quote.sellable()) {
             icon = Material.EMERALD;
             name = msg.format("menus.sell.sell-name", "payout", payout);
@@ -256,7 +256,7 @@ public final class SellMenu extends Menu implements MenuListener.GuardedMenu {
         if (slot != SELL || state == State.PROCESSING) return;
         Messages msg = plugin.settings().messages();
         if (!service.canSell(viewer)) { msg.send(viewer, "sell-not-here"); return; }
-        if (!plugin.ledger().available()) { msg.send(viewer, "economy-unavailable"); return; }
+        if (!plugin.sellLedger().available()) { msg.send(viewer, "sell-economy-unavailable"); return; }
         if (!plugin.database().healthy()) { msg.send(viewer, "storage-unavailable"); return; }
         if (updateScheduled) return; // preview is about to change; ignore clicks on a stale button
         Map<Integer, ItemStack> now = contents();
@@ -288,7 +288,7 @@ public final class SellMenu extends Menu implements MenuListener.GuardedMenu {
         }
         state = State.PROCESSING;
         refresh();
-        plugin.coordinator().submit(new SaleOperation(armed));
+        plugin.sellCoordinator().submit(new SaleOperation(armed));
     }
 
     @Override
@@ -347,7 +347,7 @@ public final class SellMenu extends Menu implements MenuListener.GuardedMenu {
             Journal.Work escrow = remainingEscrow(); // must be written with COMMITTED, whatever happens below
             try {
                 Messages msg = plugin.settings().messages();
-                msg.send(viewer, "sell-completed", "payout", plugin.ledger().format(quote.payout()),
+                msg.send(viewer, "sell-completed", "payout", plugin.sellLedger().format(quote.payout()),
                         "count", String.valueOf(quote.sold().values().stream().mapToInt(ItemStack::getAmount).sum()), "tx", BoosterService.shortId(txId));
                 Bukkit.getPluginManager().callEvent(new SaleCompletedEvent(viewer, txId, quote.counts(), quote.payout()));
                 refresh();

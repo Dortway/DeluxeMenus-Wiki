@@ -58,7 +58,7 @@ public final class TransactionCoordinator {
     private enum Phase { JOURNALING, LEDGER, FINISHING }
 
     private final Journal journal;
-    private final ShardsLedger ledger;
+    private final Ledger ledger;
     private final Executor mainThread;
     private final LongSupplier clock;
     private final Supplier<String> ids;
@@ -67,7 +67,7 @@ public final class TransactionCoordinator {
     private final Map<String, Phase> inFlight = new LinkedHashMap<>();
     private volatile boolean closing;
 
-    public TransactionCoordinator(Journal journal, ShardsLedger ledger, Executor mainThread, LongSupplier clock,
+    public TransactionCoordinator(Journal journal, Ledger ledger, Executor mainThread, LongSupplier clock,
                                   Supplier<String> ids, Logger log) {
         this.journal = journal; this.ledger = ledger; this.mainThread = mainThread; this.clock = clock; this.ids = ids; this.log = log;
     }

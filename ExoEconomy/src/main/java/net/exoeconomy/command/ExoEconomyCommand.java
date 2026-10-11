@@ -78,7 +78,7 @@ public final class ExoEconomyCommand implements TabExecutor {
         var ledger = plugin.ledger();
         msg().send(sender, "info", "version", plugin.getPluginMeta().getVersion(),
                 "economy", ledger.available() ? "connected (ExcellentEconomy " + plugin.economyVersion() + ")" : "UNAVAILABLE: " + ledger.unavailableReason(),
-                "currency", ledger.currencyId(), "scale", String.valueOf(ledger.scale()),
+                "currency", ledger.currencyId(), "scale", String.valueOf(ledger.scale()), "sell_currency", plugin.sellCurrencySummary(),
                 "storage", plugin.database().healthy() ? "healthy (queue " + plugin.database().queued() + ")" : "FAILED: " + plugin.database().failure(),
                 "boosters", String.valueOf(plugin.boosters().book().snapshot().size()),
                 "prices", String.valueOf(plugin.settings().catalogue().size()),
@@ -271,7 +271,7 @@ public final class ExoEconomyCommand implements TabExecutor {
                         done.accept(e);
                         if (e == null) deliverIfOnline(r.player());
                     });
-                    case "pay" -> plugin.coordinator().credit(TxKind.PAYOUT, r.id(), r.player(), r.amount(), Props.of("reason", note), (state, why) -> {
+                    case "pay" -> plugin.sellCoordinator().credit(TxKind.PAYOUT, r.id(), r.player(), r.amount(), Props.of("reason", note), (state, why) -> {
                         msg().send(sender, "admin-refund-result", "state", String.valueOf(state), "reason", why == null ? "" : why);
                         if (state == TxState.COMMITTED)
                             db.write(List.of(Database.resolve(r.id(), TxState.UNCERTAIN, TxState.RESOLVED_COMPLETED, note + " (paid now)"),
