@@ -1,0 +1,171 @@
+# Shard boosters, bought in /boosters with ExcellentEconomy Shards.
+#
+# A booster multiplies the BASE activity reward (mining, farming, slaying, custom activities).
+# It never multiplies transfers, refunds, admin balance changes or selling payouts. Selling is
+# only boosted by tiers with "activity: selling" while config.yml selling.boosters.enabled is true.
+#
+# Purchases activate IMMEDIATELY, unless the rules below say to extend or queue:
+#   same-tier:    what buying a tier that is already running for you (or globally) does
+#                 EXTEND (add the duration, capped by max-remaining-duration) | QUEUE | STACK | REJECT
+#   overlapping:  what buying a different booster covering an overlapping activity does
+#                 STACK (both run; multipliers combine) | QUEUE (starts when the other ends) | REJECT
+# Queued boosters keep their full duration and start automatically.
+#
+# Time: boosters store expiry timestamps.
+#   personal-offline-time: CONTINUE (time runs while the owner is offline) | PAUSE (freezes)
+#   server-offline-time:   CONTINUE (time runs while the server is stopped) | PAUSE (freezes on a
+#                          clean shutdown; a crash cannot pause, so crash downtime always counts)
+rules:
+  same-tier: EXTEND
+  overlapping: STACK
+  max-active-per-owner: 3        # the global pool counts as one owner
+  max-queued-per-owner: 3
+  max-remaining-duration: 6h
+  # ADDITIVE: 1 + sum(m - 1) (1.5x + 2x = 2.5x) | MULTIPLICATIVE (= 3x) | HIGHEST (= 2x)
+  combine: ADDITIVE
+  # Hard cap on the combined booster multiplier (personal and global together).
+  max-total-multiplier: 4.0
+  personal-offline-time: CONTINUE
+  server-offline-time: CONTINUE
+
+announcements:
+  global-activated: true
+  global-expired: true
+  personal-activated: true
+  personal-expired: true
+
+menu:
+  title: "&8✦ &#7FE3FFShard Boosters"
+  size: 54
+  filler: BLACK_STAINED_GLASS_PANE
+  info-slot: 4
+  active-slot: 49
+  close-slot: 53
+  confirm:
+    title: "&8Confirm booster purchase"
+    confirm-slot: 11
+    summary-slot: 13
+    cancel-slot: 15
+
+# Tier fields: display-name, scope (PERSONAL|GLOBAL), activity (all|mining|farming|slaying|<custom>|selling),
+# multiplier (above 1, max 100), duration (30m, 1h30m, 2d), price (Shards), icon, slot,
+# permission (optional extra permission), description (lore lines).
+tiers:
+  personal_125:
+    display-name: "&#A8FFC7Minor Boost &7(1.25x)"
+    scope: PERSONAL
+    activity: all
+    multiplier: 1.25
+    duration: 30m
+    price: 250
+    icon: LIME_DYE
+    slot: 19
+    description: ["&7Boosts all of your activity rewards."]
+  personal_150:
+    display-name: "&#7FE3FFBoost &7(1.5x)"
+    scope: PERSONAL
+    activity: all
+    multiplier: 1.5
+    duration: 30m
+    price: 600
+    icon: LIGHT_BLUE_DYE
+    slot: 20
+    description: ["&7Boosts all of your activity rewards."]
+  personal_200:
+    display-name: "&#FFD27FMajor Boost &7(2x)"
+    scope: PERSONAL
+    activity: all
+    multiplier: 2.0
+    duration: 30m
+    price: 1500
+    icon: ORANGE_DYE
+    slot: 21
+    description: ["&7Boosts all of your activity rewards."]
+  personal_300:
+    display-name: "&#FF8FD8Mega Boost &7(3x)"
+    scope: PERSONAL
+    activity: all
+    multiplier: 3.0
+    duration: 15m
+    price: 2500
+    icon: MAGENTA_DYE
+    slot: 22
+    description: ["&7Boosts all of your activity rewards."]
+  mining_150:
+    display-name: "&#F5F1CBMiner's Boost &7(1.5x)"
+    scope: PERSONAL
+    activity: mining
+    multiplier: 1.5
+    duration: 1h
+    price: 700
+    icon: IRON_PICKAXE
+    slot: 24
+  farming_150:
+    display-name: "&#A8FFC7Farmer's Boost &7(1.5x)"
+    scope: PERSONAL
+    activity: farming
+    multiplier: 1.5
+    duration: 1h
+    price: 700
+    icon: GOLDEN_HOE
+    slot: 25
+  slaying_200:
+    display-name: "&#FFA6A6Hunter's Boost &7(2x)"
+    scope: PERSONAL
+    activity: slaying
+    multiplier: 2.0
+    duration: 30m
+    price: 1000
+    icon: IRON_SWORD
+    slot: 26
+  global_125:
+    display-name: "&#A8FFC7Server Boost &7(1.25x)"
+    scope: GLOBAL
+    activity: all
+    multiplier: 1.25
+    duration: 1h
+    price: 5000
+    icon: EMERALD
+    slot: 37
+    description: ["&7Boosts everyone online, including players who join later."]
+  global_150:
+    display-name: "&#7FE3FFServer Boost &7(1.5x)"
+    scope: GLOBAL
+    activity: all
+    multiplier: 1.5
+    duration: 1h
+    price: 10000
+    icon: DIAMOND
+    slot: 38
+    description: ["&7Boosts everyone online, including players who join later."]
+  global_200:
+    display-name: "&#FFD27FServer Boost &7(2x)"
+    scope: GLOBAL
+    activity: all
+    multiplier: 2.0
+    duration: 30m
+    price: 15000
+    icon: GOLD_BLOCK
+    slot: 39
+    description: ["&7Boosts everyone online, including players who join later."]
+  global_300:
+    display-name: "&#FF8FD8Server Boost &7(3x)"
+    scope: GLOBAL
+    activity: all
+    multiplier: 3.0
+    duration: 15m
+    price: 20000
+    icon: NETHER_STAR
+    slot: 40
+    description: ["&7Boosts everyone online, including players who join later."]
+  # Example selling booster. Hidden unless config.yml selling.boosters.enabled is true.
+  # Price it so that the extra payout over its duration cannot exceed its cost by much.
+  selling_125:
+    display-name: "&#FFE88FMerchant's Boost &7(1.25x selling)"
+    scope: PERSONAL
+    activity: selling
+    multiplier: 1.25
+    duration: 15m
+    price: 3000
+    icon: GOLD_INGOT
+    slot: 42

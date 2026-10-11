@@ -1,0 +1,71 @@
+name: ExoEconomy
+version: '${version}'
+main: net.exoeconomy.ExoEconomyPlugin
+api-version: '26.1.2'
+description: Activity rewards, /sell and boosters paid in ExcellentEconomy Shards.
+softdepend: [ExcellentEconomy, NightCore, ExoSkills, ExoArmorTrims, ExoSpawners, ESkyblock, PlaceholderAPI]
+commands:
+  sell:
+    description: Open the selling menu, or collect returned items with /sell claim
+    usage: /sell [claim]
+  boosters:
+    description: Open the Shard booster shop and your active boosters
+    usage: /boosters
+  exoeconomy:
+    description: ExoEconomy help, information and administration
+    usage: /exoeconomy [help|info|reload|booster|tx|claims|audit|storage]
+    aliases: [exoeco]
+permissions:
+  exoeconomy.use:
+    description: /exoeconomy help and info
+    default: true
+  exoeconomy.sell:
+    description: Open /sell
+    default: true
+  exoeconomy.sell.claim:
+    description: Collect returned items with /sell claim
+    default: true
+  exoeconomy.boosters:
+    description: Open /boosters
+    default: true
+  exoeconomy.boosters.buy.personal:
+    description: Buy personal boosters
+    default: true
+  exoeconomy.boosters.buy.global:
+    description: Buy global boosters
+    default: true
+  exoeconomy.earn.mining:
+    description: Earn Shards from mining
+    default: true
+  exoeconomy.earn.farming:
+    description: Earn Shards from farming
+    default: true
+  exoeconomy.earn.slaying:
+    description: Earn Shards from slaying mobs
+    default: true
+  exoeconomy.shards:
+    description: Use the optional balance command
+    default: true
+  exoeconomy.shards.others:
+    description: See other players' balances with the optional balance command
+    default: op
+  exoeconomy.admin:
+    description: All ExoEconomy administration
+    default: op
+    children:
+      exoeconomy.admin.reload: true
+      exoeconomy.admin.boosters: true
+      exoeconomy.admin.transactions: true
+      exoeconomy.admin.claims: true
+      exoeconomy.admin.audit: true
+      exoeconomy.shards.others: true
+  exoeconomy.admin.reload:
+    default: op
+  exoeconomy.admin.boosters:
+    default: op
+  exoeconomy.admin.transactions:
+    default: op
+  exoeconomy.admin.claims:
+    default: op
+  exoeconomy.admin.audit:
+    default: op

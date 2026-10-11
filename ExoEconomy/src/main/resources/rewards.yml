@@ -1,0 +1,145 @@
+# Activity rewards: base Shards before boosters. Rewards are batched and deposited through
+# ExcellentEconomy every notifications.flush-interval-ticks. Fractions below the currency
+# precision carry over to the next deposit.
+defaults:
+  game-modes: [SURVIVAL, ADVENTURE]
+  disabled-worlds: []
+  # Max Shards per player per day across all activities (after boosters). 0 = unlimited.
+  daily-cap: 0
+
+notifications:
+  flush-interval-ticks: 40
+  action-bar:
+    enabled: true
+    format: "&#B8F2FF+%amount% &8• &7%activities%"
+  chat:
+    enabled: false
+    format: "%prefix%&#B8F2FF+%amount% &7(%activities%)"
+  sound:
+    enabled: true
+    key: entity.experience_orb.pickup
+    volume: 0.35
+    pitch: 1.7
+  unavailable-message-cooldown-seconds: 300
+
+activities:
+  mining:
+    enabled: true
+    permission: exoeconomy.earn.mining   # empty string = no permission needed
+    worlds: []                          # empty = every world not disabled
+    disabled-worlds: []
+    daily-cap: 0
+    # Pay for blocks formed by fluids (cobblestone/stone/basalt generators). Player-placed
+    # blocks never pay; blocks pushed by pistons or falling keep their origin.
+    reward-generated-blocks: true
+    rewards:
+      STONE: 0.02
+      COBBLESTONE: 0.01
+      DEEPSLATE: 0.02
+      COBBLED_DEEPSLATE: 0.01
+      BASALT: 0.01
+      BLACKSTONE: 0.01
+      NETHERRACK: 0.005
+      END_STONE: 0.02
+      OBSIDIAN: 0.2
+      COAL_ORE: 0.3
+      DEEPSLATE_COAL_ORE: 0.35
+      COPPER_ORE: 0.25
+      DEEPSLATE_COPPER_ORE: 0.3
+      IRON_ORE: 0.6
+      DEEPSLATE_IRON_ORE: 0.7
+      GOLD_ORE: 1.0
+      DEEPSLATE_GOLD_ORE: 1.2
+      NETHER_GOLD_ORE: 0.3
+      REDSTONE_ORE: 0.5
+      DEEPSLATE_REDSTONE_ORE: 0.6
+      LAPIS_ORE: 0.8
+      DEEPSLATE_LAPIS_ORE: 0.9
+      NETHER_QUARTZ_ORE: 0.3
+      DIAMOND_ORE: 4.0
+      DEEPSLATE_DIAMOND_ORE: 4.5
+      EMERALD_ORE: 3.0
+      DEEPSLATE_EMERALD_ORE: 3.5
+      ANCIENT_DEBRIS: 15.0
+      AMETHYST_CLUSTER: 0.1
+
+  farming:
+    enabled: true
+    permission: exoeconomy.earn.farming
+    daily-cap: 0
+    # Pay for crops grown with bone meal.
+    allow-fertilized: true
+    # How many blocks above a broken sugar cane/cactus/bamboo/kelp are counted.
+    stem-scan-limit: 32
+    # Crops pay only when fully grown. Sugar cane, cactus, bamboo and kelp pay per grown segment
+    # (the planted base never pays). Melons and pumpkins pay only when grown, not placed.
+    rewards:
+      WHEAT: 0.05
+      CARROTS: 0.05
+      POTATOES: 0.05
+      BEETROOTS: 0.05
+      NETHER_WART: 0.06
+      COCOA: 0.05
+      SWEET_BERRY_BUSH: 0.04
+      TORCHFLOWER_CROP: 0.1
+      PITCHER_CROP: 0.1
+      MELON: 0.06
+      PUMPKIN: 0.06
+      SUGAR_CANE: 0.02
+      CACTUS: 0.02
+      BAMBOO: 0.005
+      KELP: 0.005
+
+  slaying:
+    enabled: true
+    permission: exoeconomy.earn.slaying
+    daily-cap: 0
+    reward-players: false
+    # Which mob origins pay. Spawn reasons are recorded when mobs spawn (persisted on the mob).
+    origins:
+      spawner: false    # SPAWNER, TRIAL_SPAWNER, Paper fromMobSpawner(), ExoSpawners stacks
+      bred: false       # BREEDING, EGG, DUPLICATION
+      summoned: false   # SPAWNER_EGG, DISPENSE_EGG, BUCKET, COMMAND, CUSTOM, BUILD_*
+      unknown: false    # spawned before ExoEconomy recorded it
+    # Extra spawn reasons that never pay (names from Paper's CreatureSpawnEvent.SpawnReason).
+    blocked-spawn-reasons: []
+    # Pay for ExoSpawners stacked-mob kills (StackMobKilledEvent). These are spawner mobs.
+    exospawners-stack-kills: false
+    rewards:
+      ZOMBIE: 0.5
+      HUSK: 0.5
+      DROWNED: 0.5
+      ZOMBIE_VILLAGER: 0.5
+      SKELETON: 0.5
+      STRAY: 0.5
+      BOGGED: 0.5
+      SPIDER: 0.4
+      CAVE_SPIDER: 0.4
+      CREEPER: 0.6
+      ENDERMAN: 0.8
+      WITCH: 0.8
+      SLIME: 0.2
+      MAGMA_CUBE: 0.2
+      BLAZE: 0.8
+      GHAST: 1.0
+      WITHER_SKELETON: 1.5
+      PIGLIN_BRUTE: 1.5
+      HOGLIN: 0.6
+      ZOGLIN: 0.6
+      PHANTOM: 0.6
+      GUARDIAN: 0.8
+      ELDER_GUARDIAN: 20.0
+      SHULKER: 1.0
+      VINDICATOR: 1.0
+      PILLAGER: 0.6
+      EVOKER: 3.0
+      RAVAGER: 3.0
+      BREEZE: 1.5
+      WARDEN: 50.0
+      WITHER: 50.0
+      ENDER_DRAGON: 100.0
+      COW: 0.1
+      PIG: 0.1
+      SHEEP: 0.1
+      CHICKEN: 0.05
+      RABBIT: 0.05

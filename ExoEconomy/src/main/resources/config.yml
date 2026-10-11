@@ -1,0 +1,55 @@
+# ExoEconomy main configuration.
+# ExcellentEconomy owns the Shards currency and every balance. ExoEconomy never stores balances.
+config-version: 1
+
+economy:
+  # The ExcellentEconomy currency id: the file name in plugins/ExcellentEconomy/currencies/
+  # without ".yml". Checked at startup; if it does not exist ExoEconomy logs the available ids
+  # and disables rewards, selling and purchases. Changing it needs a restart.
+  currency-id: shards
+  # Decimal places for ExoEconomy amounts. "auto" = 0 for a non-decimal currency, 2 for a
+  # decimal one. Amounts are always rounded DOWN, so rounding never creates Shards.
+  scale: auto
+
+storage:
+  # SQLite file in the plugin folder: boosters, transaction journal, escrow, claims,
+  # block provenance and daily counters. Back it up with the server.
+  file: exoeconomy.db
+  write-queue-capacity: 4096
+
+commands:
+  # Optional read-only balance command. Off by default because ExcellentEconomy already
+  # provides balance/pay/give/take commands for each currency. Never overrides an existing command.
+  shards:
+    enabled: false
+    name: shards
+    aliases: []
+
+selling:
+  enabled: true
+  game-modes: [SURVIVAL, ADVENTURE]
+  disabled-worlds: []
+  title: "&8Sell Items"
+  # A single sale may not pay more than this (the menu asks to split larger sales).
+  max-payout-per-sale: 1000000
+  # The sell button arms on the first click; the second click within this window sells.
+  confirm-window-seconds: 10
+  # Items left in a /sell menu by a crash: hold-for-review (admin approves with
+  # /exoeconomy claims approve) or return-to-player (delivered on join). Review is the default
+  # because, after a crash, the player's own inventory file may still contain the same items.
+  crash-recovery: hold-for-review
+  boosters:
+    # Selling payouts are NOT boosted unless this is true AND a tier in boosters.yml names
+    # "activity: selling". Boosters for "all" never apply to selling.
+    enabled: false
+  # Apply ExoSkills' farming/mining sell milestone bonus (via its SaleMultiplierAPI service,
+  # which ExoSkills only registers while ExoArmorTrims is installed). Off by default because
+  # ExoSkills' bonuses are designed for its own money shop.
+  exoskills-sale-bonus: false
+  # Cap on the combined selling multiplier (ExoSkills bonus x selling booster).
+  max-total-multiplier: 3.0
+
+integrations:
+  exoskills: true
+  exospawners: true
+  placeholderapi: true
