@@ -513,10 +513,13 @@ public final class CoreStore implements AutoCloseable {
                 WHERE job_id=? AND uuid=? AND integration=?""", state.name(), detail, now, jobId, key(uuid), integration);
     }
 
-    /** Puts failed or blocked steps of a job back to PENDING for a retry. */
+    /**
+     * Puts failed or blocked steps of a job back to PENDING for a retry, and steps that were skipped because their
+     * plugin looked uninstalled (so a job hit by that can be finished once the plugin is detected).
+     */
     public synchronized int resetProblemSteps(long jobId, long now) throws SQLException {
-        return Sqlite.update(c, "UPDATE job_steps SET state='PENDING', updated_at=? WHERE job_id=? AND state IN ('FAILED','BLOCKED')",
-                now, jobId);
+        return Sqlite.update(c, "UPDATE job_steps SET state='PENDING', updated_at=? WHERE job_id=? AND (state IN ('FAILED','BLOCKED')"
+                + " OR (state='SKIPPED' AND detail IN ('plugin not installed', 'plugin not enabled')))", now, jobId);
     }
 
     // ------------------------------------------------------------------ locks

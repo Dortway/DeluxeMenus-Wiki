@@ -4,7 +4,7 @@
 dogo's `libraries/` folder and the installed ExcellentEconomy 2.8.0, nightcore 2.16.4, EssentialsX 2.22.1-dev+12 and
 ESkyblock 2.0.0 jars.
 
-**65 tests, 0 failures, 0 errors.** Two real defects were found by the tests and fixed before release: a `§l` colour
+**67 tests, 0 failures, 0 errors.** Two real defects were found by the tests and fixed before release: a `§l` colour
 code in a reason left an `l` behind, and the test environment exposed a missing Adventure logger class (test-only).
 
 No real wipe was run and nothing was deployed to the live server. Every database test uses a fresh SQLite file built

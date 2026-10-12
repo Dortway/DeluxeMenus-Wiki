@@ -51,7 +51,12 @@ public final class ExoCleanWipePlugin extends JavaPlugin {
             settings = new Settings(getConfig(), serverRoot());
             store = new CoreStore(getDataFolder().toPath().resolve("exocleanwipe.db"));
             registry = new IntegrationRegistry();
-            registry.registerStartup(settings, name -> Bukkit.getPluginManager().getPlugin(name) != null);
+            // read the jars: the plugins we edit at startup are loaded after us and may not be registered yet
+            java.util.Set<String> installed = dev.exo.cleanwipe.wipe.InstalledPlugins.scan(getDataFolder().toPath().getParent());
+            registry.registerStartup(settings, name -> installed.contains(name.toLowerCase(java.util.Locale.ROOT))
+                    || Bukkit.getPluginManager().getPlugin(name) != null);
+            getLogger().info("installed plugins found for startup wipes: " + registry.startup().size()
+                    + (registry.unavailable().isEmpty() ? "" : "; not covered: " + registry.unavailable()));
             engine = new JobEngine(store, registry, settings.backupDir, getLogger());
             engine.setNotifier(e -> {
                 String[] p = e.split(":");
