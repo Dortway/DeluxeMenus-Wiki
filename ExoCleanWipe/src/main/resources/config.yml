@@ -31,6 +31,13 @@ wipe:
   # Kick and lock the target as soon as a preview is shown, so nothing can be moved to another account
   # between the preview and the confirmation. Released again if the token expires or is cancelled.
   freeze-on-preview: true
+  # Wipe the Exo plugins, ExoVaults, LightZone, EGen and ExoSpawners while the server runs (no restart).
+  # Each change is checked again after live-settle-seconds; if a plugin writes the data back, or the player owns
+  # something a plugin cannot remove live (placed ExoCubes, chunk collectors, player shops, running ExoEconomy
+  # boosters), only that part waits for the next restart and the account stays locked until then.
+  # false = everything except the vanilla/economy/island/essentials part runs at the next restart (the old way).
+  live: true
+  live-settle-seconds: 5
   vanilla:
     inventory: true        # main inventory, hotbar, armour, offhand (the cursor is saved back into the inventory on kick)
     ender-chest: true

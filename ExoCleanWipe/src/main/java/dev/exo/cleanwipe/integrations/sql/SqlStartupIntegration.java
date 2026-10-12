@@ -41,6 +41,8 @@ public abstract class SqlStartupIntegration implements StartupIntegration {
 
     protected final String id;
     protected final Path database;
+    /** True when the owning plugin has the database open: backups then use VACUUM INTO (a consistent copy). */
+    private volatile boolean liveBackups;
 
     protected SqlStartupIntegration(String id, Path database) {
         this.id = id;
@@ -50,6 +52,15 @@ public abstract class SqlStartupIntegration implements StartupIntegration {
     @Override
     public String id() {
         return id;
+    }
+
+    /** Use consistent online backups because the owning plugin is running. */
+    public void useLiveBackups() {
+        this.liveBackups = true;
+    }
+
+    public Path database() {
+        return database;
     }
 
     /** Tables that must exist; otherwise the schema is not the one this integration was written for. */
@@ -146,8 +157,17 @@ public abstract class SqlStartupIntegration implements StartupIntegration {
         }
         Path dir = ctx.backupDirCreated();
         // whole-file copy first, while no connection is open (the owning plugin has not started yet)
-        Backups.copyOnce(database, dir.resolve(database.getFileName() + ".before"));
-        Backups.copyOnce(database.resolveSibling(database.getFileName() + "-wal"), dir.resolve(database.getFileName() + "-wal.before"));
+        if (liveBackups) {
+            Path copy = dir.resolve(database.getFileName() + ".before");
+            if (!Files.exists(copy)) {
+                try (Connection c = Sqlite.open(database, true); Statement st = c.createStatement()) {
+                    st.execute("VACUUM INTO '" + copy.toAbsolutePath().toString().replace("'", "''") + "'");
+                }
+            }
+        } else {
+            Backups.copyOnce(database, dir.resolve(database.getFileName() + ".before"));
+            Backups.copyOnce(database.resolveSibling(database.getFileName() + "-wal"), dir.resolve(database.getFileName() + "-wal.before"));
+        }
 
         try (Connection c = Sqlite.open(database, false)) {
             String schema = checkSchema(c);

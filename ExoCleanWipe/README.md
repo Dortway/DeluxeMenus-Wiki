@@ -30,9 +30,10 @@ checklist in [docs/TESTING.md](docs/TESTING.md) covers what to try there.
 
 ```
 /wipe Steve all          -> preview (nothing changed; Steve is kicked and frozen so nothing can be moved away)
-/wipe confirm K7M2QX     -> job 12 written to the database, Steve locked, live part starts
-   live part             -> player file, ExcellentEconomy balances, Essentials mail, ESkyblock island
-   next server start     -> ExoVaults, Exo* databases, EGen, ExoSpawners (before those plugins load)
+/wipe confirm K7M2QX     -> job 12 written to the database, Steve locked, wipe starts immediately
+   live, no restart      -> player file, ExcellentEconomy, Essentials mail, ESkyblock island,
+                            ExoVaults, every Exo plugin, LightZone, EGen, ExoSpawners
+   only if needed        -> a part a plugin cannot change live waits for the next server start (see below)
    all steps finished    -> lock released (a /wipe punish suspension stays until it expires)
 ```
 
@@ -40,17 +41,23 @@ checklist in [docs/TESTING.md](docs/TESTING.md) covers what to try there.
   every *other* player affected (island members and co-ops), unfinished transactions that would block, and which
   integrations are not available. Nothing changes until the same staff member types `/wipe confirm <code>` within
   60 seconds (45 seconds for `/wipeall`, which also needs the word `wipeall`).
-* **Locking.** Targets are kicked and cannot join while the job runs (`lock-screen`). ExcellentEconomy balance changes
-  to or from a locked account are cancelled. A job only unlocks when every step finished; if a step is blocked or
-  failed the account **stays locked** and `/wipe status <job>` explains how to resolve it.
-* **Live vs. startup integrations.** Plugins whose data is cached in memory must not be edited behind their back. Where
-  a plugin offers an API (ExcellentEconomy, ESkyblock, Essentials) it is used live. The custom Exo plugins have no
-  API and cache data (ExoVaults, for example, refuses older revisions it remembers), so their data is changed in
-  ExoCleanWipe's `onLoad` at the next server start, before those plugins load. The account stays locked until then;
-  restart the server to finish (staff are told "job 12 … integration(s) run on the next server start").
+* **Locking.** Targets are kicked and cannot join while the job runs. ExcellentEconomy balance changes to or from a
+  locked account are cancelled. A job only unlocks when every step finished; if a step is blocked or failed the
+  account **stays locked** and `/wipe status <job>` explains how to resolve it.
+* **No restart needed** (`wipe.live: true`, the default). The Exo plugins keep player data in memory, so their data
+  is changed through the plugin itself where it has a way to do it (ExoWoodCube and ExoFarmCube admin remove,
+  ExoTools revoke, LightZone backpack invalidation, an empty ExoVaults record written by ExoVaults' own repository
+  with the next revision) and otherwise in the database once the kicked player's data has been saved. Every change
+  is checked again `wipe.live-settle-seconds` later.
+* **When a restart is still needed.** Only that one step waits for the next server start, and the account stays
+  locked until then, when: a plugin wrote the data back after the wipe; the player owns placed ExoCubes, chunk
+  collectors, player shops or running ExoEconomy boosters (those plugins keep them in memory with no way to remove
+  them live); ExoVaults still had the player's vaults loaded; or a plugin was updated and its internals changed.
+  Staff are told which step and why (`/wipe status <job>`). A season reset (`/wipeall`) still finishes the
+  plugin data at the next start.
 * **Offline players** are wiped the same way: persistent data is changed directly, nothing waits for them to join.
 * **Backups.** Before anything is changed it is saved under `plugins/ExoCleanWipe/backups/job-<id>/<uuid>/<integration>/`
-  (whole database files plus `restore.sql` with the exact rows, player files, balances, vault files...). See
+  (consistent database copies plus `restore.sql` with the exact rows, player files, balances, vault files...). See
   [docs/RECOVERY.md](docs/RECOVERY.md).
 * **Restarts and crashes.** Jobs, steps, locks and punishments are stored in `plugins/ExoCleanWipe/exocleanwipe.db`.
   An interrupted job resumes on the next start. Every step is idempotent and keeps the backup of its first attempt.
@@ -160,7 +167,8 @@ The Paper API comes from `repo.papermc.io` (`26.1.2.build.72-stable`, the build 
   are removed and their item handles become invalid.
 * Plugins whose data folder exists but whose jar is **not installed** (ShardBoost, ExoEnchants, ExoArmorTrims,
   ExoLootBoxes, AxHoes, AxSpawners, EnhancedGenerators) are not wiped. If you reinstall one, its old balances come back.
-* Startup integrations finish at the next restart; until then the account stays locked.
+* Live wipes of the Exo plugins reach into those plugins' in-memory state (names checked against the installed
+  versions). After a plugin update, a step that no longer matches is moved to the next restart instead of guessing.
 * A block (unfinished transaction in another plugin) means staff must resolve it in that plugin; ExoCleanWipe does not
   guess who already paid.
 * Preview figures for startup integrations are "as last saved" by those plugins.

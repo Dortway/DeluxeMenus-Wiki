@@ -34,6 +34,8 @@ public final class Settings {
     public final int batchSize;
     public final int batchIntervalTicks;
     public final boolean freezeOnPreview;
+    public final boolean liveWipes;
+    public final int liveSettleSeconds;
     public final boolean vanillaInventory;
     public final boolean vanillaEnder;
     public final boolean vanillaXp;
@@ -84,6 +86,8 @@ public final class Settings {
         batchSize = clamp(c.getInt("limits.batch-size", 20), 1, 500, "limits.batch-size");
         batchIntervalTicks = clamp(c.getInt("limits.batch-interval-ticks", 10), 1, 200, "limits.batch-interval-ticks");
         freezeOnPreview = c.getBoolean("wipe.freeze-on-preview", true);
+        liveWipes = c.getBoolean("wipe.live", true);
+        liveSettleSeconds = clamp(c.getInt("wipe.live-settle-seconds", 5), 1, 60, "wipe.live-settle-seconds");
         vanillaInventory = c.getBoolean("wipe.vanilla.inventory", true);
         vanillaEnder = c.getBoolean("wipe.vanilla.ender-chest", true);
         vanillaXp = c.getBoolean("wipe.vanilla.experience", true);

@@ -6,9 +6,26 @@ plugin's source folder in `plugins/*-Plugin`. Table and column names, states and
 the automated tests create each database from the exact `CREATE TABLE`/`ALTER TABLE` statements of the installed
 version (`src/test/resources/fixtures`).
 
-**Phase:** *live* = runs while the server is up, through the plugin's API, target kicked and locked.
-*startup* = runs in ExoCleanWipe's `onLoad` on the next server start, before the plugin loads its data (the plugin has
-no API and caches data, so editing it live could be overwritten or break it).
+**Phase:** *live* = runs while the server is up, target kicked and locked. *startup* = the same rules applied in
+ExoCleanWipe's `onLoad` before the plugin loads its data. With `wipe.live: true` (default) the "startup" rows below
+also run live:
+
+| Plugin | How it is changed live | Falls back to the next restart when |
+|---|---|---|
+| ExoVaults | empty record written with ExoVaults' own `RecordRepository.write`, next revision; old `.bak`/corrupt copies removed | vaults still loaded, a vault save pending, record unreadable |
+| ExoWoodCube | `service().remove(console, cube)` per owned cube (its admin remove; also clears the structure) | blocked ledger entries (step is blocked instead) |
+| ExoFarmCube | `service().adminRemove(console, cube, false, null)` per owned cube | — |
+| ExoTools | `store().setState(id, REVOKED, …)` (its /exotools revoke) | — |
+| LightZone | `backpacks().invalidate(id, true)` per backpack, other rows in the database | data written back |
+| ExoSkills | cached entry removed from `storage.players`, rows deleted | data written back |
+| EGen | `ChestStorageManager.remove(id)` per owned chest, purchased limit removed | someone has the chest open |
+| ExoSpawners | entry removed from `Progress.players`, then its own `saveAsync()` | — |
+| ExoEconomy | database | the player owns a running booster |
+| ExoCubes, ChunkCollector, EPlayerShop | nothing to do when the player owns none | the player owns any (kept in memory, no live removal) |
+| ExoBoxes, ExoDaily, ExoDailySpinner, ExoNightMarket, ExoQuests, ExoWands, ExoMultiTools, ExoTokenShop | database, after the kicked player's quit save | data written back |
+
+Every live database change is re-checked after `wipe.live-settle-seconds`; data that comes back is wiped once more,
+and if it comes back again the step moves to the next restart (it is never reported as done).
 
 **Shared:** whether the deletion can affect other players. The preview lists them by name.
 

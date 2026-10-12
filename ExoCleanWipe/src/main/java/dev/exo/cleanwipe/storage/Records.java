@@ -51,10 +51,12 @@ public final class Records {
      * BLOCKED: refused because running it could affect other players (for example an unfinished transaction).
      * FAILED: an error happened; the account stays locked.
      */
-    public enum StepState { PENDING, DONE, NOTHING, SKIPPED, BLOCKED, FAILED;
+    public enum StepState { PENDING, DONE, NOTHING, SKIPPED, BLOCKED, FAILED,
+        /** Only returned by live integrations: could not be done safely now; the step is moved to the next start. */
+        DEFERRED;
 
         public boolean finished() {
-            return this != PENDING;
+            return this != PENDING && this != DEFERRED;
         }
 
         public boolean problem() {

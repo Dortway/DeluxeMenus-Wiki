@@ -139,6 +139,17 @@ public final class LiveRunner {
     }
 
     private void finish(Step s, StepResult r) {
+        if (r.state() == dev.exo.cleanwipe.storage.Records.StepState.DEFERRED) {
+            try {
+                engine.store().deferToStartup(s.jobId(), s.uuid(), s.integration(), "next restart: " + r.detail(), System.currentTimeMillis());
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "could not defer step " + s.integration() + " of job " + s.jobId(), e);
+            }
+            logger.info("job " + s.jobId() + " " + s.integration() + " moved to the next restart: " + r.detail());
+            engine.evaluate(s.jobId());
+            jobCache.remove(s.jobId());
+            return;
+        }
         engine.record(s, r);
         if (r.state().problem()) {
             logger.warning("job " + s.jobId() + " step " + s.integration() + (s.uuid() == null ? "" : " for " + s.uuid())

@@ -21,6 +21,11 @@ public record StepResult(StepState state, String detail) {
         return new StepResult(StepState.BLOCKED, detail);
     }
 
+    /** Live attempt not possible right now; the job service moves the step to the next server start. */
+    public static StepResult deferred(String reason) {
+        return new StepResult(StepState.DEFERRED, reason);
+    }
+
     public static StepResult failed(String detail) {
         return new StepResult(StepState.FAILED, detail);
     }

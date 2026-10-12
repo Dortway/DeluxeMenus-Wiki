@@ -513,6 +513,13 @@ public final class CoreStore implements AutoCloseable {
                 WHERE job_id=? AND uuid=? AND integration=?""", state.name(), detail, now, jobId, key(uuid), integration);
     }
 
+    /** Moves a live step that could not run safely to the startup phase (it then runs in the next onLoad). */
+    public synchronized void deferToStartup(long jobId, UUID uuid, String integration, String reason, long now) throws SQLException {
+        Sqlite.update(c, """
+                UPDATE job_steps SET phase='STARTUP', state='PENDING', detail=?, attempts=attempts+1, updated_at=?
+                WHERE job_id=? AND uuid=? AND integration=?""", reason, now, jobId, key(uuid), integration);
+    }
+
     /**
      * Puts failed or blocked steps of a job back to PENDING for a retry, and steps that were skipped because their
      * plugin looked uninstalled (so a job hit by that can be finished once the plugin is detected).

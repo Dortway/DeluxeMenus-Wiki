@@ -126,6 +126,11 @@ public final class ExoCleanWipePlugin extends JavaPlugin {
             registry.markUnavailable("ESkyblock", "plugin not enabled");
         }
 
+        if (settings.liveWipes) {
+            int live = makeStartupIntegrationsLive(io);
+            getLogger().info(live + " plugin integration(s) run live (no restart needed)");
+        }
+
         AuditLog audit = new AuditLog(getDataFolder().toPath().resolve("audit.log"), store, getLogger());
         PunishmentService punishments = new PunishmentService(store, messages, settings.referencePrefix, settings.appeal, settings.neverBanPrivate);
         VpnService vpn = null;
@@ -182,6 +187,44 @@ public final class ExoCleanWipePlugin extends JavaPlugin {
             });
         }
         getLogger().info(registry.all().size() + " integration(s) active; " + registry.unavailable().size() + " not covered (see /wipe integrations)");
+    }
+
+    /**
+     * Replaces the startup integrations (used in onLoad) by live versions that work while those plugins run. The
+     * startup versions stay in use for steps that had to be moved to the next restart.
+     */
+    private int makeStartupIntegrationsLive(java.util.concurrent.Executor io) {
+        long settle = settings.liveSettleSeconds * 1000L;
+        int n = 0;
+        for (dev.exo.cleanwipe.wipe.StartupIntegration s : registry.startup()) {
+            dev.exo.cleanwipe.wipe.Integration live = switch (s.id()) {
+                case "ExoVaults" -> new dev.exo.cleanwipe.integrations.live.LiveVaults(
+                        (dev.exo.cleanwipe.integrations.files.ExoVaultsIntegration) s, settings.integration("ExoVaults").path("data"), io);
+                case "EGen" -> dev.exo.cleanwipe.integrations.live.LiveFileHooks.egen(s, io);
+                case "ExoSpawners" -> dev.exo.cleanwipe.integrations.live.LiveFileHooks.spawners(s, io);
+                default -> {
+                    if (!(s instanceof dev.exo.cleanwipe.integrations.sql.SqlStartupIntegration sql)) {
+                        yield null;
+                    }
+                    dev.exo.cleanwipe.integrations.live.LiveSqlIntegration.Hook hook = switch (s.id()) {
+                        case "ExoWoodCube" -> dev.exo.cleanwipe.integrations.live.LiveHooks::woodCube;
+                        case "ExoFarmCube" -> dev.exo.cleanwipe.integrations.live.LiveHooks::farmCube;
+                        case "ExoTools" -> dev.exo.cleanwipe.integrations.live.LiveHooks::tools;
+                        case "LightZone" -> dev.exo.cleanwipe.integrations.live.LiveHooks::lightZone;
+                        case "ExoSkills" -> dev.exo.cleanwipe.integrations.live.LiveHooks::skills;
+                        case "ExoEconomy" -> dev.exo.cleanwipe.integrations.live.LiveHooks::economy;
+                        default -> null;
+                    };
+                    boolean deferIfOwns = s.id().equals("ExoCubes") || s.id().equals("ChunkCollector") || s.id().equals("EPlayerShop");
+                    yield new dev.exo.cleanwipe.integrations.live.LiveSqlIntegration(sql, s.id(), hook, deferIfOwns, io, settle);
+                }
+            };
+            if (live != null) {
+                registry.register(live);
+                n++;
+            }
+        }
+        return n;
     }
 
     private ProxyTrust.Inputs proxyInputs() {

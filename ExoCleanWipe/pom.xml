@@ -158,6 +158,15 @@
             <systemPath>${libs.dir}/ESkyblock-2.0.0.jar</systemPath>
         </dependency>
 
+        <!-- Tests: the installed ExoVaults jar, to test the live vault wipe against its real repository -->
+        <dependency>
+            <groupId>local.dogo</groupId>
+            <artifactId>exovaults</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${libs.dir}/ExoVaults-1.0.0.jar</systemPath>
+        </dependency>
+
         <!-- Tests -->
         <dependency>
             <groupId>net.kyori</groupId>

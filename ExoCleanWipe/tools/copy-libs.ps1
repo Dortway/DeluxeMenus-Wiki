@@ -11,6 +11,7 @@ $wanted = @{
     "nightcore-*.jar"        = "nightcore-2.16.4.jar"
     "EssentialsX-2*.jar"     = "EssentialsX-2.22.1.jar"
     "ESkyblock-*.jar"        = "ESkyblock-2.0.0.jar"
+    "ExoVaults-*.jar"        = "ExoVaults-1.0.0.jar"
 }
 foreach ($pattern in $wanted.Keys) {
     $jar = Get-ChildItem $plugins -Filter $pattern -File | Select-Object -First 1

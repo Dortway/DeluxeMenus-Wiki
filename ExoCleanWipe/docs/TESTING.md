@@ -4,7 +4,7 @@
 dogo's `libraries/` folder and the installed ExcellentEconomy 2.8.0, nightcore 2.16.4, EssentialsX 2.22.1-dev+12 and
 ESkyblock 2.0.0 jars.
 
-**67 tests, 0 failures, 0 errors.** Two real defects were found by the tests and fixed before release: a `§l` colour
+**74 tests, 0 failures, 0 errors.** Two real defects were found by the tests and fixed before release: a `§l` colour
 code in a reason left an `l` behind, and the test environment exposed a missing Adventure logger class (test-only).
 
 No real wipe was run and nothing was deployed to the live server. Every database test uses a fresh SQLite file built
@@ -21,6 +21,7 @@ from the plugin's own `CREATE TABLE`/`ALTER TABLE` statements extracted from the
 | Offline wipe of player data (inventory, armour/offhand, ender chest, XP, mount storage, ExoVaults markers, `.dat_old`, advancements) | `VanillaPlayerDataTest` (5) | pass |
 | Vaults (every vault, backups, corrupt copies) | `exoVaultsMovesEveryRecordFileAndRestores` | pass |
 | EGen chest storage, ExoSpawners progress, ChunkCollector snapshot owner, EPlayerShop JSON owner | `FileIntegrationsTest` (5) | pass |
+| Live wipe without restart: ExoVaults emptied through its real `RecordRepository` (installed jar) and ExoVaults can save again afterwards; database plugin wiped live with an online backup; data written back by the plugin moves the step to the next restart; owned in-memory objects wait for a restart; blockers stop memory hooks; deferred step runs at the next start | `LiveWipeTest` (7) | pass |
 | Restart recovery: job survives a restart, startup steps run once | `jobSurvivesRestartAndStartupStepsRunOnce` | pass |
 | Partial failure keeps the account locked; retry finishes and unlocks; successful steps not repeated | `failedStepKeepsAccountLockedUntilRetrySucceeds` | pass |
 | Uninstalled plugin reported as skipped with the reason | `stepsForUninstalledPluginsAreSkippedWithReason` | pass |
