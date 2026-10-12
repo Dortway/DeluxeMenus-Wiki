@@ -63,7 +63,7 @@ permissions:
     default: op
   exocleanwipe.unlock:
     description: /wipe unlock <player> (release a lock left by a partial wipe)
-    default: false
+    default: op
   exocleanwipe.restore:
     description: /wipe restore <job> (queue a restore from the job's backups)
     default: false

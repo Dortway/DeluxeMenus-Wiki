@@ -19,7 +19,7 @@ know about can all escape it. The limits are listed at the end of this file.
 4. Edit `config.yml`: at least `server.appeal`. Restart (configuration is read at startup only).
 5. Give staff the permissions they need (LuckPerms), for example
    `lp group mod permission set exocleanwipe.use true`, `... exocleanwipe.wipe true`, `... exocleanwipe.punish true`.
-   `exocleanwipe.wipeall`, `exocleanwipe.unlock`, `exocleanwipe.restore` and `exocleanwipe.viewip` are `false` by default,
+   `exocleanwipe.wipeall`, `exocleanwipe.restore` and `exocleanwipe.viewip` are `false` by default,
    even for operators. `exocleanwipe.admin` grants everything.
 6. Check `/wipe integrations`: it lists every integration, whether it is available and why not.
 
