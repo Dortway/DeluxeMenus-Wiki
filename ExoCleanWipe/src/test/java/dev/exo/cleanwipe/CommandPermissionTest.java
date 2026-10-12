@@ -197,4 +197,28 @@ class CommandPermissionTest {
         guard.onChange(frozen);
         verify(frozen, never()).setCancelled(true);
     }
+
+    @Test
+    void unpunishExplainsWhatStillBlocksThePlayer() throws Exception {
+        CommandSender mod = sender("exocleanwipe.use", "exocleanwipe.unpunish");
+        PunishmentService ps = new PunishmentService(store, new Messages(java.util.Map.of(), java.util.Map.of(), true), "ew-", "x", true);
+        long now = System.currentTimeMillis();
+        store.transaction(c -> ps.createAccount(c, STEVE, "Steve", "duping", null, "Mod", now, Duration.ofDays(30), 12L));
+        JobEngine engine = new JobEngine(store, new IntegrationRegistry(), dir, Logger.getLogger("t"));
+        long job = engine.create(dev.exo.cleanwipe.storage.Records.JobType.PUNISH, null, "Mod", "duping", WipeOptions.DEFAULT,
+                List.of(new JobEngine.Target(STEVE, "Steve", "primary")),
+                List.of(new JobEngine.StepPlan(STEVE, "ExoVaults", dev.exo.cleanwipe.storage.Records.Phase.STARTUP)), false, null);
+        engine.evaluate(job);
+        cmd.onCommand(mod, wipe, "wipe", new String[]{"unpunish", "Steve"});
+        List<String> out = said(mod);
+        assertTrue(out.stream().anyMatch(m -> m.contains("removed 1 account punishment")), out.toString());
+        assertTrue(out.stream().anyMatch(m -> m.contains("still cannot join")), out.toString());
+        assertTrue(out.stream().anyMatch(m -> m.contains("locked by job " + job) && m.contains("next server restart")
+                && m.contains("/wipe unlock Steve")), out.toString());
+
+        store.unlock(STEVE);
+        CommandSender mod2 = sender("exocleanwipe.use", "exocleanwipe.unpunish");
+        cmd.onCommand(mod2, wipe, "wipe", new String[]{"unpunish", "Steve"});
+        assertTrue(said(mod2).stream().anyMatch(m -> m.contains("Steve can join again")), said(mod2).toString());
+    }
 }

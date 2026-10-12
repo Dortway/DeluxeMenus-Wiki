@@ -66,7 +66,7 @@ checklist in [docs/TESTING.md](docs/TESTING.md) covers what to try there.
 | `/wipe punish <player> <duration> <reason...>` | `exocleanwipe.punish` | wipe + temporary (or `permanent`) suspension, e.g. `/wipe punish Steve 30days duping` |
 | `/wipe ippunish <player> [reason...]` | `exocleanwipe.ippunish` | permanent ban of the account and its known addresses; accounts connecting from those addresses are refused. **No wipe.** |
 | `/wipe unippunish <player>` | `exocleanwipe.unippunish` | removes that IP punishment, its address bans and the restrictions it caused |
-| `/wipe unpunish <player>` | `exocleanwipe.unpunish` | removes account suspensions; a separate IP punishment stays |
+| `/wipe unpunish <player>` | `exocleanwipe.unpunish` | removes account suspensions; a separate IP punishment stays. If something else still keeps the player out (the wipe lock of a `/wipe punish` job until the restart, an IP punishment, a vanilla `/ban`), it says so and how to clear it |
 | `/wipeall` | `exocleanwipe.wipeall` | season reset of every online and offline player, no bans |
 | `/wipe confirm <code> [wipeall]` / `/wipe cancel <code>` | `exocleanwipe.use` | confirm / cancel your own preview |
 | `/wipe links <player>` | `exocleanwipe.links` | name history, addresses, accounts seen on the same addresses |

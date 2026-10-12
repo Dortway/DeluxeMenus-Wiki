@@ -4,7 +4,7 @@
 dogo's `libraries/` folder and the installed ExcellentEconomy 2.8.0, nightcore 2.16.4, EssentialsX 2.22.1-dev+12 and
 ESkyblock 2.0.0 jars.
 
-**64 tests, 0 failures, 0 errors.** Two real defects were found by the tests and fixed before release: a `§l` colour
+**65 tests, 0 failures, 0 errors.** Two real defects were found by the tests and fixed before release: a `§l` colour
 code in a reason left an `l` behind, and the test environment exposed a missing Adventure logger class (test-only).
 
 No real wipe was run and nothing was deployed to the live server. Every database test uses a fresh SQLite file built
@@ -28,6 +28,7 @@ from the plugin's own `CREATE TABLE`/`ALTER TABLE` statements extracted from the
 | Punishment created atomically with its job | `punishmentIsCreatedAtomicallyWithTheJob` | pass |
 | Ban screen: reason, duration "30 days", remaining "29 days, 23 hours", reference, appeal; expired ban lets the player in | `temporaryBanShowsAccurateScreenAndExpires` | pass |
 | `unpunish` removes only account punishments, not the IP punishment | `unpunishRemovesOnlyAccountPunishmentsNotIpPunishments` | pass |
+| `unpunish` tells staff what still blocks the player (wipe lock until restart, ip punishment, vanilla ban) | `unpunishExplainsWhatStillBlocksThePlayer` | pass |
 | `ippunish` restricts other accounts on the address, never bans private addresses, `unippunish` releases them | `ipPunishRestrictsAccountsOnThoseAddressesAndUnipPunishReleasesThem` | pass |
 | Locked / season-reset accounts cannot join | `lockedAccountsAndSeasonResetCannotJoin` | pass |
 | Moving currency into/out of a locked account during a wipe | `lockedAccountsCannotReceiveOrSendCurrency` | pass |

@@ -332,6 +332,56 @@ public final class WipeCommand implements TabExecutor {
         } else {
             messages.send(s, "unpunished", Messages.values("name", t.get().name(), "count", n));
         }
+        explainRemainingBlocks(s, t.get());
+    }
+
+    /**
+     * After an unpunish, tells staff everything that still keeps the player out, so "unpunished but still can't join"
+     * is never a mystery: the wipe lock of a /wipe punish job, an ip punishment, a season reset, a vanilla /ban.
+     */
+    private void explainRemainingBlocks(CommandSender s, Resolved t) throws Exception {
+        long now = System.currentTimeMillis();
+        List<String> blocks = new ArrayList<>();
+        Optional<Lock> lock = store.lockOf(t.uuid());
+        if (lock.isPresent()) {
+            long jobId = lock.get().jobId();
+            if (jobId == ActionService.FREEZE_JOB) {
+                blocks.add("frozen by an open preview (cancel it with /wipe cancel <code>, or it expires by itself)");
+            } else {
+                String state = store.job(jobId).map(j -> j.state().name().toLowerCase(Locale.ROOT).replace('_', ' ')).orElse("unknown");
+                String why = switch (state) {
+                    case "waiting restart" -> "its wipe finishes at the next server restart";
+                    case "partial" -> "its wipe stopped with problems (see /wipe status " + jobId + ")";
+                    default -> "its wipe is still running (see /wipe status " + jobId + ")";
+                };
+                blocks.add("locked by job " + jobId + ": " + why + ". restart (or fix and /wipe retry " + jobId
+                        + "), or /wipe unlock " + t.name() + " to let them in now (data not wiped yet can then be moved before the restart)");
+            }
+        }
+        if (store.lockOf(null).isPresent()) {
+            blocks.add("a season reset is running; nobody can join until it finishes");
+        }
+        for (Punishment p : store.activePunishments(t.uuid())) {
+            if (p.inForce(now) && p.kind() == dev.exo.cleanwipe.storage.Records.PunishmentKind.IP_GROUP) {
+                blocks.add("ip punishment " + punishments.reference(p.id()) + " still bans this account; remove it with /wipe unippunish " + t.name());
+            }
+        }
+        try {
+            var vanilla = Bukkit.getBanList(org.bukkit.BanList.Type.PROFILE);
+            if (vanilla != null && Bukkit.getOfflinePlayer(t.uuid()).isBanned()) {
+                blocks.add("also banned by vanilla /ban or another plugin (not exocleanwipe); use /pardon " + t.name() + " or that plugin");
+            }
+        } catch (Exception | LinkageError ignored) {
+            // vanilla ban list unavailable (tests); nothing to report
+        }
+        if (blocks.isEmpty()) {
+            line(s, "<gray><name> can join again.</gray>", "name", t.name());
+            return;
+        }
+        line(s, "<red><sym:warn> <name> still cannot join:</red>", "name", t.name());
+        for (String b : blocks) {
+            line(s, " <gray><sym:dot> <b></gray>", "b", b);
+        }
     }
 
     private void unippunish(CommandSender s, String[] args) throws Exception {
@@ -354,6 +404,7 @@ public final class WipeCommand implements TabExecutor {
         } else {
             messages.send(s, "unippunished", Messages.values("name", t.get().name(), "count", r.addresses(), "accounts", r.released()));
         }
+        explainRemainingBlocks(s, t.get());
     }
 
     // ------------------------------------------------------------------ reports
