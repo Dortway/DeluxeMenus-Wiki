@@ -1,0 +1,91 @@
+name: ExoCleanWipe
+version: '${project.version}'
+main: dev.exo.cleanwipe.ExoCleanWipePlugin
+api-version: '26.1'
+description: Staff wipes, season resets and owned punishments for dogo.
+authors: [ExoCleanWipe]
+# sqlite-jdbc is downloaded by Paper from Maven Central on first start.
+libraries:
+  - org.xerial:sqlite-jdbc:3.53.4.0
+# Live integrations: loaded first so their services exist when ExoCleanWipe enables.
+softdepend: [ExcellentEconomy, nightcore, Essentials, ESkyblock, Vault]
+# Startup integrations: ExoCleanWipe applies queued wipes in onLoad, before these plugins open their data.
+loadbefore: [ExoBoxes, ExoCubes, ExoDaily, ExoDailySpinner, ExoEconomy, ExoFarmCube, ExoMultiTools,
+             ExoNightMarket, ExoQuests, ExoSkills, ExoTokenShop, ExoTools, ExoVaults, ExoWands, ExoWoodCube,
+             LightZone, ChunkCollector, EPlayerShop, EGen, ExoSpawners]
+
+commands:
+  wipe:
+    description: Preview and run wipes, punishments and reports.
+    usage: /wipe help
+    permission: exocleanwipe.use
+  wipeall:
+    description: Season reset of every online and offline player (no bans).
+    usage: /wipeall
+    permission: exocleanwipe.wipeall
+
+permissions:
+  exocleanwipe.use:
+    description: Base access to /wipe (each action still needs its own node).
+    default: op
+  exocleanwipe.wipe:
+    description: /wipe <player> all
+    default: op
+  exocleanwipe.wipe.linked:
+    description: Include selected linked accounts in a wipe (+alt:<name>).
+    default: op
+  exocleanwipe.wipeall:
+    description: /wipeall season reset.
+    default: false
+  exocleanwipe.punish:
+    description: /wipe punish <player> <duration> <reason>
+    default: op
+  exocleanwipe.unpunish:
+    description: /wipe unpunish <player>
+    default: op
+  exocleanwipe.ippunish:
+    description: /wipe ippunish <player> [reason]
+    default: op
+  exocleanwipe.unippunish:
+    description: /wipe unippunish <player>
+    default: op
+  exocleanwipe.links:
+    description: /wipe links <player> linked-account report.
+    default: op
+  exocleanwipe.viewip:
+    description: See full IP addresses in reports (otherwise masked).
+    default: false
+  exocleanwipe.status:
+    description: /wipe status, /wipe jobs, /wipe integrations
+    default: op
+  exocleanwipe.retry:
+    description: /wipe retry <job>
+    default: op
+  exocleanwipe.unlock:
+    description: /wipe unlock <player> (release a lock left by a partial wipe)
+    default: false
+  exocleanwipe.restore:
+    description: /wipe restore <job> (queue a restore from the job's backups)
+    default: false
+  exocleanwipe.notify:
+    description: Receive staff alerts (VPN flags, partial wipes, proxy warnings).
+    default: op
+  exocleanwipe.admin:
+    description: Every ExoCleanWipe permission.
+    default: false
+    children:
+      exocleanwipe.use: true
+      exocleanwipe.wipe: true
+      exocleanwipe.wipe.linked: true
+      exocleanwipe.wipeall: true
+      exocleanwipe.punish: true
+      exocleanwipe.unpunish: true
+      exocleanwipe.ippunish: true
+      exocleanwipe.unippunish: true
+      exocleanwipe.links: true
+      exocleanwipe.viewip: true
+      exocleanwipe.status: true
+      exocleanwipe.retry: true
+      exocleanwipe.unlock: true
+      exocleanwipe.restore: true
+      exocleanwipe.notify: true

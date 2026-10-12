@@ -1,0 +1,200 @@
+# ExoCleanWipe configuration. Reload with a restart (staff actions are destructive, so live reload is not offered).
+config-version: 1
+
+server:
+  # Shown on ban screens. Use a Discord invite, website or e-mail.
+  appeal: "discord.gg/your-invite"
+  # Reference shown to players and staff: ew-000123
+  reference-prefix: "ew-"
+
+appearance:
+  # Emoji / unicode symbols. Set to false if your players see empty boxes; ascii fallbacks are used instead.
+  symbols: true
+  # Hex colours used by every message (<red>, <gray>, <white>, <accent> below).
+  colors:
+    red: "#ff5555"
+    gray: "#aaaaaa"
+    white: "#ffffff"
+    accent: "#55cfff"
+
+limits:
+  max-punish-duration: 3650days
+  reason-max-length: 120
+  # Confirmation tokens expire after this many seconds.
+  confirm-seconds: 60
+  wipeall-confirm-seconds: 45
+  # Bounded batches: steps started per run and ticks between runs. Keeps the main thread responsive.
+  batch-size: 20
+  batch-interval-ticks: 10
+
+wipe:
+  # Kick and lock the target as soon as a preview is shown, so nothing can be moved to another account
+  # between the preview and the confirmation. Released again if the token expires or is cancelled.
+  freeze-on-preview: true
+  vanilla:
+    inventory: true        # main inventory, hotbar, armour, offhand (the cursor is saved back into the inventory on kick)
+    ender-chest: true
+    experience: true
+    advancements: false    # deletes world/players/advancements/<uuid>.json
+    statistics: false      # deletes world/players/stats/<uuid>.json
+  excellent-economy:
+    # "all" or a list of currency ids, e.g. [money, shards, tokens, lightcoin]
+    currencies: all
+    # start-value: the currency's Start_Value, zero: 0
+    reset-to: start-value
+  essentials:
+    mail: true
+    # auto: reset Essentials money only when Essentials is the Vault economy provider
+    money: auto
+  eskyblock:
+    # What to do when the target OWNS an island that other players are members of:
+    #   require-flag : the preview lists the members and the wipe needs --shared (disband) or --keep-shared
+    #   disband      : always disband (members lose the island)
+    #   keep         : never disband shared islands (the target stays owner, bank and chest are kept)
+    owned-shared-island: require-flag
+    # Copy the eskyblock region files that contain the island before it is cleared.
+    backup-region-files: true
+
+# Startup integrations: applied the next time the server starts, before these plugins load their data.
+# Set enabled: false to leave a plugin's data untouched. Paths are relative to the server folder.
+integrations:
+  ExoVaults:       { enabled: true, data: plugins/ExoVaults/data }
+  ExoBoxes:        { enabled: true, database: plugins/ExoBoxes/database.db }
+  ExoCubes:        { enabled: true, database: plugins/ExoCubes/exocubes.db }
+  ExoWoodCube:     { enabled: true, database: plugins/ExoWoodCube/exowoodcube.db }
+  ExoFarmCube:     { enabled: true, database: plugins/ExoFarmCube/exofarmcube.db }
+  ExoDaily:        { enabled: true, database: plugins/ExoDaily/data.db }
+  ExoDailySpinner: { enabled: true, database: plugins/ExoDailySpinner/data.db }
+  ExoEconomy:      { enabled: true, database: plugins/ExoEconomy/exoeconomy.db }
+  ExoMultiTools:   { enabled: true, database: plugins/ExoMultiTools/data.db }
+  ExoNightMarket:  { enabled: true, database: plugins/ExoNightMarket/data.db }
+  ExoQuests:       { enabled: true, database: plugins/ExoQuests/exoquests.db }
+  ExoSkills:       { enabled: true, database: plugins/ExoSkills/skills.db }
+  ExoTokenShop:    { enabled: true, database: plugins/ExoTokenShop/tokenshop.db }
+  ExoTools:        { enabled: true, database: plugins/ExoTools/exotools.db }
+  ExoWands:        { enabled: true, database: plugins/ExoWands/data/data.db }
+  LightZone:       { enabled: true, database: plugins/LightZone/data/lightzone.db, storage-config: plugins/LightZone/storage.yml }
+  ChunkCollector:  { enabled: true, database: plugins/ChunkCollector/collectors.db }
+  EPlayerShop:     { enabled: true, database: plugins/EPlayerShop/shops.db }
+  EGen:            { enabled: true, machines: plugins/EGen/machines.yml, chests: plugins/EGen/chestdata.yml, limits: plugins/EGen/playerdata.yml }
+  ExoSpawners:     { enabled: true, players: plugins/ExoSpawners/players.yml }
+
+wipeall:
+  # Accounts that may join while a season reset holds the global lock (for example a console-less owner).
+  # Their data is still wiped. Empty = nobody can join until the reset has finished.
+  allow-join: []
+
+backups:
+  # Every wipe writes its backups here (per job). ExoCleanWipe never deletes backups by itself.
+  directory: plugins/ExoCleanWipe/backups
+
+identity:
+  track-ips: true
+  # IP history older than this is deleted on startup (0 = keep forever).
+  ip-retention-days: 180
+  # Accounts seen on more than this many accounts' IPs are marked as a shared network in link reports.
+  shared-network-threshold: 5
+
+punishments:
+  # Never IP-ban loopback, private (10/8, 172.16/12, 192.168/16), link-local or CGNAT addresses.
+  never-ban-private-addresses: true
+
+proxy:
+  # auto: read spigot.yml / config/paper-global.yml / server.properties and decide.
+  # direct | velocity | bungeecord: force a mode (auto is recommended).
+  mode: auto
+  # Addresses of your own proxies / load balancers. Never stored, linked or banned as a player address.
+  trusted-proxy-addresses: []
+  # Legacy BungeeCord forwarding cannot be verified by the server. Only enable this if the backend port is
+  # firewalled so that nothing except the proxy can reach it.
+  allow-legacy-bungeecord-forwarding: false
+
+vpn:
+  enabled: false
+  # proxycheck: https://proxycheck.io (v2 API). Get a key from your dashboard there.
+  provider: proxycheck
+  # Never printed to logs or chat. You can also set the environment variable EXOCLEANWIPE_VPN_KEY instead.
+  api-key: ""
+  timeout-ms: 2500
+  cache-hours: 24
+  # all: check every login | new-players: only accounts ExoCleanWipe has never seen before
+  check: new-players
+  # flag: allow and alert staff | deny: refuse the connection
+  action: flag
+  # Provider outage or timeout: allow | deny | deny-new (deny only accounts never seen before)
+  on-error: allow
+  # UUIDs that are never checked.
+  exempt: []
+
+messages:
+  prefix: "<accent>exocleanwipe</accent> <gray><sym:arrow></gray> "
+  no-permission: "<red>you do not have permission to do that.</red>"
+  unknown-player: "<red>unknown player <white><name></white>. they must have joined this server at least once.</red>"
+  invalid-name: "<red>'<white><name></white>' is not a valid player name.</red>"
+  invalid-duration: "<red><error></red>"
+  missing-reason: "<red>please give a reason.</red>"
+  usage: "<gray>usage: <white><usage></white></gray>"
+  console-only-flag: "<red><error></red>"
+  busy: "<red>that player is already part of a running wipe (<white>job <job></white>). see <white>/wipe status <job></white>.</red>"
+  token-unknown: "<red>that confirmation code is unknown or has expired. run the command again for a new preview.</red>"
+  token-wrong-sender: "<red>that confirmation code belongs to someone else.</red>"
+  token-cancelled: "<gray>cancelled. nothing was changed.</gray>"
+  token-expired-unfreeze: "<gray>preview <white><token></white> expired. <white><name></white> is no longer frozen.</gray>"
+  # the whole line is clickable (fills in /wipe confirm <code>)
+  confirm-hint: "<gray>to continue type <accent>/wipe confirm <token></accent> within <white><seconds>s</white>, or <white>/wipe cancel <token></white>.</gray>"
+  confirm-hint-wipeall: "<red><sym:warn> this resets every player on the server.</red> <gray>to continue type <accent>/wipe confirm <token> wipeall</accent> within <white><seconds>s</white>.</gray>"
+  wipeall-word-missing: "<red>type the word <white>wipeall</white> after the code to confirm a season reset.</red>"
+  job-started: "<accent><sym:check></accent> <white>job <job></white> <gray>started (<what>). follow it with</gray> <white>/wipe status <job></white>"
+  job-finished: "<accent><sym:check></accent> <white>job <job></white> <gray>finished: <result></gray>"
+  job-partial: "<red><sym:warn> job <job> finished with problems: <result>.</red> <gray>affected accounts stay locked. see</gray> <white>/wipe status <job></white>"
+  job-waiting-restart: "<accent><sym:dot></accent> <white>job <job></white> <gray>live part done. <white><count></white> integration(s) run on the next server start; the account stays locked until then.</gray>"
+  punished: "<accent><sym:check></accent> <gray><white><name></white> is suspended for <white><duration></white> (<white><ref></white>).</gray>"
+  ippunished: "<accent><sym:check></accent> <gray><white><name></white> and <white><count></white> address(es) are banned permanently (<white><ref></white>).</gray>"
+  unpunished: "<accent><sym:check></accent> <gray>removed <white><count></white> account punishment(s) from <white><name></white>. ip punishments were not changed.</gray>"
+  unippunished: "<accent><sym:check></accent> <gray>removed the ip punishment of <white><name></white> (<white><count></white> address(es), <white><accounts></white> restricted account(s) released).</gray>"
+  nothing-to-remove: "<gray><white><name></white> has no active <what> created by exocleanwipe.</gray>"
+  unlocked: "<accent><sym:check></accent> <gray><white><name></white> is unlocked.</gray>"
+  not-locked: "<gray><white><name></white> is not locked.</gray>"
+  staff-alert: "<accent>[exocleanwipe]</accent> <gray><message></gray>"
+  vpn-flag: "<white><name></white> joined from a vpn/proxy address (<white><detail></white>)."
+  lock-screen: |-
+    <red><sym:stop> exocleanwipe</red>
+
+    <white>your account is temporarily locked while staff finish maintenance.</white>
+    <gray>please try again later.</gray>
+
+    <gray>reference <sym:arrow></gray> <white><ref></white>
+  wipeall-screen: |-
+    <accent><sym:dot> exocleanwipe</accent>
+
+    <white>a new season is being prepared.</white>
+    <gray>the server will be back shortly.</gray>
+  vpn-screen: |-
+    <red><sym:stop> exocleanwipe</red>
+
+    <white>connections through vpn or proxy services are not allowed.</white>
+    <gray>please disconnect from the vpn and try again.</gray>
+
+    <gray>appeal <sym:arrow></gray> <white><appeal></white>
+  vpn-error-screen: |-
+    <red><sym:stop> exocleanwipe</red>
+
+    <white>we could not verify your connection right now.</white>
+    <gray>please try again in a few minutes.</gray>
+  ban-screen: |-
+    <red><sym:stop> exocleanwipe</red>
+    <white>your access to this server has been suspended</white>
+
+    <gray>reason <sym:arrow></gray> <white><reason></white>
+    <gray>duration <sym:arrow></gray> <white><duration></white>
+    <gray>remaining <sym:arrow></gray> <white><remaining></white>
+    <gray>reference <sym:arrow></gray> <white><ref></white>
+    <gray>appeal <sym:arrow></gray> <accent><appeal></accent>
+  ip-ban-screen: |-
+    <red><sym:stop> exocleanwipe</red>
+    <white>connections from your network have been suspended</white>
+
+    <gray>reason <sym:arrow></gray> <white><reason></white>
+    <gray>duration <sym:arrow></gray> <white>permanent</white>
+    <gray>reference <sym:arrow></gray> <white><ref></white>
+    <gray>appeal <sym:arrow></gray> <accent><appeal></accent>
