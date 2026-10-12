@@ -107,13 +107,14 @@ public final class LoginGate implements Listener {
             if (global.isPresent() && !settings.wipeAllAllowJoin.contains(uuid)) {
                 return messages.screen("wipeall-screen");
             }
-            Optional<Lock> lock = store.lockOf(uuid);
-            if (lock.isPresent()) {
-                return messages.screen("lock-screen", Messages.values("ref", "job " + lock.get().jobId()));
-            }
+            // a ban shows its reason and length even while the wipe of that punishment is still running
             Optional<Punishment> account = punishments.accountBlock(uuid, now);
             if (account.isPresent()) {
                 return punishments.banScreen(account.get(), now);
+            }
+            Optional<Lock> lock = store.lockOf(uuid);
+            if (lock.isPresent()) {
+                return messages.screen("lock-screen", Messages.values("ref", "job " + lock.get().jobId()));
             }
             Optional<Punishment> address = punishments.addressBlock(ip, now);
             if (address.isPresent()) {

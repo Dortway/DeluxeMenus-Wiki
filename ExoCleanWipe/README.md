@@ -107,11 +107,11 @@ records are never read or changed, and the unpunish commands only ever touch Exo
 Ban screen (colours and text in `config.yml` → `messages.ban-screen`):
 
 ```
-⛔ exocleanwipe
+⛔ Exity Skyblock
 your access to this server has been suspended
 
 reason › duping
-duration › 30 days
+ban length › 30 days
 remaining › 29 days, 23 hours
 reference › ew-000123
 appeal › discord.gg/your-invite

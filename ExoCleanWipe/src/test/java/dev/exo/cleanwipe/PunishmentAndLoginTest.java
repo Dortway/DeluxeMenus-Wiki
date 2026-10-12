@@ -91,10 +91,15 @@ class PunishmentAndLoginTest {
         String screen = plain(g.decide(STEVE, "Steve", "203.0.113.9", now + 30 * 60_000));
         assertNotNull(screen);
         assertTrue(screen.contains("reason › duping <red>x</red>"), screen);
-        assertTrue(screen.contains("duration › 30 days"), screen);
+        assertTrue(screen.contains("ban length › 30 days"), screen);
         assertTrue(screen.contains("remaining › 29 days, 23 hours"), screen);
         assertTrue(screen.contains("reference › ew-" + String.format("%06d", id)), screen);
         assertTrue(screen.contains("appeal › discord.gg/dogo"), screen);
+        assertTrue(screen.startsWith("\u26d4 Exity Skyblock"), screen);
+        store.lock(STEVE, 5, "punish job 5", now);
+        assertTrue(plain(g.decide(STEVE, "Steve", "203.0.113.9", now + 60_000)).contains("reason › duping"),
+                "the ban screen wins over the wipe lock");
+        store.unlock(STEVE);
         assertNull(g.decide(STEVE, "Steve", "203.0.113.9", now + 31 * DAY), "expired ban lets the player in");
     }
 

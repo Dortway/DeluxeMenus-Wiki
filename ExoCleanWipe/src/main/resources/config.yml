@@ -158,43 +158,43 @@ messages:
   staff-alert: "<accent>[exocleanwipe]</accent> <gray><message></gray>"
   vpn-flag: "<white><name></white> joined from a vpn/proxy address (<white><detail></white>)."
   lock-screen: |-
-    <red><sym:stop> exocleanwipe</red>
+    <red><sym:stop> Exity Skyblock</red>
 
     <white>your account is temporarily locked while staff finish maintenance.</white>
     <gray>please try again later.</gray>
 
     <gray>reference <sym:arrow></gray> <white><ref></white>
   wipeall-screen: |-
-    <accent><sym:dot> exocleanwipe</accent>
+    <accent><sym:dot> Exity Skyblock</accent>
 
     <white>a new season is being prepared.</white>
     <gray>the server will be back shortly.</gray>
   vpn-screen: |-
-    <red><sym:stop> exocleanwipe</red>
+    <red><sym:stop> Exity Skyblock</red>
 
     <white>connections through vpn or proxy services are not allowed.</white>
     <gray>please disconnect from the vpn and try again.</gray>
 
     <gray>appeal <sym:arrow></gray> <white><appeal></white>
   vpn-error-screen: |-
-    <red><sym:stop> exocleanwipe</red>
+    <red><sym:stop> Exity Skyblock</red>
 
     <white>we could not verify your connection right now.</white>
     <gray>please try again in a few minutes.</gray>
   ban-screen: |-
-    <red><sym:stop> exocleanwipe</red>
+    <red><sym:stop> Exity Skyblock</red>
     <white>your access to this server has been suspended</white>
 
     <gray>reason <sym:arrow></gray> <white><reason></white>
-    <gray>duration <sym:arrow></gray> <white><duration></white>
+    <gray>ban length <sym:arrow></gray> <white><duration></white>
     <gray>remaining <sym:arrow></gray> <white><remaining></white>
     <gray>reference <sym:arrow></gray> <white><ref></white>
     <gray>appeal <sym:arrow></gray> <accent><appeal></accent>
   ip-ban-screen: |-
-    <red><sym:stop> exocleanwipe</red>
+    <red><sym:stop> Exity Skyblock</red>
     <white>connections from your network have been suspended</white>
 
     <gray>reason <sym:arrow></gray> <white><reason></white>
-    <gray>duration <sym:arrow></gray> <white>permanent</white>
+    <gray>ban length <sym:arrow></gray> <white>permanent</white>
     <gray>reference <sym:arrow></gray> <white><ref></white>
     <gray>appeal <sym:arrow></gray> <accent><appeal></accent>
