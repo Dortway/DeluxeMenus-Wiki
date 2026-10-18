@@ -187,6 +187,22 @@ Admins reconcile uncertain claims with `/exodaily pending` and `/exodaily status
 
 The window for an uncertain claim is only the time between two server ticks. It is still a real window, and ExoDaily does not claim otherwise.
 
+### Shipped rewards
+
+The bundled `rewards.yml` contains 40 command rewards: xp, money, shards, vote/rare/epic/prime/omega keys and lantern/mystic/lunar boxes. Lunar boxes, 5x omega, 10x vote, 6x epic, 10x/15x lantern and mystic boxes, 5m and 10m money are **premium-only**: they are only in the pools used by positions 2 and 3, and a test checks that position 1 can never reach them. Days 7, 14 and 21 use milestone pools, and day 30 uses finale pools.
+
+They assume these commands. **Check them against your plugins before going live:**
+
+| Reward | Command |
+|---|---|
+| xp | `xp add {player} <n> points` (vanilla) |
+| money | `eco give {player} <n>` (EssentialsX) |
+| shards | `shards give {player} <n>`: **a placeholder; replace it with your shards plugin's command** |
+| keys | `crate key give {player} <crate> <n>` |
+| boxes | `ebox give {player} <box> <n>` |
+
+`%player%` works as well as `{player}`. The previous item rewards are kept as a test fixture in `src/test/resources/fixtures/item-rewards.yml`, which you can copy back if you want item rewards.
+
 ### Command rewards
 
 A reward can run console commands instead of, or after, giving an item:
@@ -201,7 +217,7 @@ rewards:
       - "eco give {player} 500"
 ```
 
-Placeholders: `{player}` `{uuid}` `{claim_id}` `{cycle}` `{day}` `{position}` `{reward}`. A leading `/` is optional. You can have up to 16 commands per reward, each on a single line. Unknown placeholders are rejected when the config loads. A command label that no plugin has registered produces a warning. That check runs after all plugins have enabled, and again on every reload.
+Placeholders: `{player}` (or `%player%`) `{uuid}` `{claim_id}` `{cycle}` `{day}` `{position}` `{reward}`. A leading `/` is optional. You can have up to 16 commands per reward, each on a single line. Unknown placeholders are rejected when the config loads. A command label that no plugin has registered produces a warning. That check runs after all plugins have enabled, and again on every reload.
 
 **These rewards have weaker guarantees than item rewards. They are not dupe-proof, and ExoDaily does not claim otherwise.**
 
@@ -235,7 +251,7 @@ The default deployment supports **one server**. Claim uniqueness is enforced by 
 ### What was actually compiled and tested
 
 - The plugin was compiled with `javac` 21 (`--release 21`) against **Paper API 1.21.11** with no warnings.
-- **92 automated tests pass** (`mvn clean package`):
+- **98 automated tests pass** (`mvn clean package`):
   - Core tests run against a real SQLite database, without a server.
   - **4 command-reward tests** run on MockBukkit's real command map: placeholder expansion, no items for `command`, items before commands for `both`, no commands when the items don't fit, and failing or unknown commands → `UNCERTAIN`.
   - **11 integration tests** boot the real plugin on MockBukkit 4.116.3 (a mock Paper 1.21.11 server). They cover enabling with the bundled configuration and storage, menu contents, every click type plus drags being cancelled, standard and premium claims through the GUI, full inventories, leaked-icon removal, admin `setday` refreshing open menus, permission denial, reload rollback, the overview previews and `reward save` from the hand.

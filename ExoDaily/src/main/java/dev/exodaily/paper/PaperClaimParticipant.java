@@ -97,6 +97,7 @@ public final class PaperClaimParticipant implements ClaimParticipant {
     static String expand(String template, Player player, RewardDefinition reward, ClaimKey key) {
         return template
                 .replace("{player}", player.getName())
+                .replace("%player%", player.getName())
                 .replace("{uuid}", player.getUniqueId().toString())
                 .replace("{claim_id}", key.asString())
                 .replace("{cycle}", Integer.toString(key.cycle()))

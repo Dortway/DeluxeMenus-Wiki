@@ -689,7 +689,7 @@ public final class ConfigLoader {
 
     /** Placeholders available in reward commands. */
     public static final List<String> COMMAND_PLACEHOLDERS =
-            List.of("{player}", "{uuid}", "{claim_id}", "{cycle}", "{day}", "{position}", "{reward}");
+            List.of("{player}", "%player%", "{uuid}", "{claim_id}", "{cycle}", "{day}", "{position}", "{reward}");
 
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{([a-z_]+)}");
 

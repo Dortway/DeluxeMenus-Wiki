@@ -12,6 +12,7 @@
 #
 #  Positions: 1 = standard (everyone), 2 and 3 = premium (exodaily.premium).
 #  Premium players can claim at most 3 rewards per day in total.
+#  Premium-only rewards are only placed in pools used by positions 2 and 3.
 # ─────────────────────────────────────────────────────────────────────────────
 config-version: 1
 
@@ -21,7 +22,7 @@ settings:
   # below; only if every option is used up is a duplicate allowed (logged).
   prevent-duplicates-per-day: true
   # Last-resort pool for any pool that runs out of eligible entries.
-  fallback-pool: standard_common
+  fallback-pool: standard_daily
   # How many possible rewards future-day previews list per pool.
   preview-max-entries: 4
   # Days highlighted as milestones in the cycle overview.
@@ -29,161 +30,376 @@ settings:
 
 # ═════════════════════════════════════════════════════════════════ rewards
 # id (lowercase letters, digits, _ and -; never rename an id in use):
-#   material:          Bukkit material name (required unless serialized-item)
-#   amount:            total amount, split into stacks (up to 36 stacks)
-#   summary:           short text used in menus, e.g. "16 diamonds"
-#   name / lore:       optional MiniMessage display name and lore
-#   enchantments:      { enchantment_key: level }   (unsafe levels allowed)
-#   flags:             [HIDE_ENCHANTS, ...]          (Bukkit ItemFlag names)
-#   custom-model-data: number (applied as the first custom model data float)
-#   weight:            default selection weight (pools may override it)
-#   serialized-item:   written by /exodaily reward save <id>; the item is
-#                      restored exactly (all metadata). Do not edit by hand.
 #   type:              item (default), command, or both (item first, then commands)
-#   commands:          console commands for type command/both, see below
+#   commands:          console commands for type command/both
+#   material:          the item to give, or just the menu icon for type: command
+#   amount:            item amount (for type: command only the icon's stack size)
+#   summary:           short text used in menus, e.g. "30k money" (required for commands)
+#   name / lore:       optional MiniMessage display name and lore
+#   enchantments:      { enchantment_key: level }   (item rewards)
+#   flags:             [HIDE_ENCHANTS, ...]          (item rewards)
+#   custom-model-data: number
+#   weight:            default selection weight (pools may override it)
+#   serialized-item:   written by /exodaily reward save <id>; do not edit by hand.
 #
 # ── command rewards ──────────────────────────────────────────────────────────
-# Commands run from the console, in order, after the claim is reserved. The
-# material/name/lore are only the menu icon for type: command, and a summary
-# is required. Placeholders:
-#   {player} {uuid} {claim_id} {cycle} {day} {position} {reward}
+# Commands run from the console, in order, after the claim is reserved.
+# Placeholders: {player} (or %player%) {uuid} {claim_id} {cycle} {day}
+#               {position} {reward}
 # {claim_id} is unique per player, cycle, day and position. Pass it to plugins
 # that can ignore repeated ids so a reward can never be applied twice.
 #
 # !! Commands are WEAKER than item rewards: they cannot be rolled back and
 # !! ExoDaily cannot see what they did. A command that fails, or a crash while
 # !! commands run, flags the claim for staff review (/exodaily pending); it is
-# !! never re-run automatically. Use commands you trust, ideally idempotent ones.
-#
-# Example (add the id to a pool to use it):
-#   money_500:
-#     type: command
-#     material: GOLD_NUGGET          # menu icon only
-#     summary: "$500"
-#     name: "<#FCD34D>$500"
-#     lore: ["<#9CA3AF>paid into your balance"]
-#     commands:
-#       - "eco give {player} 500"
-#   crate_key:
-#     type: both                     # gives the item, then runs the commands
-#     material: TRIPWIRE_HOOK
-#     amount: 1
-#     summary: "1 crate key"
-#     commands:
-#       - "broadcast {player} claimed a crate key on day {day}!"
+# !! never re-run automatically. Check every command below matches your plugins:
+# !!   money  → EssentialsX   "eco give {player} <amount>"
+# !!   xp     → vanilla        "xp add {player} <amount> points"
+# !!   shards → your shards plugin (placeholder command, adjust it)
+# !!   keys   → crate plugin   "crate key give {player} <crate> <amount>"
+# !!   boxes  → ebox plugin    "ebox give {player} <box> <amount>"
 rewards:
 
-  # ── everyday resources ────────────────────────────────────────────────────
-  iron_16:          { material: IRON_INGOT, amount: 16, summary: "16 iron ingots", weight: 30 }
-  coal_32:          { material: COAL, amount: 32, summary: "32 coal", weight: 30 }
-  copper_32:        { material: COPPER_INGOT, amount: 32, summary: "32 copper ingots", weight: 25 }
-  redstone_24:      { material: REDSTONE, amount: 24, summary: "24 redstone", weight: 20 }
-  lapis_16:         { material: LAPIS_LAZULI, amount: 16, summary: "16 lapis lazuli", weight: 20 }
-  gold_8:           { material: GOLD_INGOT, amount: 8, summary: "8 gold ingots", weight: 15 }
-  torches_32:       { material: TORCH, amount: 32, summary: "32 torches", weight: 20 }
-  arrows_32:        { material: ARROW, amount: 32, summary: "32 arrows", weight: 15 }
+  # ── experience ────────────────────────────────────────────────────────────
+  xp_1k:
+    type: command
+    material: EXPERIENCE_BOTTLE
+    summary: "1k xp"
+    name: "<#86EFAC>1,000 experience"
+    commands: ["xp add {player} 1000 points"]
+    weight: 30
+  xp_5k:
+    type: command
+    material: EXPERIENCE_BOTTLE
+    amount: 5
+    summary: "5k xp"
+    name: "<#86EFAC>5,000 experience"
+    commands: ["xp add {player} 5000 points"]
+    weight: 18
+  xp_10k:
+    type: command
+    material: EXPERIENCE_BOTTLE
+    amount: 10
+    summary: "10k xp"
+    name: "<#86EFAC>10,000 experience"
+    commands: ["xp add {player} 10000 points"]
+    weight: 20
 
-  # ── food ──────────────────────────────────────────────────────────────────
-  bread_16:         { material: BREAD, amount: 16, summary: "16 bread", weight: 30 }
-  steak_12:         { material: COOKED_BEEF, amount: 12, summary: "12 steak", weight: 25 }
-  baked_potato_16:  { material: BAKED_POTATO, amount: 16, summary: "16 baked potatoes", weight: 25 }
-  golden_carrot_8:  { material: GOLDEN_CARROT, amount: 8, summary: "8 golden carrots", weight: 15 }
-  pumpkin_pie_8:    { material: PUMPKIN_PIE, amount: 8, summary: "8 pumpkin pies", weight: 15 }
-
-  # ── building ──────────────────────────────────────────────────────────────
-  oak_logs_32:      { material: OAK_LOG, amount: 32, summary: "32 oak logs", weight: 25 }
-  stone_bricks_64:  { material: STONE_BRICKS, amount: 64, summary: "64 stone bricks", weight: 25 }
-  glass_32:         { material: GLASS, amount: 32, summary: "32 glass", weight: 20 }
-  deepslate_64:     { material: DEEPSLATE_BRICKS, amount: 64, summary: "64 deepslate bricks", weight: 15 }
-  bookshelves_4:    { material: BOOKSHELF, amount: 4, summary: "4 bookshelves", weight: 15 }
-  lanterns_8:       { material: LANTERN, amount: 8, summary: "8 lanterns", weight: 15 }
-
-  # ── rarer finds ───────────────────────────────────────────────────────────
-  diamonds_3:       { material: DIAMOND, amount: 3, summary: "3 diamonds", weight: 20 }
-  emeralds_8:       { material: EMERALD, amount: 8, summary: "8 emeralds", weight: 25 }
-  xp_bottles_16:    { material: EXPERIENCE_BOTTLE, amount: 16, summary: "16 bottles o' enchanting", weight: 25 }
-  ender_pearls_4:   { material: ENDER_PEARL, amount: 4, summary: "4 ender pearls", weight: 20 }
-  golden_apple_1:   { material: GOLDEN_APPLE, amount: 1, summary: "1 golden apple", weight: 10 }
-
-  # ── premium resources ─────────────────────────────────────────────────────
-  diamonds_4:       { material: DIAMOND, amount: 4, summary: "4 diamonds", weight: 20 }
-  emeralds_16:      { material: EMERALD, amount: 16, summary: "16 emeralds", weight: 25 }
-  golden_apples_2:  { material: GOLDEN_APPLE, amount: 2, summary: "2 golden apples", weight: 15 }
-  xp_bottles_24:    { material: EXPERIENCE_BOTTLE, amount: 24, summary: "24 bottles o' enchanting", weight: 20 }
-  ender_pearls_8:   { material: ENDER_PEARL, amount: 8, summary: "8 ender pearls", weight: 15 }
-  quartz_32:        { material: QUARTZ, amount: 32, summary: "32 nether quartz", weight: 20 }
-  amethyst_16:      { material: AMETHYST_SHARD, amount: 16, summary: "16 amethyst shards", weight: 15 }
-  name_tag_1:       { material: NAME_TAG, amount: 1, summary: "1 name tag", weight: 10 }
-
-  # ── premium rarities ──────────────────────────────────────────────────────
-  diamonds_8:       { material: DIAMOND, amount: 8, summary: "8 diamonds", weight: 20 }
-  emeralds_32:      { material: EMERALD, amount: 32, summary: "32 emeralds", weight: 20 }
-  golden_apples_4:  { material: GOLDEN_APPLE, amount: 4, summary: "4 golden apples", weight: 15 }
-  blaze_rods_8:     { material: BLAZE_ROD, amount: 8, summary: "8 blaze rods", weight: 15 }
-  shulker_shells_2: { material: SHULKER_SHELL, amount: 2, summary: "2 shulker shells", weight: 10 }
-  saddle_1:         { material: SADDLE, amount: 1, summary: "1 saddle", weight: 10 }
-
-  # ── weekly milestones (days 7, 14, 21) ────────────────────────────────────
-  milestone_xp_32:  { material: EXPERIENCE_BOTTLE, amount: 32, summary: "32 bottles o' enchanting", weight: 20 }
-  milestone_pickaxe:
-    material: DIAMOND_PICKAXE
-    amount: 1
-    summary: "milestone pickaxe"
-    name: "<#67E8F9><sym:star> milestone pickaxe"
-    lore:
-      - "<#9CA3AF>earned by a full week of rewards"
-    enchantments:
-      efficiency: 3
-      unbreaking: 2
-    custom-model-data: 1001
+  # ── money ─────────────────────────────────────────────────────────────────
+  money_20k:
+    type: command
+    material: GOLD_NUGGET
+    summary: "20k money"
+    name: "<#FCD34D>$20,000"
+    commands: ["eco give {player} 20000"]
+    weight: 30
+  money_30k:
+    type: command
+    material: GOLD_NUGGET
+    amount: 3
+    summary: "30k money"
+    name: "<#FCD34D>$30,000"
+    commands: ["eco give {player} 30000"]
+    weight: 25
+  money_50k:
+    type: command
+    material: GOLD_INGOT
+    summary: "50k money"
+    name: "<#FCD34D>$50,000"
+    commands: ["eco give {player} 50000"]
+    weight: 18
+  money_100k:
+    type: command
+    material: GOLD_INGOT
+    amount: 2
+    summary: "100k money"
+    name: "<#FCD34D>$100,000"
+    commands: ["eco give {player} 100000"]
+    weight: 25
+  money_200k:
+    type: command
+    material: GOLD_INGOT
+    amount: 4
+    summary: "200k money"
+    name: "<#FCD34D>$200,000"
+    commands: ["eco give {player} 200000"]
     weight: 15
-  diamonds_16:      { material: DIAMOND, amount: 16, summary: "16 diamonds", weight: 20 }
-  netherite_scrap_2: { material: NETHERITE_SCRAP, amount: 2, summary: "2 netherite scrap", weight: 15 }
-  totem_1:          { material: TOTEM_OF_UNDYING, amount: 1, summary: "1 totem of undying", weight: 10 }
-  enchanted_apple_1: { material: ENCHANTED_GOLDEN_APPLE, amount: 1, summary: "1 enchanted golden apple", weight: 5 }
-  premium_pickaxe:
-    material: DIAMOND_PICKAXE
-    amount: 1
-    summary: "premium pickaxe"
-    name: "<#FCD34D><sym:star> premium pickaxe"
-    lore:
-      - "<#9CA3AF>a premium milestone reward"
-    enchantments:
-      efficiency: 4
-      unbreaking: 3
-      fortune: 2
-    custom-model-data: 1002
+  money_1m:
+    type: command
+    material: GOLD_BLOCK
+    summary: "1m money"
+    name: "<#FCD34D>$1,000,000"
+    commands: ["eco give {player} 1000000"]
+    weight: 8
+
+  # ── shards ────────────────────────────────────────────────────────────────
+  shards_8k:
+    type: command
+    material: AMETHYST_SHARD
+    amount: 8
+    summary: "8k shards"
+    name: "<#A78BFA>8,000 shards"
+    commands: ["shards give {player} 8000"]
+    weight: 25
+  shards_10k:
+    type: command
+    material: AMETHYST_SHARD
+    amount: 10
+    summary: "10k shards"
+    name: "<#A78BFA>10,000 shards"
+    commands: ["shards give {player} 10000"]
+    weight: 20
+  shards_20k:
+    type: command
+    material: AMETHYST_SHARD
+    amount: 20
+    summary: "20k shards"
+    name: "<#A78BFA>20,000 shards"
+    commands: ["shards give {player} 20000"]
+    weight: 20
+  shards_50k:
+    type: command
+    material: AMETHYST_CLUSTER
+    summary: "50k shards"
+    name: "<#A78BFA>50,000 shards"
+    commands: ["shards give {player} 50000"]
+    weight: 10
+
+  # ── vote keys ─────────────────────────────────────────────────────────────
+  vote_key_1:
+    type: command
+    material: TRIPWIRE_HOOK
+    summary: "1x vote key"
+    name: "<#67E8F9>1x vote key"
+    commands: ["crate key give {player} vote 1"]
+    weight: 25
+  vote_key_2:
+    type: command
+    material: TRIPWIRE_HOOK
+    amount: 2
+    summary: "2x vote key"
+    name: "<#67E8F9>2x vote key"
+    commands: ["crate key give {player} vote 2"]
     weight: 15
-  premium_blade:
-    material: DIAMOND_SWORD
-    amount: 1
-    summary: "premium blade"
-    name: "<#FCD34D><sym:star> premium blade"
-    lore:
-      - "<#9CA3AF>a premium milestone reward"
-    enchantments:
-      sharpness: 4
-      unbreaking: 3
-      looting: 2
+  vote_key_5:
+    type: command
+    material: TRIPWIRE_HOOK
+    amount: 5
+    summary: "5x vote key"
+    name: "<#67E8F9>5x vote key"
+    commands: ["crate key give {player} vote 5"]
+    weight: 20
+
+  # ── rare keys ─────────────────────────────────────────────────────────────
+  rare_key_1:
+    type: command
+    material: TRIPWIRE_HOOK
+    summary: "1x rare key"
+    name: "<#86EFAC>1x rare key"
+    commands: ["crate key give {player} rare 1"]
+    weight: 15
+  rare_key_2:
+    type: command
+    material: TRIPWIRE_HOOK
+    amount: 2
+    summary: "2x rare key"
+    name: "<#86EFAC>2x rare key"
+    commands: ["crate key give {player} rare 2"]
+    weight: 8
+  rare_key_5:
+    type: command
+    material: TRIPWIRE_HOOK
+    amount: 5
+    summary: "5x rare key"
+    name: "<#86EFAC>5x rare key"
+    commands: ["crate key give {player} rare 5"]
     weight: 15
 
-  # ── cycle finale (day 30) ─────────────────────────────────────────────────
-  netherite_ingot_1: { material: NETHERITE_INGOT, amount: 1, summary: "1 netherite ingot", weight: 20 }
-  netherite_ingot_2: { material: NETHERITE_INGOT, amount: 2, summary: "2 netherite ingots", weight: 20 }
-  diamonds_32:      { material: DIAMOND, amount: 32, summary: "32 diamonds", weight: 20 }
-  nether_star_1:    { material: NETHER_STAR, amount: 1, summary: "1 nether star", weight: 10 }
-  cycle_crown:
-    material: GOLDEN_HELMET
-    amount: 1
-    summary: "cycle crown"
-    name: "<#FCD34D><sym:star> cycle crown"
-    lore:
-      - "<#9CA3AF>for completing a full cycle"
-    enchantments:
-      protection: 4
-      unbreaking: 3
-    flags: [HIDE_ENCHANTS]
-    custom-model-data: 1003
+  # ── epic keys ─────────────────────────────────────────────────────────────
+  epic_key_1:
+    type: command
+    material: TRIPWIRE_HOOK
+    summary: "1x epic key"
+    name: "<#A78BFA>1x epic key"
+    commands: ["crate key give {player} epic 1"]
+    weight: 10
+  epic_key_2:
+    type: command
+    material: TRIPWIRE_HOOK
+    amount: 2
+    summary: "2x epic key"
+    name: "<#A78BFA>2x epic key"
+    commands: ["crate key give {player} epic 2"]
+    weight: 6
+  epic_key_5:
+    type: command
+    material: TRIPWIRE_HOOK
+    amount: 5
+    summary: "5x epic key"
+    name: "<#A78BFA>5x epic key"
+    commands: ["crate key give {player} epic 5"]
+    weight: 12
+
+  # ── prime keys ────────────────────────────────────────────────────────────
+  prime_key_5:
+    type: command
+    material: TRIPWIRE_HOOK
+    amount: 5
+    summary: "5x prime key"
+    name: "<#FCD34D>5x prime key"
+    commands: ["crate key give {player} prime 5"]
+    weight: 6
+  prime_key_8:
+    type: command
+    material: TRIPWIRE_HOOK
+    amount: 8
+    summary: "8x prime key"
+    name: "<#FCD34D>8x prime key"
+    commands: ["crate key give {player} prime 8"]
+    weight: 10
+
+  # ── omega keys ────────────────────────────────────────────────────────────
+  omega_key_1:
+    type: command
+    material: TRIPWIRE_HOOK
+    summary: "1x omega key"
+    name: "<#FCA5A5>1x omega key"
+    commands: ["crate key give {player} omega 1"]
+    weight: 10
+
+  # ── boxes ─────────────────────────────────────────────────────────────────
+  lantern_box_1:
+    type: command
+    material: LANTERN
+    summary: "1x lantern box"
+    name: "<#FCD34D>1x lantern box"
+    commands: ["ebox give {player} lantern 1"]
+    weight: 15
+  mystic_box_1:
+    type: command
+    material: ENDER_CHEST
+    summary: "1x mystic box"
+    name: "<#A78BFA>1x mystic box"
+    commands: ["ebox give {player} mystic 1"]
+    weight: 12
+
+  # ══════════════════════════════════════════════ premium-only rewards
+  # These appear only in premium pools (positions 2 and 3).
+  lunar_box_1:
+    type: command
+    material: END_CRYSTAL
+    summary: "1x lunar box"
+    name: "<#67E8F9>1x lunar box"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["ebox give {player} lunar 1"]
+    weight: 25
+  lunar_box_5:
+    type: command
+    material: END_CRYSTAL
+    amount: 5
+    summary: "5x lunar box"
+    name: "<#67E8F9>5x lunar box"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["ebox give {player} lunar 5"]
+    weight: 15
+  lunar_box_10:
+    type: command
+    material: END_CRYSTAL
+    amount: 10
+    summary: "10x lunar box"
+    name: "<#67E8F9>10x lunar box"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["ebox give {player} lunar 10"]
+    weight: 20
+  lunar_box_30:
+    type: command
+    material: END_CRYSTAL
+    amount: 30
+    summary: "30x lunar box"
+    name: "<#67E8F9>30x lunar box"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["ebox give {player} lunar 30"]
+    weight: 8
+  premium_omega_key_5:
+    type: command
+    material: TRIPWIRE_HOOK
+    amount: 5
+    summary: "5x omega key"
+    name: "<#FCA5A5>5x omega key"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["crate key give {player} omega 5"]
+    weight: 15
+  premium_vote_key_10:
+    type: command
+    material: TRIPWIRE_HOOK
+    amount: 10
+    summary: "10x vote key"
+    name: "<#67E8F9>10x vote key"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["crate key give {player} vote 10"]
+    weight: 20
+  premium_epic_key_6:
+    type: command
+    material: TRIPWIRE_HOOK
+    amount: 6
+    summary: "6x epic key"
+    name: "<#A78BFA>6x epic key"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["crate key give {player} epic 6"]
+    weight: 15
+  lantern_box_10:
+    type: command
+    material: LANTERN
+    amount: 10
+    summary: "10x lantern box"
+    name: "<#FCD34D>10x lantern box"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["ebox give {player} lantern 10"]
+    weight: 18
+  lantern_box_15:
+    type: command
+    material: LANTERN
+    amount: 15
+    summary: "15x lantern box"
+    name: "<#FCD34D>15x lantern box"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["ebox give {player} lantern 15"]
+    weight: 15
+  mystic_box_10:
+    type: command
+    material: ENDER_CHEST
+    amount: 10
+    summary: "10x mystic box"
+    name: "<#A78BFA>10x mystic box"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["ebox give {player} mystic 10"]
+    weight: 18
+  mystic_box_15:
+    type: command
+    material: ENDER_CHEST
+    amount: 15
+    summary: "15x mystic box"
+    name: "<#A78BFA>15x mystic box"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["ebox give {player} mystic 15"]
+    weight: 15
+  money_5m:
+    type: command
+    material: GOLD_BLOCK
+    amount: 5
+    summary: "5m money"
+    name: "<#FCD34D>$5,000,000"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["eco give {player} 5000000"]
+    weight: 10
+  money_10m:
+    type: command
+    material: GOLD_BLOCK
+    amount: 10
+    summary: "10m money"
+    name: "<#FCD34D>$10,000,000"
+    lore: ["<#9CA3AF>premium only"]
+    commands: ["eco give {player} 10000000"]
     weight: 10
 
 # ═══════════════════════════════════════════════════════════════════ pools
@@ -191,64 +407,43 @@ rewards:
 # fallback:    pool tried when this one has no eligible entry left.
 # entries:     reward ids, or { reward: id, weight: n } to override the weight.
 pools:
-  standard_common:
-    description: "everyday resources"
-    entries: [iron_16, coal_32, copper_32, redstone_24, lapis_16, gold_8, torches_32, arrows_32]
+  # Position 1 on normal days.
+  standard_daily:
+    description: "daily rewards"
+    entries: [xp_1k, xp_5k, money_20k, money_30k, money_50k, shards_8k, shards_10k,
+              vote_key_1, vote_key_2, lantern_box_1, mystic_box_1, rare_key_1, rare_key_2,
+              epic_key_1, epic_key_2, prime_key_5]
 
-  standard_food:
-    description: "hearty food"
-    fallback: standard_common
-    entries: [bread_16, steak_12, baked_potato_16, golden_carrot_8, pumpkin_pie_8]
-
-  standard_building:
-    description: "building blocks"
-    fallback: standard_common
-    entries: [oak_logs_32, stone_bricks_64, glass_32, deepslate_64, bookshelves_4, lanterns_8]
-
-  standard_uncommon:
-    description: "rarer finds"
-    fallback: standard_common
-    entries: [diamonds_3, emeralds_8, xp_bottles_16, ender_pearls_4, golden_apple_1]
-
-  premium_common:
-    description: "premium resources"
-    fallback: standard_uncommon
-    entries: [diamonds_4, emeralds_16, golden_apples_2, xp_bottles_24, ender_pearls_8, quartz_32, amethyst_16, name_tag_1]
-
-  premium_uncommon:
-    description: "premium rarities"
-    fallback: premium_common
-    entries: [diamonds_8, emeralds_32, golden_apples_4, blaze_rods_8, shulker_shells_2, saddle_1]
-
-  milestone_standard:
+  # Position 1 on days 7, 14 and 21.
+  standard_milestone:
     description: "weekly milestone"
-    fallback: standard_uncommon
-    entries:
-      - diamonds_8
-      - golden_apples_4
-      - milestone_pickaxe
-      - milestone_xp_32
+    fallback: standard_daily
+    entries: [xp_10k, money_100k, money_200k, shards_20k, vote_key_5, rare_key_5, epic_key_5, prime_key_8, omega_key_1]
 
-  milestone_premium:
-    description: "premium milestone"
-    fallback: premium_uncommon
-    entries:
-      - premium_pickaxe
-      - premium_blade
-      - netherite_scrap_2
-      - totem_1
-      - diamonds_16
-      - { reward: enchanted_apple_1, weight: 5 }
-
-  finale_standard:
+  # Position 1 on day 30.
+  standard_finale:
     description: "cycle finale"
-    fallback: milestone_standard
-    entries: [netherite_ingot_1, diamonds_16, totem_1, enchanted_apple_1]
+    fallback: standard_milestone
+    entries: [money_1m, shards_50k, omega_key_1, prime_key_8]
 
-  finale_premium:
+  # Positions 2 and 3 on normal days (premium only).
+  premium_daily:
+    description: "premium rewards"
+    fallback: standard_milestone
+    entries: [lunar_box_1, lunar_box_5, premium_vote_key_10, premium_epic_key_6,
+              lantern_box_10, mystic_box_10, money_5m]
+
+  # Positions 2 and 3 on days 7, 14 and 21 (premium only).
+  premium_milestone:
+    description: "premium milestone"
+    fallback: premium_daily
+    entries: [lunar_box_10, premium_omega_key_5, lantern_box_15, mystic_box_15, money_5m, money_10m]
+
+  # Positions 2 and 3 on day 30 (premium only).
+  premium_finale:
     description: "premium cycle finale"
-    fallback: milestone_premium
-    entries: [netherite_ingot_2, diamonds_32, nether_star_1, cycle_crown]
+    fallback: premium_milestone
+    entries: [lunar_box_30, money_10m, premium_omega_key_5, lunar_box_10]
 
 # ════════════════════════════════════════════════════════════════ schedule
 # default: pools for any day not listed under days.
@@ -256,42 +451,42 @@ pools:
 #          default. Days beyond cycle-length (config.yml) are ignored.
 schedule:
   default:
-    position-1: standard_common
-    position-2: premium_common
-    position-3: premium_common
+    position-1: standard_daily
+    position-2: premium_daily
+    position-3: premium_daily
 
   days:
     # ── week 1 ──
-    1:  { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
-    2:  { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
-    3:  { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
-    4:  { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
-    5:  { position-1: standard_uncommon,  position-2: premium_uncommon,  position-3: premium_common }
-    6:  { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
-    7:  { position-1: milestone_standard, position-2: milestone_premium, position-3: premium_uncommon }
+    1:  { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    2:  { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    3:  { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    4:  { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    5:  { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    6:  { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    7:  { position-1: standard_milestone, position-2: premium_milestone, position-3: premium_milestone }
     # ── week 2 ──
-    8:  { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
-    9:  { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
-    10: { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
-    11: { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
-    12: { position-1: standard_uncommon,  position-2: premium_uncommon,  position-3: premium_common }
-    13: { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
-    14: { position-1: milestone_standard, position-2: milestone_premium, position-3: premium_uncommon }
+    8:  { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    9:  { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    10: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    11: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    12: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    13: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    14: { position-1: standard_milestone, position-2: premium_milestone, position-3: premium_milestone }
     # ── week 3 ──
-    15: { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
-    16: { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
-    17: { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
-    18: { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
-    19: { position-1: standard_uncommon,  position-2: premium_uncommon,  position-3: premium_common }
-    20: { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
-    21: { position-1: milestone_standard, position-2: milestone_premium, position-3: premium_uncommon }
+    15: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    16: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    17: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    18: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    19: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    20: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    21: { position-1: standard_milestone, position-2: premium_milestone, position-3: premium_milestone }
     # ── week 4 and finale ──
-    22: { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
-    23: { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
-    24: { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
-    25: { position-1: standard_building,  position-2: premium_common,    position-3: premium_common }
-    26: { position-1: standard_uncommon,  position-2: premium_uncommon,  position-3: premium_common }
-    27: { position-1: standard_food,      position-2: premium_common,    position-3: premium_common }
-    28: { position-1: standard_common,    position-2: premium_common,    position-3: premium_common }
-    29: { position-1: standard_uncommon,  position-2: premium_uncommon,  position-3: premium_uncommon }
-    30: { position-1: finale_standard,    position-2: finale_premium,    position-3: milestone_premium }
+    22: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    23: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    24: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    25: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    26: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    27: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    28: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    29: { position-1: standard_daily,     position-2: premium_daily,     position-3: premium_daily }
+    30: { position-1: standard_finale,    position-2: premium_finale,    position-3: premium_finale }

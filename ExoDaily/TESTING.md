@@ -85,11 +85,13 @@ Use a test server whose clock you can change, or set `timezone` to a zone where 
 
 ## Command rewards
 
-Uncomment the `money_500` example in `rewards.yml`, change its command to one that exists on your server (for example `"give {player} diamond 1"` or `"say {player} {claim_id}"`), put it alone in a pool, point a day's `position-1` at that pool and run `/exodaily reload`.
+The shipped rewards are all console commands. First check each command in `rewards.yml` against your plugins; in particular, replace the placeholder `shards give …` command.
 
-- [ ] The menu shows the reward's icon and summary. Claiming runs the command once. The console logs `Ran 1 reward command(s) … (claim <uuid>:<cycle>:<day>:1 …)`.
+- [ ] The menu shows each reward's icon and summary (for example `30k money`, `1x epic key`).
+- [ ] Claiming runs the command once. The console logs `Ran 1 reward command(s) … (claim <uuid>:<cycle>:<day>:<position> …)` and the player receives the money, keys or box.
 - [ ] Spam-click the claim button. The command still runs exactly once.
-- [ ] Change the command to one that doesn't exist and reload. The reload warns that the command is not registered. Claim it on a fresh day: the console logs the failing command, the position shows "under review", `/exodaily pending` lists it, and it is never re-run automatically.
+- [ ] As a standard player, position 1 never shows a lunar box, 5m or 10m money, or another premium-only reward.
+- [ ] Change one command to one that doesn't exist and reload. The reload warns that the command is not registered. Claim it on a fresh day: the console logs the failing command, the position shows "under review", `/exodaily pending` lists it, and it is never re-run automatically.
 - [ ] Use an unknown placeholder such as `{nope}` and reload. The reload is rejected with `unknown placeholder {nope}`.
 
 ## Crash recovery (optional, destructive — test server only)

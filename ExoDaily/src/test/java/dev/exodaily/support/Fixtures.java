@@ -25,8 +25,37 @@ public final class Fixtures {
     private Fixtures() {
     }
 
-    /** The configuration files shipped in the plugin JAR. */
+    /**
+     * The shipped config files, but with an item-only rewards.yml fixture (the shipped rewards are
+     * server-specific console commands). Most tests use this.
+     */
     public static Map<String, String> bundledFiles() {
+        Map<String, String> files = shippedFiles();
+        files.put(ConfigLoader.REWARDS, resource("/fixtures/item-rewards.yml"));
+        return files;
+    }
+
+    public static ConfigBundle shippedConfig() {
+        ConfigLoader.Result result = new ConfigLoader(new TestPlatform()).load(shippedFiles(), shippedFiles());
+        if (!result.success()) {
+            throw new IllegalStateException("shipped configuration is invalid: " + result.errors());
+        }
+        return result.bundle();
+    }
+
+    public static String resource(String path) {
+        try (InputStream in = Fixtures.class.getResourceAsStream(path)) {
+            if (in == null) {
+                throw new IllegalStateException("missing test resource " + path);
+            }
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /** The configuration files exactly as shipped in the plugin JAR. */
+    public static Map<String, String> shippedFiles() {
         Map<String, String> files = new HashMap<>();
         for (String file : ConfigLoader.FILES) {
             try (InputStream in = Fixtures.class.getResourceAsStream("/" + file)) {

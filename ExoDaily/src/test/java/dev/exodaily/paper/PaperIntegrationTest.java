@@ -56,6 +56,24 @@ class PaperIntegrationTest {
     void setUp() {
         server = MockBukkit.mock();
         plugin = MockBukkit.loadWith(TestPlugin.class, PaperIntegrationTest.class.getResourceAsStream("/plugin.yml"));
+        useItemRewards();
+    }
+
+    /**
+     * The shipped rewards are console commands for plugins that don't exist here; these tests
+     * exercise real item delivery, so they switch to the item-reward fixture.
+     */
+    private void useItemRewards() {
+        try {
+            Files.writeString(plugin.getDataFolder().toPath().resolve(ConfigLoader.REWARDS),
+                    dev.exodaily.support.Fixtures.resource("/fixtures/item-rewards.yml"), StandardCharsets.UTF_8);
+        } catch (java.io.IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
+        Presentation before = plugin.presentation();
+        server.dispatchCommand(server.getConsoleSender(), "exodaily reload");
+        await("item rewards", () -> plugin.presentation() != before
+                && plugin.presentation().config().rewards().rewards().containsKey("coal_32"));
     }
 
     @AfterEach
