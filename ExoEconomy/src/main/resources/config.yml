@@ -59,6 +59,11 @@ selling:
   exoskills-sale-bonus: true
   # Cap on the combined selling multiplier (ExoSkills bonus x selling booster).
   max-total-multiplier: 3.0
+  shulker-boxes:
+    # Put a filled shulker box in /sell: the sellable items inside are sold, anything unsellable stays
+    # inside, and the box goes back to your inventory after the sale. Empty shulker boxes are sold
+    # like any other item. Plugin-tagged boxes (backpacks etc.) are never opened.
+    sell-contents: true
 
 integrations:
   exoskills: true

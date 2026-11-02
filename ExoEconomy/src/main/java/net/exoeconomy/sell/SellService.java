@@ -36,10 +36,18 @@ public final class SellService {
     public record Rejected(Material type, int amount, String reasonKey, String detail) {}
 
     /**
-     * An immutable sale offer. {@code sold} maps menu slots to the exact stacks being sold;
+     * Items sold out of a shulker box in a menu slot. {@code after} is the box with those items removed
+     * (unsellable items stay inside); it goes back to the player once the sale succeeds.
+     */
+    public record ContainerSale(ItemStack original, ItemStack after, List<ItemStack> soldInner) {}
+
+    /**
+     * An immutable sale offer. {@code sold} maps menu slots to the exact stacks being sold; {@code containers}
+     * maps menu slots holding shulker boxes to the items sold from inside them;
      * {@code fingerprint} identifies the menu contents the quote was made for.
      */
-    public record Quote(List<Line> lines, List<Rejected> rejected, Map<Integer, ItemStack> sold, BigDecimal total,
+    public record Quote(List<Line> lines, List<Rejected> rejected, Map<Integer, ItemStack> sold,
+                        Map<Integer, ContainerSale> containers, BigDecimal total,
                         BigDecimal payout, long fingerprint, boolean tooLarge) {
         public boolean sellable() { return payout.signum() > 0 && !tooLarge; }
         public Map<String, Integer> counts() {
@@ -57,28 +65,56 @@ public final class SellService {
         Map<String, Line> lines = new LinkedHashMap<>();
         List<Rejected> rejected = new ArrayList<>();
         Map<Integer, ItemStack> sold = new LinkedHashMap<>();
+        Map<Integer, ContainerSale> containers = new LinkedHashMap<>();
         Map<Material, BigDecimal> skillCache = new HashMap<>();
         BigDecimal total = BigDecimal.ZERO;
         for (Map.Entry<Integer, ItemStack> e : contents.entrySet()) {
             ItemStack item = e.getValue();
+            if (s.shulkerContents() && Shulkers.hasContents(item)) {
+                // A filled shulker box: sell what is inside, keep the box (and anything unsellable in it).
+                Optional<String> veto = inspector.veto(seller, item);
+                if (veto.isPresent()) { rejected.add(new Rejected(item.getType(), item.getAmount(), "sell-reject-protected", veto.get())); continue; }
+                Set<org.bukkit.NamespacedKey> tags = item.getItemMeta().getPersistentDataContainer().getKeys();
+                if (!tags.isEmpty()) { rejected.add(new Rejected(item.getType(), item.getAmount(), "sell-reject-modified", ItemInspector.describe(item))); continue; }
+                ItemStack[] inside = Shulkers.contents(item);
+                Set<Integer> soldSlots = new LinkedHashSet<>();
+                List<ItemStack> soldInner = new ArrayList<>();
+                for (int i = 0; i < inside.length; i++) {
+                    ItemStack inner = inside[i];
+                    if (inner == null) continue;
+                    ItemInspector.Verdict v = inspector.inspect(seller, inner, catalogue);
+                    if (!v.sellable()) { rejected.add(new Rejected(inner.getType(), inner.getAmount(), v.reasonKey(), "in shulker box")); continue; }
+                    total = total.add(addLine(lines, v, inner, booster, s, seller, skillCache));
+                    soldSlots.add(i);
+                    soldInner.add(inner.clone());
+                }
+                if (!soldSlots.isEmpty()) containers.put(e.getKey(), new ContainerSale(item.clone(), Shulkers.without(item, soldSlots), List.copyOf(soldInner)));
+                continue;
+            }
             ItemInspector.Verdict v = inspector.inspect(seller, item, catalogue);
             if (!v.sellable()) { rejected.add(new Rejected(item.getType(), item.getAmount(), v.reasonKey(), v.detail())); continue; }
-            BigDecimal mult = booster;
-            if (!v.custom() && s.exoSkillsBonus() && exoSkills != null)
-                mult = mult.multiply(skillCache.computeIfAbsent(item.getType(), m -> exoSkills.multiplier(seller, m)), MathContext.DECIMAL64);
-            mult = mult.min(s.maxTotalMultiplier()).max(BigDecimal.ONE);
-            BigDecimal unit = v.custom() ? v.unitPrice() : v.unitPrice().multiply(s.priceMultiplier());
-            BigDecimal subtotal = unit.multiply(BigDecimal.valueOf(item.getAmount())).multiply(mult, MathContext.DECIMAL64);
-            total = total.add(subtotal);
+            total = total.add(addLine(lines, v, item, booster, s, seller, skillCache));
             sold.put(e.getKey(), item.clone());
-            BigDecimal m = mult;
-            lines.merge(v.key() + "@" + m.toPlainString(), new Line(v.key(), item.getType(), item.getAmount(), unit, m, subtotal),
-                    (a, b) -> new Line(a.key(), a.type(), a.amount() + b.amount(), a.unit(), a.multiplier(), a.subtotal().add(b.subtotal())));
         }
         BigDecimal payout = Money.floor(total, plugin.sellLedger().scale());
         boolean tooLarge = payout.compareTo(s.maxPayoutPerSale()) > 0 || payout.compareTo(Money.MAX_OPERATION) > 0;
-        return new Quote(List.copyOf(lines.values()), List.copyOf(rejected), Collections.unmodifiableMap(sold), total, payout,
-                fingerprint(contents), tooLarge);
+        return new Quote(List.copyOf(lines.values()), List.copyOf(rejected), Collections.unmodifiableMap(sold),
+                Collections.unmodifiableMap(containers), total, payout, fingerprint(contents), tooLarge);
+    }
+
+    /** Prices one sellable stack, merges it into the preview lines and returns its subtotal. */
+    private BigDecimal addLine(Map<String, Line> lines, ItemInspector.Verdict v, ItemStack item, BigDecimal booster,
+                               SellSettings s, Player seller, Map<Material, BigDecimal> skillCache) {
+        BigDecimal mult = booster;
+        if (!v.custom() && s.exoSkillsBonus() && exoSkills != null)
+            mult = mult.multiply(skillCache.computeIfAbsent(item.getType(), m -> exoSkills.multiplier(seller, m)), MathContext.DECIMAL64);
+        mult = mult.min(s.maxTotalMultiplier()).max(BigDecimal.ONE);
+        BigDecimal unit = v.custom() ? v.unitPrice() : v.unitPrice().multiply(s.priceMultiplier());
+        BigDecimal subtotal = unit.multiply(BigDecimal.valueOf(item.getAmount())).multiply(mult, MathContext.DECIMAL64);
+        BigDecimal m = mult;
+        lines.merge(v.key() + "@" + m.toPlainString(), new Line(v.key(), item.getType(), item.getAmount(), unit, m, subtotal),
+                (a, b) -> new Line(a.key(), a.type(), a.amount() + b.amount(), a.unit(), a.multiplier(), a.subtotal().add(b.subtotal())));
+        return subtotal;
     }
 
     /** Identity of a set of slot contents, including full item data and amounts. */

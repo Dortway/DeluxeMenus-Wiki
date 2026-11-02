@@ -89,6 +89,8 @@ A shift-click from the player's inventory into the menu is performed by ExoEcono
 
 API filters can veto even plain-looking items.
 
+**Shulker boxes** (`selling.shulker-boxes.sell-contents`, on by default). Each item inside a filled box is checked with the same rules as a loose item. Sellable items are priced into the same quote, and unsellable ones stay inside. When the sale runs, the sold items are removed from the box through its block state, so every other part of the box (colour, name) is kept. After a successful sale the box goes straight back to the player's inventory, or to a claim if the inventory is full, so it cannot be sold by the next click. If the economy refuses, the original box is put back unchanged. If the outcome is uncertain, only the items taken out are held for review. Boxes with plugin data (backpacks) or vetoed by an API filter are never opened. An empty, otherwise plain shulker box is sold at its normal price, even if it still carries an empty container record.
+
 **Returning items.** Close, disconnect, kick, death, game-mode change and shutdown all return every deposited item. Whatever does not fit is stored as a CLAIMABLE claim (`/sell claim`); nothing is dropped or deleted. Claims are deleted in the database before delivery, so they can never be delivered twice.
 
 **Escrow.** Deposit contents are written to the escrow table (Paper `serializeAsBytes`, which keeps item identity) one tick after any change. After a crash they become REVIEW claims by default.

@@ -129,6 +129,8 @@ menus:
       - "&7Put items in the slots above."
       - "&7Only plain vanilla items are bought;"
       - "&7anything else is returned when you close."
+      - "&7Shulker boxes: the items inside are sold"
+      - "&7and the box comes back to you."
       - "&7Click the emerald to review, then again"
       - "&7to confirm. Unsold items always come back."
     close-name: "&cClose and return items"

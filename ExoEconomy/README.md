@@ -3,7 +3,7 @@
 Shards rewards for your Paper 26.1.2 server, with ExcellentEconomy as the bank:
 
 - **Activity rewards** for mining natural blocks, chopping tree logs, harvesting fully grown crops and killing eligible mobs. Custom plugins can add their own activities through the API. Every deposit shows a chat line and an action bar message; both can be turned off server-wide, and players can turn them off for themselves with `/shardnotify`.
-- **`/sell`**: a menu where players deposit plain vanilla items and confirm a sale. **It pays in money** (Vault by default, or any ExcellentEconomy currency). Prices come from a catalogue that lists every vanilla block item in 26.1.
+- **`/sell`**: a menu where players deposit plain vanilla items and confirm a sale. **It pays in money** (Vault by default, or any ExcellentEconomy currency). Prices come from a catalogue that lists every vanilla block item in 26.1. Put in a filled shulker box and the items inside are sold and the box comes back to you; empty shulker boxes sell like any other item.
 - **ExoCubes / ExoWoodCube**: mining ore cubes pays mining rewards and chopping wood cubes pays woodcutting rewards. Each plugin has its own `reward-multiplier`. Payment goes through their harvest events: ExoCubes' built-in `CubeHarvestEvent`, and a `WoodCubeHarvestEvent` that ExoWoodCube gets from the patch in [integrations/ExoWoodCube](integrations/ExoWoodCube).
 - **`/boosters`**: personal and global timed boosters bought with Shards, with stacking rules, queues, persistence and announcements.
 

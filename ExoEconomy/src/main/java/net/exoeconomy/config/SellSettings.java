@@ -14,11 +14,13 @@ import java.util.Set;
  * @param currency        "vault" (Vault money, default), "shards" (the Shards currency) or "excellenteconomy:&lt;id&gt;"
  * @param priceMultiplier every prices.yml price is multiplied by this (prices.yml is scaled for Shards;
  *                        100 turns it into typical money prices). Uniform, so recipes stay arbitrage-free.
+ * @param shulkerContents sell the items inside filled shulker boxes and give the boxes back
  */
 public record SellSettings(boolean enabled, String currency, BigDecimal priceMultiplier, Set<GameMode> gameModes,
                            Set<String> disabledWorlds, String title,
                            BigDecimal maxPayoutPerSale, long confirmWindowMs, boolean returnEscrowAfterCrash,
-                           boolean boostersEnabled, boolean exoSkillsBonus, BigDecimal maxTotalMultiplier) {
+                           boolean boostersEnabled, boolean exoSkillsBonus, BigDecimal maxTotalMultiplier,
+                           boolean shulkerContents) {
     public boolean usesVault() { return currency.equals("vault"); }
     public boolean usesShards() { return currency.equals("shards"); }
     /** The ExcellentEconomy currency id for "excellenteconomy:&lt;id&gt;", else null. */
@@ -43,6 +45,6 @@ public record SellSettings(boolean enabled, String currency, BigDecimal priceMul
                 Set.copyOf(s.getStringList("disabled-worlds")), s.getString("title", "&8Sell Items"),
                 RewardSettings.amount(s.get("max-payout-per-sale", 1_000_000), "selling.max-payout-per-sale", problems),
                 window, recovery.equals("return-to-player"), s.getBoolean("boosters.enabled", false),
-                s.getBoolean("exoskills-sale-bonus", true), cap);
+                s.getBoolean("exoskills-sale-bonus", true), cap, s.getBoolean("shulker-boxes.sell-contents", true));
     }
 }

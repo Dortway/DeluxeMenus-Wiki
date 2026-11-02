@@ -350,7 +350,7 @@ public class InventoryCloseEvent extends InventoryEvent {
 # ---------------------------------------------------------------- inventory
 f("org/bukkit/inventory/InventoryHolder.java", "package org.bukkit.inventory;\npublic interface InventoryHolder { Inventory getInventory(); }")
 f("org/bukkit/inventory/Inventory.java", """package org.bukkit.inventory;
-public interface Inventory { int getSize(); ItemStack getItem(int index); void setItem(int index, ItemStack item); void clear(); InventoryHolder getHolder(); }""")
+public interface Inventory { int getSize(); ItemStack getItem(int index); void setItem(int index, ItemStack item); void clear(); InventoryHolder getHolder(); ItemStack[] getContents(); }""")
 f("org/bukkit/inventory/PlayerInventory.java", """package org.bukkit.inventory;
 public interface PlayerInventory extends Inventory { java.util.HashMap<Integer, ItemStack> addItem(ItemStack... items) throws IllegalArgumentException; }""")
 f("org/bukkit/inventory/InventoryView.java", "package org.bukkit.inventory;\npublic interface InventoryView { Inventory getTopInventory(); }")
@@ -407,7 +407,8 @@ public interface ItemMeta extends org.bukkit.persistence.PersistentDataHolder {
     void addItemFlags(org.bukkit.inventory.ItemFlag... flags);
     boolean hasDisplayName(); boolean hasLore(); boolean hasEnchants();
 }""")
-f("org/bukkit/inventory/meta/BlockStateMeta.java", "package org.bukkit.inventory.meta;\npublic interface BlockStateMeta extends ItemMeta { boolean hasBlockState(); }")
+f("org/bukkit/inventory/meta/BlockStateMeta.java", "package org.bukkit.inventory.meta;\npublic interface BlockStateMeta extends ItemMeta { boolean hasBlockState(); org.bukkit.block.BlockState getBlockState(); void setBlockState(org.bukkit.block.BlockState blockState); }")
+f("org/bukkit/block/ShulkerBox.java", "package org.bukkit.block;\npublic interface ShulkerBox extends BlockState { org.bukkit.inventory.Inventory getInventory(); }")
 f("org/bukkit/inventory/meta/BundleMeta.java", "package org.bukkit.inventory.meta;\npublic interface BundleMeta extends ItemMeta { boolean hasItems(); }")
 f("org/bukkit/inventory/meta/Damageable.java", "package org.bukkit.inventory.meta;\npublic interface Damageable extends ItemMeta { boolean hasDamage(); }")
 

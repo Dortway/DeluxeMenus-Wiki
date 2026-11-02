@@ -317,7 +317,10 @@ public final class SellMenu extends Menu implements MenuListener.GuardedMenu {
             d.put("session", session);
             d.put("payout", quote.payout().toPlainString());
             d.put("unrounded", quote.total().toPlainString());
-            d.put("items", ItemCodec.summary(quote.sold().values()));
+            List<ItemStack> soldItems = new ArrayList<>(quote.sold().values());
+            quote.containers().values().forEach(c -> soldItems.addAll(c.soldInner()));
+            d.put("items", ItemCodec.summary(soldItems));
+            if (!quote.containers().isEmpty()) d.put("shulker_boxes", String.valueOf(quote.containers().size()));
             for (SellService.Line l : quote.lines()) d.put("line." + l.key() + "@" + l.multiplier().toPlainString(), l.amount() + " x " + l.unit().toPlainString());
             return Props.write(d);
         }
@@ -339,16 +342,36 @@ public final class SellMenu extends Menu implements MenuListener.GuardedMenu {
                 removed.put(e.getKey(), current == null ? null : current.clone());
                 inventory.setItem(e.getKey(), null);
             }
+            // Shulker boxes: take the sold items out of the box; unsellable items stay inside it.
+            for (Map.Entry<Integer, SellService.ContainerSale> e : quote.containers().entrySet()) {
+                ItemStack current = inventory.getItem(e.getKey());
+                removed.put(e.getKey(), current == null ? null : current.clone());
+                inventory.setItem(e.getKey(), e.getValue().after().clone());
+            }
+        }
+
+        /** Number of items sold, counting items sold out of shulker boxes. */
+        private int soldCount() {
+            return quote.lines().stream().mapToInt(SellService.Line::amount).sum();
         }
 
         @Override public List<Journal.Work> committed(String txId, LedgerResult result) {
             state = State.IDLE;
             armed = null;
+            // Shulker boxes whose contents were sold go straight back to the player (they must not be sold
+            // themselves by the next click). What does not fit is stored as a claim.
+            List<ItemStack> boxes = new ArrayList<>();
+            for (int slot : quote.containers().keySet()) {
+                ItemStack box = inventory.getItem(slot);
+                if (box != null && !box.getType().isAir()) boxes.add(box.clone());
+                inventory.setItem(slot, null);
+            }
             Journal.Work escrow = remainingEscrow(); // must be written with COMMITTED, whatever happens below
+            if (!boxes.isEmpty()) service.giveBack(viewer, boxes, "shulker box returned from /sell", List.of());
             try {
                 Messages msg = plugin.settings().messages();
                 msg.send(viewer, "sell-completed", "payout", plugin.sellLedger().format(quote.payout()),
-                        "count", String.valueOf(quote.sold().values().stream().mapToInt(ItemStack::getAmount).sum()), "tx", BoosterService.shortId(txId));
+                        "count", String.valueOf(soldCount()), "tx", BoosterService.shortId(txId));
                 Bukkit.getPluginManager().callEvent(new SaleCompletedEvent(viewer, txId, quote.counts(), quote.payout()));
                 refresh();
             } catch (RuntimeException e) {
@@ -372,8 +395,15 @@ public final class SellMenu extends Menu implements MenuListener.GuardedMenu {
             plugin.settings().messages().send(viewer, "sale-uncertain", "tx", BoosterService.shortId(txId));
             plugin.notifyAdmins("admin-uncertain", "tx", BoosterService.shortId(txId), "player", viewer.getName());
             refresh();
+            // Hold exactly what was taken out: whole stacks, and the items removed from shulker boxes
+            // (the boxes themselves, with any unsold items, stay in the menu and are returned normally).
             Map<Integer, ItemStack> held = new LinkedHashMap<>();
-            removed.forEach((slot, item) -> { if (item != null) held.put(slot, item); });
+            int n = 0;
+            for (Map.Entry<Integer, ItemStack> e : removed.entrySet()) {
+                SellService.ContainerSale box = quote.containers().get(e.getKey());
+                if (box != null) for (ItemStack inner : box.soldInner()) held.put(n++, inner.clone());
+                else if (e.getValue() != null) held.put(n++, e.getValue());
+            }
             return List.of(remainingEscrow(), Database.insertClaim(new Database.Claim(UUID.randomUUID().toString(), viewer.getUniqueId(),
                     Database.CLAIM_REVIEW, txId, "sale outcome uncertain", ItemCodec.encode(held), ItemCodec.summary(held.values()), System.currentTimeMillis())));
         }
